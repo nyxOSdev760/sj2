@@ -1,0 +1,179 @@
+:root {
+	--bg: #0f1115;
+	--panel: #181b22;
+	--border: #2a2f3a;
+	--text: #e7e9ee;
+	--muted: #8b91a0;
+	--accent: #7c5cff;
+	--error: #ff6b6b;
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	background: var(--bg);
+	color: var(--text);
+	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a {
+	color: var(--accent);
+}
+
+[hidden] {
+	display: none !important;
+}
+
+#home-screen {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 16px;
+}
+
+.logo {
+	margin: 0;
+	font-size: clamp(56px, 12vw, 96px);
+	font-weight: 800;
+	letter-spacing: -0.04em;
+}
+
+.logo span {
+	color: var(--accent);
+}
+
+.tagline {
+	margin: 0 0 12px;
+	color: var(--muted);
+}
+
+.search {
+	width: min(640px, 100%);
+}
+
+input,
+select {
+	font: inherit;
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	outline: none;
+}
+
+input:focus,
+select:focus {
+	border-color: var(--accent);
+}
+
+#search {
+	width: 100%;
+	padding: 14px 22px;
+	font-size: 17px;
+}
+
+.status {
+	min-height: 1.4em;
+	margin: 0;
+	font-size: 14px;
+	color: var(--muted);
+}
+
+.status.error {
+	color: var(--error);
+}
+
+.settings {
+	margin-top: 8px;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+.settings summary {
+	cursor: pointer;
+	text-align: center;
+}
+
+.settings label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: 10px;
+}
+
+.settings select {
+	min-width: 140px;
+	padding: 6px 12px;
+	border-radius: 8px;
+}
+
+#toolbar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 8px;
+	background: var(--panel);
+	border-bottom: 1px solid var(--border);
+}
+
+.icon {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	flex: none;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.icon:hover {
+	background: var(--border);
+}
+
+.icon svg {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.bar {
+	flex: 1;
+	min-width: 0;
+	margin: 0 4px;
+}
+
+#bar {
+	width: 100%;
+	padding: 7px 14px;
+	font-size: 14px;
+}
+
+#frame {
+	flex: 1;
+	width: 100%;
+	border: 0;
+	background: #fff;
+}

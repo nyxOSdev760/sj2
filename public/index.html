@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>sj2</title>
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="/style.css" />
+		<script src="/app.js" defer></script>
+	</head>
+	<body>
+		<header id="toolbar" hidden>
+			<button id="back" class="icon" title="Back" aria-label="Back">
+				<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+			</button>
+			<button id="forward" class="icon" title="Forward" aria-label="Forward">
+				<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+			</button>
+			<button id="reload" class="icon" title="Reload" aria-label="Reload">
+				<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
+			</button>
+			<button id="home" class="icon" title="Home" aria-label="Home">
+				<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
+			</button>
+			<form id="bar-form" class="bar">
+				<input id="bar" type="text" autocomplete="off" spellcheck="false" aria-label="Address" />
+			</form>
+			<button id="newtab" class="icon" title="Open real URL in a new tab" aria-label="Open in new tab">
+				<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" /></svg>
+			</button>
+		</header>
+
+		<main id="home-screen">
+			<h1 class="logo">sj<span>2</span></h1>
+			<p class="tagline">A Scramjet 2 web proxy</p>
+			<form id="search-form" class="search">
+				<input id="search" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter a URL" aria-label="Search or enter a URL" autofocus />
+			</form>
+			<p id="status" class="status" role="status">Starting proxy…</p>
+			<details class="settings">
+				<summary>Settings</summary>
+				<label>
+					Transport
+					<select id="transport">
+						<option value="libcurl">libcurl</option>
+						<option value="epoxy">epoxy</option>
+					</select>
+				</label>
+				<label>
+					Search engine
+					<select id="engine">
+						<option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
+						<option value="https://www.google.com/search?q=%s">Google</option>
+						<option value="https://www.bing.com/search?q=%s">Bing</option>
+						<option value="https://search.brave.com/search?q=%s">Brave</option>
+					</select>
+				</label>
+			</details>
+		</main>
+
+		<iframe id="frame" title="Proxied page" hidden></iframe>
+	</body>
+</html>
