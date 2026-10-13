@@ -6,7 +6,8 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "node scripts/build.js"
   },
   "license": "AGPL-3.0-only",
   "dependencies": {
@@ -15,5 +16,8 @@
     "@mercuryworkshop/scramjet": "2.0.67-alpha.2",
     "@mercuryworkshop/scramjet-controller": "0.0.14",
     "@mercuryworkshop/wisp-js": "0.5.0"
+  },
+  "engines": {
+    "node": ">=20.10"
   }
 }

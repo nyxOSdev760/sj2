@@ -4,9 +4,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>sj2</title>
-		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-		<link rel="stylesheet" href="/style.css" />
-		<script src="/app.js" defer></script>
+		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="style.css" />
+		<script src="config.js"></script>
+		<script src="app.js" defer></script>
 	</head>
 	<body>
 		<header id="toolbar" hidden>
@@ -45,6 +46,10 @@
 						<option value="libcurl">libcurl</option>
 						<option value="epoxy">epoxy</option>
 					</select>
+				</label>
+				<label>
+					Wisp server
+					<input id="wisp" type="url" autocomplete="off" spellcheck="false" />
 				</label>
 				<label>
 					Search engine

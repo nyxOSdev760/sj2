@@ -22,15 +22,43 @@ Service workers only run in secure contexts, so when you deploy it anywhere othe
 `localhost` it must be served over **HTTPS** (put it behind a reverse proxy such as Caddy or
 nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
+## Static hosting
+
+sj2 can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
+or any plain file host, including from a subpath like `https://you.github.io/sj2/`.
+A static host can't run the Wisp server, so the browser connects to an external one instead.
+
+```sh
+npm install
+npm run build                                   # uses wss://wisp.mercurywork.shop/
+WISP_URL=wss://wisp.example.com/ npm run build  # or your own Wisp server
+```
+
+Upload the generated `dist/` folder. Visitors can also point the site at a different Wisp
+server under **Settings → Wisp server** (saved in their browser).
+
+**GitHub Pages:** the included workflow (`.github/workflows/pages.yml`) builds and deploys on
+every push to `master`. Turn it on once under *Settings → Pages → Build and deployment →
+Source: GitHub Actions*. To use your own Wisp server, add a repository variable named
+`WISP_URL` (*Settings → Secrets and variables → Actions → Variables*).
+
+**Netlify / Cloudflare Pages / Vercel:** build command `npm run build`, output directory
+`dist`, and set the `WISP_URL` environment variable if you want a different Wisp server.
+
+To host your own Wisp server, run this project's Node server (`npm start`, which serves one on
+`/wisp/`) or `npx -p @mercuryworkshop/wisp-js wisp-js-server` anywhere that accepts WebSockets.
+The default public server is run by a third party, so it can see which hosts you connect
+to (not the contents of HTTPS pages, since TLS is end-to-end) and may go down or rate-limit you.
+
 ## How it works
 
 | Piece | Where |
 | --- | --- |
-| Static site (UI, `sw.js`) | `public/` |
+| Static site (UI, `sw.js`, `config.js`) | `public/` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |
-| Wisp server (TCP over WebSocket) | `/wisp/` → `@mercuryworkshop/wisp-js` |
+| Wisp server (TCP over WebSocket) | `/wisp/` → `@mercuryworkshop/wisp-js` (Node server only) |
 
 1. `public/app.js` registers `sw.js`, loads Scramjet and the controller, and creates a
    transport (libcurl by default, epoxy selectable under *Settings*).

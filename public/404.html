@@ -4,12 +4,38 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Not found · sj2</title>
-		<link rel="stylesheet" href="/style.css" />
+		<!-- Self-contained: static hosts serve this page at arbitrary paths. -->
+		<style>
+			body {
+				display: grid;
+				place-items: center;
+				min-height: 100vh;
+				margin: 0;
+				background: #0f1115;
+				color: #8b91a0;
+				font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+				text-align: center;
+			}
+			h1 {
+				margin: 0;
+				color: #e7e9ee;
+				font-size: 72px;
+			}
+			a {
+				color: #7c5cff;
+			}
+		</style>
 	</head>
 	<body>
-		<main id="home-screen">
-			<h1 class="logo">4<span>0</span>4</h1>
-			<p class="tagline">That page doesn't exist. <a href="/">Go home</a></p>
+		<main>
+			<h1>404</h1>
+			<p>That page doesn't exist. <a id="home" href="/">Go home</a></p>
 		</main>
+		<script>
+			// A stale proxied URL (e.g. after the proxy's service worker went away)
+			// looks like <base>/~/sj/...; send people back to <base>.
+			const at = location.pathname.indexOf("/~/sj/");
+			if (at !== -1) document.getElementById("home").href = location.pathname.slice(0, at + 1);
+		</script>
 	</body>
 </html>

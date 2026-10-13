@@ -2,11 +2,9 @@ import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { join, extname, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
+import { mounts } from "./mounts.js";
 
-const root = fileURLToPath(new URL("..", import.meta.url));
-const modules = join(root, "node_modules", "@mercuryworkshop");
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || "0.0.0.0";
 
@@ -14,15 +12,6 @@ logging.set_level(logging.INFO);
 // Keep proxied traffic off the host's own network (no SSRF into localhost/LAN).
 wisp.options.allow_private_ips = false;
 wisp.options.allow_loopback_ips = false;
-
-// URL prefix -> directory on disk. First match wins, so "/" must stay last.
-const mounts = [
-	["/scramjet/", join(modules, "scramjet", "dist")],
-	["/controller/", join(modules, "scramjet-controller", "dist")],
-	["/libcurl/", join(modules, "libcurl-transport", "dist")],
-	["/epoxy/", join(modules, "epoxy-transport", "dist")],
-	["/", join(root, "public")],
-];
 
 const mimeTypes = {
 	".html": "text/html; charset=utf-8",

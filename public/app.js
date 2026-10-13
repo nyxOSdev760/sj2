@@ -1,16 +1,27 @@
 "use strict";
 
-const WISP_URL = `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/wisp/`;
+// Directory the app is served from: "/" normally, "/<repo>/" on GitHub Pages project
+// sites. Everything is resolved against it so the app works from any subpath.
+const BASE = new URL("./", location.href);
+const path = (p) => new URL(p, BASE).pathname;
 
 const PATHS = {
-	sw: "/sw.js",
-	scramjet: "/scramjet/scramjet.js",
-	wasm: "/scramjet/scramjet.wasm",
-	controllerApi: "/controller/controller.api.js",
-	controllerInject: "/controller/controller.inject.js",
-	libcurl: "/libcurl/index.js",
-	epoxy: "/epoxy/index.js",
+	sw: path("sw.js"),
+	prefix: path("~/sj/"),
+	scramjet: path("scramjet/scramjet.js"),
+	wasm: path("scramjet/scramjet.wasm"),
+	controllerApi: path("controller/controller.api.js"),
+	controllerInject: path("controller/controller.inject.js"),
+	libcurl: path("libcurl/index.js"),
+	epoxy: path("epoxy/index.js"),
 };
+
+// config.js sets an external Wisp server for static hosting; otherwise use our own.
+function defaultWisp() {
+	const local = new URL("wisp/", BASE);
+	local.protocol = location.protocol === "https:" ? "wss:" : "ws:";
+	return self.SJ2_CONFIG?.wisp || local.href;
+}
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -23,6 +34,7 @@ const els = {
 	searchForm: $("search-form"),
 	status: $("status"),
 	transport: $("transport"),
+	wisp: $("wisp"),
 	engine: $("engine"),
 };
 
@@ -79,14 +91,15 @@ async function registerServiceWorker(path) {
 
 const transportScripts = new Set();
 async function createTransport(name) {
+	const wisp = els.wisp.value.trim() || defaultWisp();
 	if (name === "epoxy") {
 		if (!transportScripts.has(name)) await loadScript(PATHS.epoxy);
 		transportScripts.add(name);
-		return new EpoxyTransport.default({ wisp: WISP_URL });
+		return new EpoxyTransport.default({ wisp });
 	}
 	if (!transportScripts.has("libcurl")) await loadScript(PATHS.libcurl);
 	transportScripts.add("libcurl");
-	return new LibcurlTransport.LibcurlClient({ wisp: WISP_URL });
+	return new LibcurlTransport.LibcurlClient({ wisp });
 }
 
 async function boot() {
@@ -102,6 +115,7 @@ async function boot() {
 	const transport = await createTransport(els.transport.value);
 
 	const { Controller, config } = $scramjetController;
+	config.prefix = PATHS.prefix;
 	config.scramjetPath = PATHS.scramjet;
 	config.wasmPath = PATHS.wasm;
 	config.injectPath = PATHS.controllerInject;
@@ -158,6 +172,8 @@ function showBrowser(visible) {
 
 async function main() {
 	els.transport.value = settings.get("transport", "libcurl");
+	els.wisp.placeholder = defaultWisp();
+	els.wisp.value = settings.get("wisp", "");
 	els.engine.value = settings.get("engine", els.engine.options[0].value);
 	if (!els.engine.value) els.engine.selectedIndex = 0;
 
@@ -206,15 +222,27 @@ async function main() {
 	});
 
 	els.engine.addEventListener("change", () => settings.set("engine", els.engine.value));
-	els.transport.addEventListener("change", async () => {
-		settings.set("transport", els.transport.value);
+	async function reconnect(message) {
 		if (!proxy) return;
 		try {
 			proxy.controller.setTransport(await createTransport(els.transport.value));
-			setStatus(`Switched to ${els.transport.value}.`);
+			setStatus(message);
 		} catch (err) {
 			setStatus("Couldn't switch transport: " + err.message, true);
 		}
+	}
+	els.transport.addEventListener("change", () => {
+		settings.set("transport", els.transport.value);
+		reconnect(`Switched to ${els.transport.value}.`);
+	});
+	els.wisp.addEventListener("change", () => {
+		const value = els.wisp.value.trim();
+		if (value && !/^wss?:\/\/[^/]/.test(value)) {
+			setStatus("Wisp server must be a ws:// or wss:// URL.", true);
+			return;
+		}
+		settings.set("wisp", value);
+		reconnect(`Using Wisp server ${value || defaultWisp()}.`);
 	});
 
 	// Keep the address bar in sync, including SPA navigations that never fire "load".
