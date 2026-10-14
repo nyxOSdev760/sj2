@@ -37,7 +37,6 @@ const els = {
 	transport: $("transport"),
 	wisp: $("wisp"),
 	engine: $("engine"),
-	adblock: $("adblock"),
 	saveHistory: $("save-history"),
 	settingsPanel: $("settings-panel"),
 	settingsStatus: $("settings-status"),
@@ -263,8 +262,6 @@ async function main() {
 	els.wisp.value = settings.get("wisp", "");
 	els.engine.value = settings.get("engine", els.engine.options[0].value);
 	if (!els.engine.value) els.engine.selectedIndex = 0;
-	els.adblock.checked = settings.get("adblock", "1") === "1";
-	AdGuardDNS.enabled = els.adblock.checked;
 	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
 	browsingHistory.load();
 
@@ -522,15 +519,6 @@ async function main() {
 	}
 
 	els.engine.addEventListener("change", () => settings.set("engine", els.engine.value));
-	els.adblock.addEventListener("change", () => {
-		AdGuardDNS.enabled = els.adblock.checked;
-		settings.set("adblock", els.adblock.checked ? "1" : "0");
-		setStatus(
-			els.adblock.checked
-				? "Blocking ads and trackers with AdGuard DNS."
-				: "Ad and tracker blocking is off."
-		);
-	});
 	els.saveHistory.addEventListener("change", () => {
 		settings.set("saveHistory", els.saveHistory.checked ? "1" : "0");
 	});

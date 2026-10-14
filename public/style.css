@@ -1,6 +1,7 @@
 :root {
 	--bg: #000;
-	--panel: #181b22;
+	--panel: #000;
+	--hover: #141414;
 	--border: #2a2f3a;
 	--text: #e7e9ee;
 	--muted: #8b91a0;
@@ -204,11 +205,11 @@ select:focus {
 }
 
 .tab:hover {
-	background: var(--panel);
+	background: var(--hover);
 }
 
 .tab.active {
-	background: var(--panel);
+	background: var(--bg);
 	border-color: var(--border);
 	color: var(--text);
 }
@@ -359,7 +360,7 @@ select:focus {
 }
 
 .history-item:hover {
-	background: var(--bg);
+	background: var(--hover);
 }
 
 .history-open {

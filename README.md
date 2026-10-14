@@ -12,7 +12,7 @@ npm install
 npm start
 ```
 
-Then open <http://localhost:8080>. All options (transport, Wisp server, ad blocking,
+Then open <http://localhost:8080>. All options (transport, Wisp server,
 history, search engine) are under **Settings**, on the home screen or the gear in the toolbar.
 
 Set `PORT` (and optionally `HOST`) to change where it listens:
@@ -44,7 +44,7 @@ those requests are blocked at lookup time and never connect:
   DoH endpoint on those same addresses), sent through the proxy's own transport. Blocked
   hosts get a "Blocked by AdGuard DNS" response. Answers are cached for 10 minutes; if
   AdGuard can't be reached, requests go through unfiltered rather than breaking the page.
-  Toggle it under *Settings → Block ads & trackers*. See `public/adblock.js`.
+  Blocking is always on. See `public/adblock.js`.
 - **On the Node server**: the Wisp server resolves every hostname with `94.140.14.14` and
   `94.140.15.15` directly, and refuses connections that resolve to `0.0.0.0`. Set
   `DNS_SERVERS` to a comma-separated list to use other resolvers, or to an empty string for
