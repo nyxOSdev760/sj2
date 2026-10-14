@@ -46,16 +46,11 @@ a {
 }
 
 .logo {
-	margin: 0;
+	margin: 0 0 12px;
 	color: #fff;
 	font-size: clamp(56px, 12vw, 96px);
 	font-weight: 800;
 	letter-spacing: -0.04em;
-}
-
-.tagline {
-	margin: 0 0 12px;
-	color: var(--muted);
 }
 
 .search {
