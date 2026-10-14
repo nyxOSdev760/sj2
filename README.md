@@ -33,7 +33,7 @@ the toolbar), which you can search, open in the current tab (Ctrl/Cmd- or middle
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
-The home screen has shortcuts to YouTube, TikTok, Google, Discord and Twitch
+The home screen has shortcuts to YouTube, TikTok, Discord and Twitch
 (Ctrl/Cmd- or middle-click opens one in a new tab). They're plain buttons in
 `public/index.html`, so edit that list to change them. Icons are from
 [Simple Icons](https://simpleicons.org) (CC0).
