@@ -497,7 +497,6 @@ async function main() {
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-history").addEventListener("click", openHistory);
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
-	$("open-settings").addEventListener("click", () => els.settingsPanel.showModal());
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	$("external").addEventListener("click", () => {
 		const url = activeTab.frame && currentRealUrl(activeTab);

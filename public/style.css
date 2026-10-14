@@ -90,10 +90,6 @@ select:focus {
 	color: var(--error);
 }
 
-.settings-button {
-	margin-top: 4px;
-}
-
 .settings {
 	display: flex;
 	flex-direction: column;

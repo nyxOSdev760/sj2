@@ -13,7 +13,7 @@ npm start
 ```
 
 Then open <http://localhost:8080>. All options (transport, Wisp server,
-history, search engine) are under **Settings**, on the home screen or the gear in the toolbar.
+history, search engine) are under **Settings**, the gear at the top right.
 
 Set `PORT` (and optionally `HOST`) to change where it listens:
 
