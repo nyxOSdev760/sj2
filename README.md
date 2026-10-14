@@ -1,4 +1,4 @@
-# sj2
+# Saints
 
 A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
 service-worker-based interception proxy from Mercury Workshop.
@@ -12,7 +12,10 @@ npm install
 npm start
 ```
 
-Then open <http://localhost:8080>. Set `PORT` (and optionally `HOST`) to change where it listens:
+Then open <http://localhost:8080>. All options (transport, Wisp server, ad blocking,
+history, search engine) are under **Settings**, on the home screen or the gear in the toolbar.
+
+Set `PORT` (and optionally `HOST`) to change where it listens:
 
 ```sh
 PORT=3000 npm start

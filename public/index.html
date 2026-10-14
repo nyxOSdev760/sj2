@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>sj2</title>
+		<title>Saints</title>
 		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 		<link rel="stylesheet" href="style.css" />
 		<script src="config.js"></script>
@@ -37,20 +37,34 @@
 			<button id="show-history" class="icon" title="History" aria-label="History">
 				<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
 			</button>
+			<button id="show-settings" class="icon" title="Settings" aria-label="Settings">
+				<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
+			</button>
 			<button id="external" class="icon" title="Open the real site outside the proxy" aria-label="Open the real site outside the proxy">
 				<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" /></svg>
 			</button>
 		</header>
 
 		<main id="home-screen">
-			<h1 class="logo">sj<span>2</span></h1>
+			<h1 class="logo">Saints</h1>
 			<p class="tagline">A Scramjet 2 web proxy</p>
 			<form id="search-form" class="search">
 				<input id="search" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter a URL" aria-label="Search or enter a URL" autofocus />
 			</form>
 			<p id="status" class="status" role="status">Starting proxy…</p>
-			<details class="settings">
-				<summary>Settings</summary>
+			<button id="open-settings" class="text-button settings-button" type="button">Settings</button>
+		</main>
+
+		<div id="frames"></div>
+
+		<dialog id="settings-panel" class="panel" aria-labelledby="settings-title">
+			<header class="panel-head">
+				<h2 id="settings-title">Settings</h2>
+				<button id="settings-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<div class="settings">
 				<label>
 					Transport
 					<select id="transport">
@@ -79,13 +93,12 @@
 						<option value="https://search.brave.com/search?q=%s">Brave</option>
 					</select>
 				</label>
-			</details>
-		</main>
+				<p id="settings-status" class="status" role="status"></p>
+			</div>
+		</dialog>
 
-		<div id="frames"></div>
-
-		<dialog id="history-panel" aria-labelledby="history-title">
-			<header class="history-head">
+		<dialog id="history-panel" class="panel" aria-labelledby="history-title">
+			<header class="panel-head history-head">
 				<h2 id="history-title">History</h2>
 				<input id="history-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search history" aria-label="Search history" />
 				<button id="history-clear" class="text-button" type="button">Clear all</button>

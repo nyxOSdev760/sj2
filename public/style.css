@@ -1,5 +1,5 @@
 :root {
-	--bg: #0f1115;
+	--bg: #000;
 	--panel: #181b22;
 	--border: #2a2f3a;
 	--text: #e7e9ee;
@@ -47,13 +47,10 @@ a {
 
 .logo {
 	margin: 0;
+	color: #fff;
 	font-size: clamp(56px, 12vw, 96px);
 	font-weight: 800;
 	letter-spacing: -0.04em;
-}
-
-.logo span {
-	color: var(--accent);
 }
 
 .tagline {
@@ -97,15 +94,16 @@ select:focus {
 	color: var(--error);
 }
 
-.settings {
-	margin-top: 8px;
-	color: var(--muted);
-	font-size: 14px;
+.settings-button {
+	margin-top: 4px;
 }
 
-.settings summary {
-	cursor: pointer;
-	text-align: center;
+.settings {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 18px 20px 20px;
+	font-size: 14px;
 }
 
 .settings label {
@@ -113,12 +111,16 @@ select:focus {
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	margin-top: 10px;
+}
+
+.settings .status {
+	min-height: 0;
 }
 
 .settings select,
 .settings input {
-	width: min(240px, 60vw);
+	width: 240px;
+	max-width: 55%;
 	padding: 6px 12px;
 	border-radius: 8px;
 }
@@ -293,7 +295,7 @@ select:focus {
 	background: var(--border);
 }
 
-#history-panel {
+.panel {
 	width: min(760px, calc(100vw - 32px));
 	max-height: min(80vh, 900px);
 	padding: 0;
@@ -303,16 +305,20 @@ select:focus {
 	color: var(--text);
 }
 
-#history-panel[open] {
+#settings-panel {
+	width: min(520px, calc(100vw - 32px));
+}
+
+.panel[open] {
 	display: flex;
 	flex-direction: column;
 }
 
-#history-panel::backdrop {
+.panel::backdrop {
 	background: rgb(0 0 0 / 0.5);
 }
 
-.history-head {
+.panel-head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -321,7 +327,7 @@ select:focus {
 	border-bottom: 1px solid var(--border);
 }
 
-.history-head h2 {
+.panel-head h2 {
 	margin: 0 auto 0 0;
 	font-size: 18px;
 }

@@ -39,6 +39,8 @@ const els = {
 	engine: $("engine"),
 	adblock: $("adblock"),
 	saveHistory: $("save-history"),
+	settingsPanel: $("settings-panel"),
+	settingsStatus: $("settings-status"),
 	historyPanel: $("history-panel"),
 	historySearch: $("history-search"),
 	historyList: $("history-list"),
@@ -108,8 +110,10 @@ const browsingHistory = {
 };
 
 function setStatus(text, isError = false) {
-	els.status.textContent = text;
-	els.status.classList.toggle("error", isError);
+	for (const status of [els.status, els.settingsStatus]) {
+		status.textContent = text;
+		status.classList.toggle("error", isError);
+	}
 }
 
 function loadScript(src) {
@@ -495,6 +499,9 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-history").addEventListener("click", openHistory);
+	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	$("open-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	$("external").addEventListener("click", () => {
 		const url = activeTab.frame && currentRealUrl(activeTab);
 		if (url) window.open(url, "_blank", "noopener");
@@ -507,10 +514,12 @@ async function main() {
 		browsingHistory.clear();
 		renderHistory();
 	});
-	// Clicking the backdrop (outside the panel) closes it.
-	els.historyPanel.addEventListener("click", (e) => {
-		if (e.target === els.historyPanel) els.historyPanel.close();
-	});
+	// Clicking the backdrop (outside a panel) closes it.
+	for (const panel of [els.settingsPanel, els.historyPanel]) {
+		panel.addEventListener("click", (e) => {
+			if (e.target === panel) panel.close();
+		});
+	}
 
 	els.engine.addEventListener("change", () => settings.set("engine", els.engine.value));
 	els.adblock.addEventListener("change", () => {
