@@ -22,6 +22,36 @@ Service workers only run in secure contexts, so when you deploy it anywhere othe
 `localhost` it must be served over **HTTPS** (put it behind a reverse proxy such as Caddy or
 nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
+## Tabs and history
+
+Open as many tabs as you like with **+** in the tab strip (middle-click a tab to close it).
+Each tab is its own proxied frame. Visited pages are saved to **History** (the clock button in
+the toolbar), which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
+a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
+turned off under *Settings → Save history*.
+
+## Ad and tracker blocking (AdGuard DNS)
+
+Hostnames are checked against [AdGuard DNS](https://adguard-dns.io/en/public-dns.html)
+(`94.140.14.14`, `94.140.15.15`), which answers `0.0.0.0` for ad and tracker domains, so
+those requests are blocked at lookup time and never connect:
+
+- **In the browser** (works on static hosts too): before the proxy opens a request or
+  WebSocket, it looks the hostname up over DNS-over-HTTPS at `dns.adguard-dns.com` (AdGuard's
+  DoH endpoint on those same addresses), sent through the proxy's own transport. Blocked
+  hosts get a "Blocked by AdGuard DNS" response. Answers are cached for 10 minutes; if
+  AdGuard can't be reached, requests go through unfiltered rather than breaking the page.
+  Toggle it under *Settings → Block ads & trackers*. See `public/adblock.js`.
+- **On the Node server**: the Wisp server resolves every hostname with `94.140.14.14` and
+  `94.140.15.15` directly, and refuses connections that resolve to `0.0.0.0`. Set
+  `DNS_SERVERS` to a comma-separated list to use other resolvers, or to an empty string for
+  the system resolver:
+
+  ```sh
+  DNS_SERVERS=1.1.1.1,1.0.0.1 npm start   # other resolvers
+  DNS_SERVERS= npm start                  # system resolver
+  ```
+
 ## Static hosting
 
 sj2 can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
@@ -54,7 +84,8 @@ to (not the contents of HTTPS pages, since TLS is end-to-end) and may go down or
 
 | Piece | Where |
 | --- | --- |
-| Static site (UI, `sw.js`, `config.js`) | `public/` |
+| Static site (UI, tabs, history, `sw.js`, `config.js`) | `public/` |
+| AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |

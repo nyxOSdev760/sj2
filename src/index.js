@@ -13,6 +13,19 @@ logging.set_level(logging.INFO);
 wisp.options.allow_private_ips = false;
 wisp.options.allow_loopback_ips = false;
 
+// Resolve hostnames with AdGuard DNS, which answers 0.0.0.0 for ad and tracker domains;
+// the loopback filter above then refuses those connections. DNS_SERVERS="" uses the
+// system resolver instead.
+const dnsServers = (process.env.DNS_SERVERS ?? "94.140.14.14,94.140.15.15")
+	.split(",")
+	.map((s) => s.trim())
+	.filter(Boolean);
+if (dnsServers.length) {
+	wisp.options.dns_method = "resolve";
+	wisp.options.dns_servers = dnsServers;
+	wisp.options.dns_result_order = "ipv4first";
+}
+
 const mimeTypes = {
 	".html": "text/html; charset=utf-8",
 	".js": "text/javascript; charset=utf-8",
@@ -93,6 +106,7 @@ server.on("upgrade", (req, socket, head) => {
 
 server.listen(port, host, () => {
 	console.log(`sj2 listening on http://localhost:${port}`);
+	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
 });
 
 function shutdown() {

@@ -25,9 +25,10 @@ function defaultWisp() {
 
 const $ = (id) => document.getElementById(id);
 const els = {
+	tabs: $("tabs"),
 	toolbar: $("toolbar"),
 	home: $("home-screen"),
-	frame: $("frame"),
+	frames: $("frames"),
 	bar: $("bar"),
 	barForm: $("bar-form"),
 	search: $("search"),
@@ -36,6 +37,11 @@ const els = {
 	transport: $("transport"),
 	wisp: $("wisp"),
 	engine: $("engine"),
+	adblock: $("adblock"),
+	saveHistory: $("save-history"),
+	historyPanel: $("history-panel"),
+	historySearch: $("history-search"),
+	historyList: $("history-list"),
 };
 
 const settings = {
@@ -52,6 +58,52 @@ const settings = {
 		} catch {
 			// storage unavailable; setting just won't persist
 		}
+	},
+	remove(key) {
+		try {
+			localStorage.removeItem("sj2:" + key);
+		} catch {
+			// storage unavailable
+		}
+	},
+};
+
+// Visited pages, newest first, kept in this browser only. Each URL appears once.
+const browsingHistory = {
+	max: 1000,
+	entries: [],
+	load() {
+		try {
+			const parsed = JSON.parse(settings.get("history", "[]"));
+			this.entries = Array.isArray(parsed) ? parsed : [];
+		} catch {
+			this.entries = [];
+		}
+	},
+	save() {
+		settings.set("history", JSON.stringify(this.entries));
+	},
+	add(url, title) {
+		if (!els.saveHistory.checked) return;
+		const existing = this.entries.findIndex((e) => e.url === url);
+		const previous = existing === -1 ? null : this.entries.splice(existing, 1)[0];
+		this.entries.unshift({ url, title: title || previous?.title || "", time: Date.now() });
+		this.entries.length = Math.min(this.entries.length, this.max);
+		this.save();
+	},
+	setTitle(url, title) {
+		const entry = this.entries.find((e) => e.url === url);
+		if (!els.saveHistory.checked || !entry || !title || entry.title === title) return;
+		entry.title = title;
+		this.save();
+	},
+	remove(url) {
+		this.entries = this.entries.filter((e) => e.url !== url);
+		this.save();
+	},
+	clear() {
+		this.entries = [];
+		settings.remove("history");
 	},
 };
 
@@ -102,6 +154,11 @@ async function createTransport(name) {
 	return new LibcurlTransport.LibcurlClient({ wisp });
 }
 
+// Every transport is wrapped so ad and tracker hosts are checked against AdGuard DNS.
+async function createFilteredTransport(name) {
+	return AdGuardDNS.wrap(await createTransport(name));
+}
+
 async function boot() {
 	if (!("serviceWorker" in navigator)) {
 		throw new Error(
@@ -112,7 +169,7 @@ async function boot() {
 	const sw = await registerServiceWorker(PATHS.sw);
 	await loadScript(PATHS.scramjet);
 	await loadScript(PATHS.controllerApi);
-	const transport = await createTransport(els.transport.value);
+	const transport = await createFilteredTransport(els.transport.value);
 
 	const { Controller, config } = $scramjetController;
 	config.prefix = PATHS.prefix;
@@ -122,7 +179,7 @@ async function boot() {
 
 	const controller = new Controller({ serviceworker: sw, transport });
 	await controller.wait();
-	return { controller, frame: controller.createFrame(els.frame) };
+	return { controller };
 }
 
 function toUrl(input) {
@@ -140,11 +197,11 @@ function toUrl(input) {
 	return els.engine.value.replace("%s", encodeURIComponent(value));
 }
 
-// Turns the iframe's proxied location back into the real URL it points at.
-function currentRealUrl(frame) {
+// Turns a tab's proxied location back into the real URL it points at.
+function currentRealUrl(tab) {
 	try {
-		const href = els.frame.contentWindow.location.href;
-		const prefix = new URL(frame.prefix, location.href).href;
+		const href = tab.iframe.contentWindow.location.href;
+		const prefix = new URL(tab.frame.prefix, location.href).href;
 		if (!href.startsWith(prefix)) return null;
 		// The real URL is fully percent-encoded, so a literal "?" starts Scramjet's
 		// own "$"-params and a literal "#" is the page's current hash.
@@ -159,15 +216,41 @@ function currentRealUrl(frame) {
 	}
 }
 
-function showBrowser(visible) {
-	els.home.hidden = visible;
-	els.toolbar.hidden = !visible;
-	els.frame.hidden = !visible;
-	if (!visible) {
-		els.frame.removeAttribute("src");
-		els.search.value = "";
-		els.search.focus();
+function currentTitle(tab) {
+	try {
+		return tab.iframe.contentDocument?.title.trim() || "";
+	} catch {
+		return "";
 	}
+}
+
+function hostOf(url) {
+	try {
+		return new URL(url).hostname;
+	} catch {
+		return url;
+	}
+}
+
+function dayLabel(time) {
+	const date = new Date(time);
+	const today = new Date();
+	const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+	if (date.toDateString() === today.toDateString()) return "Today";
+	if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+	return date.toLocaleDateString(undefined, {
+		weekday: "long",
+		month: "long",
+		day: "numeric",
+		year: date.getFullYear() === today.getFullYear() ? undefined : "numeric",
+	});
+}
+
+function el(tag, className, text) {
+	const node = document.createElement(tag);
+	if (className) node.className = className;
+	if (text != null) node.textContent = text;
+	return node;
 }
 
 async function main() {
@@ -176,6 +259,10 @@ async function main() {
 	els.wisp.value = settings.get("wisp", "");
 	els.engine.value = settings.get("engine", els.engine.options[0].value);
 	if (!els.engine.value) els.engine.selectedIndex = 0;
+	els.adblock.checked = settings.get("adblock", "1") === "1";
+	AdGuardDNS.enabled = els.adblock.checked;
+	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
+	browsingHistory.load();
 
 	let proxy;
 	const ready = boot().then(
@@ -192,14 +279,204 @@ async function main() {
 	);
 	ready.catch(() => {}); // already reported in the status line
 
-	async function navigate(input) {
+	// Each tab gets its own iframe and Scramjet frame, created on its first navigation.
+	// A tab with no url shows the home screen.
+	const tabs = [];
+	let activeTab = null;
+
+	function updateTabLabel(tab) {
+		const text = tab.url ? tab.title || hostOf(tab.url) : "New tab";
+		tab.label.textContent = text;
+		tab.el.title = tab.url ? `${text}\n${tab.url}` : text;
+	}
+
+	function createTab({ activate = true } = {}) {
+		const tab = { url: "", title: "", recordedUrl: null, iframe: null, frame: null };
+		tab.el = el("div", "tab");
+		tab.el.setAttribute("role", "tab");
+		tab.el.tabIndex = 0;
+		tab.label = el("span", "tab-title");
+		const close = el("button", "tab-close", "×");
+		close.title = "Close tab";
+		close.setAttribute("aria-label", "Close tab");
+		tab.el.append(tab.label, close);
+
+		tab.el.addEventListener("click", (e) => {
+			if (e.target === close) closeTab(tab);
+			else selectTab(tab);
+		});
+		tab.el.addEventListener("auxclick", (e) => {
+			if (e.button === 1) closeTab(tab);
+		});
+		tab.el.addEventListener("keydown", (e) => {
+			if (e.target === tab.el && (e.key === "Enter" || e.key === " ")) {
+				e.preventDefault();
+				selectTab(tab);
+			}
+		});
+
+		els.tabs.append(tab.el);
+		tabs.push(tab);
+		updateTabLabel(tab);
+		if (activate) selectTab(tab);
+		return tab;
+	}
+
+	function selectTab(tab) {
+		activeTab = tab;
+		for (const t of tabs) {
+			const active = t === tab;
+			t.el.classList.toggle("active", active);
+			t.el.setAttribute("aria-selected", String(active));
+			if (t.iframe) t.iframe.hidden = !active || !t.url;
+		}
+		els.home.hidden = !!tab.url;
+		els.bar.value = tab.url;
+		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
+		if (!tab.url) {
+			els.search.value = "";
+			els.search.focus();
+		}
+	}
+
+	function closeTab(tab) {
+		const index = tabs.indexOf(tab);
+		if (index === -1) return;
+		tabs.splice(index, 1);
+		tab.el.remove();
+		if (tab.iframe) {
+			tab.iframe.remove();
+			const frames = proxy.controller.frames;
+			if (frames.includes(tab.frame)) frames.splice(frames.indexOf(tab.frame), 1);
+		}
+		if (!tabs.length) createTab();
+		else if (tab === activeTab) selectTab(tabs[Math.min(index, tabs.length - 1)]);
+	}
+
+	function goHome(tab) {
+		tab.url = "";
+		tab.title = "";
+		tab.recordedUrl = null;
+		if (tab.iframe) tab.iframe.src = "about:blank";
+		updateTabLabel(tab);
+		if (tab === activeTab) selectTab(tab);
+	}
+
+	function ensureFrame(tab) {
+		if (tab.frame) return;
+		tab.iframe = el("iframe");
+		tab.iframe.title = "Proxied page";
+		tab.iframe.hidden = true;
+		els.frames.append(tab.iframe);
+		tab.frame = proxy.controller.createFrame(tab.iframe);
+		tab.iframe.addEventListener("load", () => syncTab(tab));
+	}
+
+	async function navigate(input, tab = activeTab) {
 		const url = toUrl(input);
 		if (!url) return;
 		if (!proxy) setStatus("Still starting, one moment…");
-		const { frame } = await ready;
-		showBrowser(true);
-		els.bar.value = url;
-		frame.go(url);
+		await ready;
+		if (!tabs.includes(tab)) return; // closed while the proxy was starting
+		ensureFrame(tab);
+		tab.url = url;
+		tab.title = "";
+		tab.frame.go(url);
+		updateTabLabel(tab);
+		if (tab === activeTab) selectTab(tab);
+	}
+
+	// Reads a tab's real URL and title, including SPA navigations that never fire
+	// "load", and records new URLs in history.
+	function syncTab(tab) {
+		if (!tab.frame || !tab.url) return;
+		const url = currentRealUrl(tab);
+		const title = currentTitle(tab);
+		const changed = (url && url !== tab.url) || title !== tab.title;
+		if (url) {
+			tab.url = url;
+			if (url !== tab.recordedUrl) {
+				tab.recordedUrl = url;
+				browsingHistory.add(url, title);
+			} else {
+				browsingHistory.setTitle(url, title);
+			}
+		}
+		tab.title = title;
+		if (changed) updateTabLabel(tab);
+		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== tab.url) {
+			els.bar.value = tab.url;
+		}
+	}
+	setInterval(() => tabs.forEach(syncTab), 500);
+
+	function renderHistory() {
+		const query = els.historySearch.value.trim().toLowerCase();
+		const matches = browsingHistory.entries.filter(
+			(e) => !query || e.url.toLowerCase().includes(query) || e.title.toLowerCase().includes(query)
+		);
+		els.historyList.replaceChildren();
+		if (!matches.length) {
+			const message = query
+				? "No matching pages."
+				: els.saveHistory.checked
+					? "Pages you visit will show up here."
+					: "History is turned off in Settings.";
+			els.historyList.append(el("p", "history-empty", message));
+			return;
+		}
+
+		let day = null;
+		let list;
+		for (const entry of matches.slice(0, 500)) {
+			const label = dayLabel(entry.time);
+			if (label !== day) {
+				day = label;
+				list = el("ul");
+				els.historyList.append(el("h3", null, label), list);
+			}
+			const item = el("li", "history-item");
+			const open = el("button", "history-open");
+			open.type = "button";
+			open.title = entry.url;
+			open.append(
+				el("span", "history-title", entry.title || hostOf(entry.url)),
+				el("span", "history-url", entry.url)
+			);
+			const time = el(
+				"time",
+				"history-time",
+				new Date(entry.time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+			);
+			time.dateTime = new Date(entry.time).toISOString();
+			const remove = el("button", "icon history-remove", "×");
+			remove.type = "button";
+			remove.title = "Remove from history";
+			remove.setAttribute("aria-label", "Remove from history");
+
+			// Click opens in the current tab; Ctrl/Cmd-click or middle-click in a new one.
+			open.addEventListener("click", (e) => {
+				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+				navigate(entry.url, tab).catch(() => {});
+				if (tab === activeTab) els.historyPanel.close();
+			});
+			open.addEventListener("auxclick", (e) => {
+				if (e.button === 1) navigate(entry.url, createTab({ activate: false })).catch(() => {});
+			});
+			remove.addEventListener("click", () => {
+				browsingHistory.remove(entry.url);
+				renderHistory();
+			});
+			item.append(open, time, remove);
+			list.append(item);
+		}
+	}
+
+	function openHistory() {
+		els.historySearch.value = "";
+		renderHistory();
+		els.historyPanel.showModal();
+		els.historySearch.focus();
 	}
 
 	els.searchForm.addEventListener("submit", (e) => {
@@ -212,20 +489,47 @@ async function main() {
 		els.bar.blur();
 	});
 
-	$("back").addEventListener("click", () => proxy?.frame.back());
-	$("forward").addEventListener("click", () => proxy?.frame.forward());
-	$("reload").addEventListener("click", () => proxy?.frame.reload());
-	$("home").addEventListener("click", () => showBrowser(false));
-	$("newtab").addEventListener("click", () => {
-		const url = proxy && currentRealUrl(proxy.frame);
+	$("add-tab").addEventListener("click", () => createTab());
+	$("back").addEventListener("click", () => activeTab.url && activeTab.frame?.back());
+	$("forward").addEventListener("click", () => activeTab.url && activeTab.frame?.forward());
+	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
+	$("home").addEventListener("click", () => goHome(activeTab));
+	$("show-history").addEventListener("click", openHistory);
+	$("external").addEventListener("click", () => {
+		const url = activeTab.frame && currentRealUrl(activeTab);
 		if (url) window.open(url, "_blank", "noopener");
 	});
 
+	els.historySearch.addEventListener("input", renderHistory);
+	$("history-close").addEventListener("click", () => els.historyPanel.close());
+	$("history-clear").addEventListener("click", () => {
+		if (!browsingHistory.entries.length || !confirm("Clear all browsing history?")) return;
+		browsingHistory.clear();
+		renderHistory();
+	});
+	// Clicking the backdrop (outside the panel) closes it.
+	els.historyPanel.addEventListener("click", (e) => {
+		if (e.target === els.historyPanel) els.historyPanel.close();
+	});
+
 	els.engine.addEventListener("change", () => settings.set("engine", els.engine.value));
+	els.adblock.addEventListener("change", () => {
+		AdGuardDNS.enabled = els.adblock.checked;
+		settings.set("adblock", els.adblock.checked ? "1" : "0");
+		setStatus(
+			els.adblock.checked
+				? "Blocking ads and trackers with AdGuard DNS."
+				: "Ad and tracker blocking is off."
+		);
+	});
+	els.saveHistory.addEventListener("change", () => {
+		settings.set("saveHistory", els.saveHistory.checked ? "1" : "0");
+	});
+
 	async function reconnect(message) {
 		if (!proxy) return;
 		try {
-			proxy.controller.setTransport(await createTransport(els.transport.value));
+			proxy.controller.setTransport(await createFilteredTransport(els.transport.value));
 			setStatus(message);
 		} catch (err) {
 			setStatus("Couldn't switch transport: " + err.message, true);
@@ -245,14 +549,7 @@ async function main() {
 		reconnect(`Using Wisp server ${value || defaultWisp()}.`);
 	});
 
-	// Keep the address bar in sync, including SPA navigations that never fire "load".
-	const syncBar = () => {
-		if (!proxy || els.frame.hidden || document.activeElement === els.bar) return;
-		const url = currentRealUrl(proxy.frame);
-		if (url && url !== els.bar.value) els.bar.value = url;
-	};
-	els.frame.addEventListener("load", syncBar);
-	setInterval(syncBar, 500);
+	createTab();
 }
 
 main();

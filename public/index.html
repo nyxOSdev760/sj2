@@ -7,10 +7,18 @@
 		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 		<link rel="stylesheet" href="style.css" />
 		<script src="config.js"></script>
+		<script src="adblock.js"></script>
 		<script src="app.js" defer></script>
 	</head>
 	<body>
-		<header id="toolbar" hidden>
+		<nav id="tabbar">
+			<div id="tabs" role="tablist" aria-label="Tabs"></div>
+			<button id="add-tab" class="icon" title="New tab" aria-label="New tab">
+				<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+			</button>
+		</nav>
+
+		<header id="toolbar">
 			<button id="back" class="icon" title="Back" aria-label="Back">
 				<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
 			</button>
@@ -24,9 +32,12 @@
 				<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
 			</button>
 			<form id="bar-form" class="bar">
-				<input id="bar" type="text" autocomplete="off" spellcheck="false" aria-label="Address" />
+				<input id="bar" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter a URL" aria-label="Address" />
 			</form>
-			<button id="newtab" class="icon" title="Open real URL in a new tab" aria-label="Open in new tab">
+			<button id="show-history" class="icon" title="History" aria-label="History">
+				<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
+			</button>
+			<button id="external" class="icon" title="Open the real site outside the proxy" aria-label="Open the real site outside the proxy">
 				<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" /></svg>
 			</button>
 		</header>
@@ -52,6 +63,14 @@
 					<input id="wisp" type="url" autocomplete="off" spellcheck="false" />
 				</label>
 				<label>
+					Block ads &amp; trackers (AdGuard DNS)
+					<input id="adblock" type="checkbox" />
+				</label>
+				<label>
+					Save history
+					<input id="save-history" type="checkbox" />
+				</label>
+				<label>
 					Search engine
 					<select id="engine">
 						<option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
@@ -63,6 +82,18 @@
 			</details>
 		</main>
 
-		<iframe id="frame" title="Proxied page" hidden></iframe>
+		<div id="frames"></div>
+
+		<dialog id="history-panel" aria-labelledby="history-title">
+			<header class="history-head">
+				<h2 id="history-title">History</h2>
+				<input id="history-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search history" aria-label="Search history" />
+				<button id="history-clear" class="text-button" type="button">Clear all</button>
+				<button id="history-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<div id="history-list"></div>
+		</dialog>
 	</body>
 </html>
