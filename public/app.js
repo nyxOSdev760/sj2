@@ -503,6 +503,18 @@ async function main() {
 		if (url) window.open(url, "_blank", "noopener");
 	});
 
+	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
+	for (const shortcut of document.querySelectorAll(".shortcut")) {
+		const { url } = shortcut.dataset;
+		shortcut.addEventListener("click", (e) => {
+			const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+			navigate(url, tab).catch(() => {});
+		});
+		shortcut.addEventListener("auxclick", (e) => {
+			if (e.button === 1) navigate(url, createTab({ activate: false })).catch(() => {});
+		});
+	}
+
 	els.historySearch.addEventListener("input", renderHistory);
 	$("history-close").addEventListener("click", () => els.historyPanel.close());
 	$("history-clear").addEventListener("click", () => {
