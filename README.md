@@ -1,4 +1,4 @@
-# Saints
+# Saint Vicious
 
 A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
 service-worker-based interception proxy from Mercury Workshop.
