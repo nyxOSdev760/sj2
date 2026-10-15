@@ -115,3 +115,5 @@ can't be used to reach the host's own network.
   (`0.0.14`) checks the Scramjet version at runtime, so the two are pinned exactly in
   `package.json`. Upgrade them together.
 - Licensed AGPL-3.0, matching the Scramjet 2 packages it serves.
+- The logo font is [Fruktur](https://github.com/SorkinType/Fruktur), served from
+  `public/fonts/` under the SIL Open Font License (`public/fonts/fruktur-OFL.txt`).
