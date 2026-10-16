@@ -186,6 +186,22 @@ async function pickWisp(exclude = new Set()) {
 	return WispPool.fastest(urls);
 }
 
+// Backup routes for sites that fail on the main connection: epoxy (a different TLS
+// engine) on the current server, then on the next healthiest servers. Epoxy clients
+// each keep their own connection, so several servers can be used at once.
+let healthyServers = [];
+const epoxyClients = new Map();
+async function alternativeRoutes(failover) {
+	const urls = [failover.url, ...healthyServers.filter((u) => u !== failover.url && !failover.dead.has(u))];
+	const routes = [];
+	for (const url of urls.slice(0, 3)) {
+		if (url === failover.url && els.transport.value === "epoxy") continue; // that's the main route
+		if (!epoxyClients.has(url)) epoxyClients.set(url, AdGuardDNS.wrap(await createTransport("epoxy", url)));
+		routes.push(epoxyClients.get(url));
+	}
+	return routes;
+}
+
 function showWisp(url) {
 	els.wisp.placeholder = `Automatic · using ${WispPool.label(url)}`;
 }
@@ -220,6 +236,11 @@ async function boot() {
 			showWisp(to);
 			setStatus(`${WispPool.label(from)} stopped responding, switched to ${WispPool.label(to)}.`);
 		},
+		alternatives: () => alternativeRoutes(failover),
+	});
+	// In the background, find every server that answers, for the backup routes.
+	WispPool.healthy(WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"])).then((list) => {
+		healthyServers = list;
 	});
 
 	const { Controller, config } = $scramjetController;

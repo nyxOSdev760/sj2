@@ -29,9 +29,9 @@ self.Shortcuts = (() => {
 			d: "M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z",
 		},
 		{
-			hosts: ["tidal.com"],
-			color: "#fff",
-			d: "M12.012 3.992L8.008 7.996 4.004 3.992 0 7.996 4.004 12l4.004-4.004L12.012 12l-4.004 4.004 4.004 4.004 4.004-4.004L12.012 12l4.004-4.004-4.004-4.004zM16.042 7.996l3.979-3.979L24 7.996l-3.979 3.979z",
+			hosts: ["soundcloud.com"],
+			color: "#FF5500",
+			d: "M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z",
 		},
 	];
 
@@ -41,13 +41,13 @@ self.Shortcuts = (() => {
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
 		{ name: "Twitch", url: "https://www.twitch.tv/" },
-		{ name: "Music", url: "https://listen.tidal.com/" },
+		{ name: "Music", url: "https://soundcloud.com/" },
 	];
 
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
 	const ADDED_LATER = [
-		{ version: 2, name: "Music", url: "https://listen.tidal.com/" },
+		{ version: 2, name: "Music", url: "https://soundcloud.com/" },
 		{ version: 3, name: "AI", url: "skyline://ai" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
@@ -57,8 +57,13 @@ self.Shortcuts = (() => {
 			const saved = JSON.parse(localStorage.getItem(KEY));
 			if (Array.isArray(saved)) {
 				const list = saved.filter((s) => s && s.name && s.url);
-				// The Tidal tile was renamed to Music.
-				for (const s of list) if (s.name === "Tidal" && s.url.includes("tidal.com")) s.name = "Music";
+				// The Tidal tile became Music, now on SoundCloud (Tidal blocks the proxy as a bot).
+				for (const s of list) {
+					if (/(^|\.)tidal\.com\//.test(s.url.replace(/^https?:\/\//, ""))) {
+						s.name = s.name === "Tidal" ? "Music" : s.name;
+						s.url = "https://soundcloud.com/";
+					}
+				}
 				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
 				for (const extra of ADDED_LATER) {
 					const site = (url) => {

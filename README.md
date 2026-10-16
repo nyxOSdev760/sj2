@@ -33,7 +33,7 @@ which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
-The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Music (Tidal) to start). Tap **Add**
+The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Music (SoundCloud) to start). Tap **Add**
 to pin any site, the trash can to remove one, or use **☰ → Bookmark this page** while browsing.
 Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in your browser;
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
@@ -163,7 +163,10 @@ rate-limit you.
   Settings is tried first.
 - **While browsing**, if a request fails, the current server is health-checked. If it's down,
   the next fastest server takes over without a reload, and the failed page load is retried.
-  If the server is fine, the site itself failed and nothing changes.
+  If the server is fine, the site gets a rescue instead: it's retried through epoxy (a
+  different TLS engine) on the same server, then on the next healthiest servers, and the route
+  that works is remembered for that site. This gets around servers that refuse a site and
+  TLS handshakes that fail with one engine (libcurl's "error code 35: SSL connect error").
 - See `public/wisp.js`.
 
 ## How it works

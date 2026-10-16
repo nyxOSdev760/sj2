@@ -98,7 +98,7 @@ self.SkylineAI = (() => {
 	function renderEmpty() {
 		log.replaceChildren();
 		const empty = el("div", "ai-empty");
-		const title = el("p", "ai-empty-title", "Hey! Ask me anything.");
+		const title = el("p", "ai-empty-title", "Ask me anything! I know everything.");
 		empty.append(title);
 		if (status && !status.enabled) {
 			empty.append(el("p", null, "Skyline AI isn't available on this server."));
