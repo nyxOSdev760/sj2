@@ -81,9 +81,24 @@ is what keeps the total in check. Counts are kept in memory, so a restart resets
 are capped at 4,000 characters and the last 20 turns. Other websites can't use your server's
 AI unless listed in `AI_ALLOWED_ORIGINS`.
 
-A static build (GitHub Pages etc.) can't hold the key, so AI there is off unless you run the
-Node server somewhere and build with `AI_ENDPOINT=https://your-server/api/ai/`, listing the
-static site's origin in that server's `AI_ALLOWED_ORIGINS`.
+### AI on GitHub Pages
+
+Pages only serves files, so it can't hold the key. Run the Skyline server on a host that
+can (it's free on Render) and point the Pages build at it:
+
+1. On [Render](https://render.com): **New → Blueprint**, pick this repo. `render.yaml` sets
+   everything up; paste your Gemini key when it asks for `GEMINI_API_KEY`. Note the URL it
+   gives you, e.g. `https://skyline-abcd.onrender.com`.
+2. On GitHub: *Settings → Secrets and variables → Actions → Variables → New repository
+   variable*, name `AI_ENDPOINT`, value `https://skyline-abcd.onrender.com/api/ai/`.
+3. Re-run the Pages deploy (*Actions → Deploy to GitHub Pages → Run workflow*), or push.
+
+`render.yaml` already allows `https://nyxosdev760.github.io` in `AI_ALLOWED_ORIGINS`; change
+it if your Pages address differs. The Render server is also a complete Skyline on its own,
+with AI, server-side AdGuard DNS and its own Wisp server, so you can simply use that URL.
+
+Browsers that block cookies between sites (Safari, Firefox) still keep their limit: the
+same signed browser ID is also stored by the page and sent with each request.
 
 ## Ad and tracker blocking (AdGuard DNS)
 

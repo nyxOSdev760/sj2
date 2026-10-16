@@ -7,6 +7,15 @@ self.SkylineAI = (() => {
 	// The browser-ID cookie that gives each browser its own limit has to be sent along,
 	// including to an AI server on another site.
 	const credentials = endpoint.origin === location.origin ? "same-origin" : "include";
+	// The same ID as a signed token, kept for browsers that block that cross-site cookie.
+	const TOKEN_KEY = "sj2:aiToken";
+	function savedToken() {
+		try {
+			return localStorage.getItem(TOKEN_KEY);
+		} catch {
+			return null;
+		}
+	}
 	const SUGGESTIONS = ["Explain something simply", "Help me write a message", "Give me a study plan"];
 
 	const $ = (id) => document.getElementById(id);
@@ -126,9 +135,19 @@ self.SkylineAI = (() => {
 
 	async function refreshStatus() {
 		try {
-			const res = await fetch(new URL("status", endpoint), { cache: "no-store", credentials });
+			const url = new URL("status", endpoint);
+			const token = savedToken();
+			if (token) url.searchParams.set("token", token);
+			const res = await fetch(url, { cache: "no-store", credentials });
 			if (!res.ok) throw new Error(String(res.status));
 			status = await res.json();
+			if (status.token) {
+				try {
+					localStorage.setItem(TOKEN_KEY, status.token);
+				} catch {
+					// storage unavailable; the cookie still works on the same site
+				}
+			}
 		} catch {
 			status = { enabled: false };
 		}
@@ -160,7 +179,7 @@ self.SkylineAI = (() => {
 				method: "POST",
 				// text/plain keeps this a "simple" request for cross-site setups.
 				headers: { "Content-Type": "text/plain;charset=UTF-8" },
-				body: JSON.stringify({ messages }),
+				body: JSON.stringify({ messages, token: savedToken() }),
 				signal: controller.signal,
 				credentials,
 			});

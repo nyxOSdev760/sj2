@@ -24,10 +24,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Set a repository variable named WISP_URL to use your own Wisp server.
+      # Repository variables (Settings -> Secrets and variables -> Actions -> Variables):
+      #   WISP_URL     your own Wisp servers, comma-separated (optional)
+      #   AI_ENDPOINT  your Skyline server's AI address, e.g.
+      #                https://skyline.onrender.com/api/ai/ (turns AI on for Pages)
       - run: npm run build
         env:
           WISP_URL: ${{ vars.WISP_URL }}
+          AI_ENDPOINT: ${{ vars.AI_ENDPOINT }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

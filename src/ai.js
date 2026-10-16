@@ -32,7 +32,7 @@ const COOKIE_SECRET = process.env.AI_COOKIE_SECRET || randomBytes(32).toString("
 const COOKIE = "skyline_ai";
 const ALLOWED_ORIGINS = (process.env.AI_ALLOWED_ORIGINS || "")
 	.split(",")
-	.map((s) => s.trim().replace(/\/$/, ""))
+	.map((s) => s.trim().replace(/\/$/, "").toLowerCase())
 	.filter(Boolean);
 const TRUST_PROXY = process.env.TRUST_PROXY === "1";
 
@@ -75,15 +75,25 @@ function readCookie(req, name) {
 	return null;
 }
 
-// The browser's ID from its signed cookie, or a new one (sent back as a cookie).
-function browserId(req, res) {
-	const value = readCookie(req, COOKIE);
-	if (value) {
-		const [id, mac] = value.split(".");
-		const expected = Buffer.from(sign(id || ""));
-		const given = Buffer.from(mac || "");
-		if (id && given.length === expected.length && timingSafeEqual(given, expected)) return id;
-	}
+// "<id>.<signature>" -> id, or null if missing or tampered with.
+function verify(value) {
+	const [id, mac] = String(value || "").split(".");
+	if (!id) return null;
+	const expected = Buffer.from(sign(id));
+	const given = Buffer.from(mac || "");
+	return given.length === expected.length && timingSafeEqual(given, expected) ? id : null;
+}
+
+function tokenFor(id) {
+	return `${id}.${sign(id)}`;
+}
+
+// The browser's ID: from its signed cookie, else from the same signed token sent by the
+// page (for a copy on another site, where Safari and Firefox block the cookie), else a
+// new one, set as a cookie and handed back as a token.
+function browserId(req, res, token) {
+	const known = verify(readCookie(req, COOKIE)) || verify(token);
+	if (known) return known;
 	const id = randomBytes(16).toString("base64url");
 	const crossSite = Boolean(req.headers.origin && ALLOWED_ORIGINS.includes(req.headers.origin));
 	const secure =
@@ -91,7 +101,7 @@ function browserId(req, res) {
 	res.setHeader(
 		"Set-Cookie",
 		[
-			`${COOKIE}=${id}.${sign(id)}`,
+			`${COOKIE}=${tokenFor(id)}`,
 			"Path=/api/ai/",
 			"Max-Age=31536000",
 			"HttpOnly",
@@ -249,15 +259,18 @@ async function chat(req, res) {
 	if (!aiEnabled) return sendJson(req, res, 503, { error: "AI isn't set up on this server." });
 
 	let messages;
+	let token;
 	try {
-		messages = cleanMessages(JSON.parse(await readBody(req)).messages);
+		const body = JSON.parse(await readBody(req));
+		messages = cleanMessages(body.messages);
+		token = typeof body.token === "string" ? body.token : null;
 	} catch {
 		messages = null;
 	}
 	if (!messages?.length) return sendJson(req, res, 400, { error: "Bad request." });
 
 	const now = Date.now();
-	const browser = req.aiBrowser;
+	const browser = browserId(req, res, token);
 	const mine = recentUses(browser, now);
 	everyone = everyone.filter((t) => now - t < DAY);
 	const limitHeaders = { "X-AI-Remaining": "0", "X-AI-Limit": String(DAILY_LIMIT) };
@@ -340,12 +353,14 @@ export async function handleAi(req, res, pathname) {
 		sendJson(req, res, 403, { error: "Not allowed from this site." });
 		return true;
 	}
-	req.aiBrowser = browserId(req, res);
 	if (pathname === "/api/ai/status" && req.method === "GET") {
+		const token = new URL(req.url, "http://localhost").searchParams.get("token");
+		const browser = browserId(req, res, token);
 		sendJson(req, res, 200, {
 			enabled: aiEnabled,
 			limit: DAILY_LIMIT,
-			remaining: aiEnabled ? remainingFor(req.aiBrowser, Date.now()) : DAILY_LIMIT,
+			remaining: aiEnabled ? remainingFor(browser, Date.now()) : DAILY_LIMIT,
+			token: tokenFor(browser),
 		});
 	} else if (pathname === "/api/ai/chat" && req.method === "POST") {
 		await chat(req, res);
