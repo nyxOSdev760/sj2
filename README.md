@@ -49,6 +49,37 @@ The **☰ menu** has History, Bookmark this page, Open outside the proxy and Tak
 address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
+## Skyline AI
+
+A chat drawer (the ✦ button in the toolbar, the **AI** tile, ☰ → Ask AI, or `skyline://ai`)
+powered by Google Gemini. The Node server relays chats so the API key never reaches the
+browser, and every visitor gets a daily limit.
+
+**Never put the key in the code or commit it.** Set it on the server instead, either as an
+environment variable or in a `.env` file next to `package.json` (`.env` is git-ignored; see
+`.env.example`):
+
+```sh
+GEMINI_API_KEY=your-key npm start
+```
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | (none, AI is off) | Your Gemini API key |
+| `GEMINI_MODEL` | `gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest` | Models tried in order; one that's overloaded or slow is skipped for 5 minutes |
+| `AI_DAILY_LIMIT` | `30` | Messages per visitor per rolling 24 hours |
+| `AI_GLOBAL_DAILY_LIMIT` | `1000` | Messages for everyone together per 24 hours, a cap on your bill |
+| `TRUST_PROXY` | off | Set to `1` behind nginx/Caddy/Cloudflare so visitors are told apart by `X-Forwarded-For` |
+| `AI_ALLOWED_ORIGINS` | (none) | Other sites allowed to use this server's AI, comma-separated |
+
+Visitors are counted by IP address, kept in memory (a restart resets the counts). Messages
+are capped at 4,000 characters and the last 20 turns. Other websites can't use your server's
+AI unless listed in `AI_ALLOWED_ORIGINS`.
+
+A static build (GitHub Pages etc.) can't hold the key, so AI there is off unless you run the
+Node server somewhere and build with `AI_ENDPOINT=https://your-server/api/ai/`, listing the
+static site's origin in that server's `AI_ALLOWED_ORIGINS`.
+
 ## Ad and tracker blocking (AdGuard DNS)
 
 Hostnames are checked against [AdGuard DNS](https://adguard-dns.io/en/public-dns.html)
@@ -123,6 +154,7 @@ rate-limit you.
 | Shortcuts, animated wallpapers, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
+| Skyline AI drawer / Gemini relay with limits | `public/ai.js` / `src/ai.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |

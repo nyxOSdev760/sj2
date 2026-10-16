@@ -454,6 +454,7 @@ async function main() {
 		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
 		if (page) {
 			if (page === "history") openHistory();
+			else if (page === "ai") SkylineAI.open();
 			else if (page === "settings") els.settingsPanel.showModal();
 			else goHome(tab);
 			return;
@@ -581,6 +582,8 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	SkylineAI.init();
+	$("ai-button").addEventListener("click", () => SkylineAI.toggle());
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skyline://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
@@ -595,12 +598,14 @@ async function main() {
 			const tile = el("span", "shortcut-icon");
 			tile.append(Shortcuts.iconFor(shortcut));
 			open.append(tile, el("span", "shortcut-label", shortcut.name));
+			// skyline:// tiles (like AI) open a panel, not a page, so never in a new tab.
+			const internal = INTERNAL.test(shortcut.url);
 			open.addEventListener("click", (e) => {
-				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+				const tab = !internal && (e.ctrlKey || e.metaKey) ? createTab({ activate: false }) : activeTab;
 				navigate(shortcut.url, tab).catch(() => {});
 			});
 			open.addEventListener("auxclick", (e) => {
-				if (e.button === 1) navigate(shortcut.url, createTab({ activate: false })).catch(() => {});
+				if (e.button === 1 && !internal) navigate(shortcut.url, createTab({ activate: false })).catch(() => {});
 			});
 			const remove = el("button", "shortcut-remove");
 			remove.type = "button";
@@ -697,6 +702,9 @@ async function main() {
 		setMenu(false);
 		const url = activeTab.frame && currentRealUrl(activeTab);
 		switch (item.dataset.action) {
+			case "ai":
+				SkylineAI.open();
+				break;
 			case "history":
 				openHistory();
 				break;

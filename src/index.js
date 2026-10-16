@@ -1,9 +1,11 @@
+import "./env.js";
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { join, extname, resolve, sep } from "node:path";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import { mounts } from "./mounts.js";
+import { handleAi, aiEnabled, aiModel } from "./ai.js";
 
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || "0.0.0.0";
@@ -67,15 +69,24 @@ function send(res, status, body) {
 }
 
 const server = createServer(async (req, res) => {
-	if (req.method !== "GET" && req.method !== "HEAD") {
-		return send(res, 405, "Method Not Allowed");
-	}
-
 	let pathname;
 	try {
 		pathname = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
 	} catch {
 		return send(res, 400, "Bad Request");
+	}
+
+	try {
+		if (await handleAi(req, res, pathname)) return;
+	} catch (err) {
+		console.error("AI handler failed:", err);
+		if (!res.headersSent) send(res, 500, "Internal Server Error");
+		else res.end();
+		return;
+	}
+
+	if (req.method !== "GET" && req.method !== "HEAD") {
+		return send(res, 405, "Method Not Allowed");
 	}
 
 	const found = await resolveFile(pathname);
@@ -109,6 +120,7 @@ server.on("upgrade", (req, socket, head) => {
 server.listen(port, host, () => {
 	console.log(`Skyline listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
+	console.log(aiEnabled ? `AI: on (${aiModel})` : "AI: off (set GEMINI_API_KEY to turn it on)");
 });
 
 function shutdown() {

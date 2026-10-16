@@ -36,6 +36,7 @@ self.Shortcuts = (() => {
 	];
 
 	const DEFAULTS = [
+		{ name: "AI", url: "skyline://ai" },
 		{ name: "YouTube", url: "https://www.youtube.com/" },
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
@@ -45,7 +46,10 @@ self.Shortcuts = (() => {
 
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
-	const ADDED_LATER = [{ version: 2, name: "Music", url: "https://listen.tidal.com/" }];
+	const ADDED_LATER = [
+		{ version: 2, name: "Music", url: "https://listen.tidal.com/" },
+		{ version: 3, name: "AI", url: "skyline://ai" },
+	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
 	function load() {
@@ -57,9 +61,17 @@ self.Shortcuts = (() => {
 				for (const s of list) if (s.name === "Tidal" && s.url.includes("tidal.com")) s.name = "Music";
 				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
 				for (const extra of ADDED_LATER) {
-					const host = new URL(extra.url).hostname;
-					if (extra.version > version && !list.some((s) => s.url.includes(host)) && list.length < MAX) {
-						list.push({ name: extra.name, url: extra.url });
+					const site = (url) => {
+						try {
+							const u = new URL(url);
+							return u.protocol + u.host;
+						} catch {
+							return url;
+						}
+					};
+					if (extra.version > version && !list.some((s) => site(s.url) === site(extra.url)) && list.length < MAX) {
+						if (extra.url.startsWith("skyline:")) list.unshift({ name: extra.name, url: extra.url });
+						else list.push({ name: extra.name, url: extra.url });
 					}
 				}
 				localStorage.setItem(VERSION_KEY, String(ADDED_LATER.at(-1).version));
@@ -93,6 +105,20 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
+		// Built-in pages (skyline://ai) get the sparkle.
+		if (shortcut.url.startsWith("skyline:")) {
+			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			svg.setAttribute("viewBox", "0 0 24 24");
+			svg.setAttribute("aria-hidden", "true");
+			svg.classList.add("internal-icon");
+			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+			path.setAttribute(
+				"d",
+				"M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"
+			);
+			svg.append(path);
+			return svg;
+		}
 		const brand = brandFor(shortcut.url);
 		if (brand) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");

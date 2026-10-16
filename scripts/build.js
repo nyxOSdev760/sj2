@@ -21,6 +21,10 @@ for (const server of wispServers) {
 		process.exit(1);
 	}
 }
+// A static host can't run the AI relay; point AI_ENDPOINT at a Skyline Node server
+// (https://example.com/api/ai/) that lists this site in AI_ALLOWED_ORIGINS.
+const aiEndpoint = process.env.AI_ENDPOINT || context.self.SJ2_CONFIG.aiEndpoint || "api/ai/";
+
 if (!wispServers.length) {
 	console.error("No Wisp servers configured");
 	process.exit(1);
@@ -46,7 +50,7 @@ for (const [prefix, dir] of mounts) {
 
 await writeFile(
 	join(out, "config.js"),
-	`self.SJ2_CONFIG = ${JSON.stringify({ wispServers }, null, "\t")};\n`
+	`self.SJ2_CONFIG = ${JSON.stringify({ wispServers, aiEndpoint }, null, "\t")};\n`
 );
 // Stop GitHub Pages' Jekyll step from dropping files/folders it considers special.
 await writeFile(join(out, ".nojekyll"), "");
