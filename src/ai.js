@@ -10,13 +10,9 @@
 //                          overloaded or unavailable (default: see MODELS below)
 //   AI_DAILY_LIMIT         messages per browser per rolling 24 hours (default 30)
 //   AI_GLOBAL_DAILY_LIMIT  messages for everyone together per 24 hours (default 1000)
-//   AI_ALLOWED_ORIGINS     extra sites allowed to call this, comma-separated (for a
-//                          static copy of Skyline hosted elsewhere)
-//   TRUST_PROXY=1          behind nginx etc.: trust X-Forwarded-Proto to mark cookies Secure
-//   AI_COOKIE_SECRET       signs browser IDs; without it a random one is made at start,
-//                          so IDs (like the counts) reset when the server restarts
+//   (AI_ALLOWED_ORIGINS, TRUST_PROXY and AI_COOKIE_SECRET: see visitors.js)
 
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { browserId, tokenFor, originAllowed, sendJson, readBody } from "./visitors.js";
 
 const KEY = process.env.GEMINI_API_KEY || "";
 const MODELS = (process.env.GEMINI_MODEL || "gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest")
@@ -28,17 +24,9 @@ const COOLDOWN = 5 * 60 * 1000; // skip a model this long after it fails
 const coolingUntil = new Map(); // model -> time it may be tried again
 const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT) || 30;
 const GLOBAL_DAILY_LIMIT = Number(process.env.AI_GLOBAL_DAILY_LIMIT) || 1000;
-const COOKIE_SECRET = process.env.AI_COOKIE_SECRET || randomBytes(32).toString("hex");
-const COOKIE = "skyline_ai";
-const ALLOWED_ORIGINS = (process.env.AI_ALLOWED_ORIGINS || "")
-	.split(",")
-	.map((s) => s.trim().replace(/\/$/, "").toLowerCase())
-	.filter(Boolean);
-const TRUST_PROXY = process.env.TRUST_PROXY === "1";
 
 const DAY = 24 * 60 * 60 * 1000;
 const MIN_GAP = 2000; // between messages from one browser
-const MAX_BODY = 64 * 1024;
 const MAX_TURNS = 20;
 const MAX_MESSAGE = 4000;
 const MAX_TOTAL = 20000;
@@ -63,58 +51,6 @@ setInterval(() => {
 	everyone = everyone.filter((t) => now - t < DAY);
 }, 60 * 60 * 1000).unref();
 
-function sign(id) {
-	return createHmac("sha256", COOKIE_SECRET).update(id).digest("base64url");
-}
-
-function readCookie(req, name) {
-	for (const part of String(req.headers.cookie || "").split(";")) {
-		const at = part.indexOf("=");
-		if (at !== -1 && part.slice(0, at).trim() === name) return part.slice(at + 1).trim();
-	}
-	return null;
-}
-
-// "<id>.<signature>" -> id, or null if missing or tampered with.
-function verify(value) {
-	const [id, mac] = String(value || "").split(".");
-	if (!id) return null;
-	const expected = Buffer.from(sign(id));
-	const given = Buffer.from(mac || "");
-	return given.length === expected.length && timingSafeEqual(given, expected) ? id : null;
-}
-
-function tokenFor(id) {
-	return `${id}.${sign(id)}`;
-}
-
-// The browser's ID: from its signed cookie, else from the same signed token sent by the
-// page (for a copy on another site, where Safari and Firefox block the cookie), else a
-// new one, set as a cookie and handed back as a token.
-function browserId(req, res, token) {
-	const known = verify(readCookie(req, COOKIE)) || verify(token);
-	if (known) return known;
-	const id = randomBytes(16).toString("base64url");
-	const crossSite = Boolean(req.headers.origin && ALLOWED_ORIGINS.includes(req.headers.origin));
-	const secure =
-		crossSite || req.socket.encrypted || (TRUST_PROXY && req.headers["x-forwarded-proto"] === "https");
-	res.setHeader(
-		"Set-Cookie",
-		[
-			`${COOKIE}=${tokenFor(id)}`,
-			"Path=/api/ai/",
-			"Max-Age=31536000",
-			"HttpOnly",
-			// A static copy on another site needs SameSite=None (which requires Secure).
-			crossSite ? "SameSite=None" : "SameSite=Lax",
-			secure ? "Secure" : "",
-		]
-			.filter(Boolean)
-			.join("; ")
-	);
-	return id;
-}
-
 // Timestamps for `key` within the last day (empty lists aren't stored).
 function recentUses(key, now) {
 	const times = (usage.get(key) || []).filter((t) => now - t < DAY);
@@ -135,55 +71,6 @@ function forget(key) {
 
 function remainingFor(browser, now) {
 	return Math.max(0, DAILY_LIMIT - recentUses(browser, now).length);
-}
-
-// Same-site requests are always fine; other sites only when listed.
-function originAllowed(req) {
-	const origin = req.headers.origin;
-	if (!origin) return true;
-	try {
-		if (new URL(origin).host === req.headers.host) return true;
-	} catch {
-		return false;
-	}
-	return ALLOWED_ORIGINS.includes(origin);
-}
-
-function corsHeaders(req) {
-	const origin = req.headers.origin;
-	if (!origin || !ALLOWED_ORIGINS.includes(origin)) return {};
-	return {
-		"Access-Control-Allow-Origin": origin,
-		"Access-Control-Allow-Credentials": "true",
-		"Access-Control-Expose-Headers": "X-AI-Remaining, X-AI-Limit",
-		Vary: "Origin",
-	};
-}
-
-function sendJson(req, res, status, body, extra = {}) {
-	res.writeHead(status, {
-		"Content-Type": "application/json; charset=utf-8",
-		"Cache-Control": "no-store",
-		...corsHeaders(req),
-		...extra,
-	});
-	res.end(JSON.stringify(body));
-}
-
-function readBody(req) {
-	return new Promise((resolve, reject) => {
-		let size = 0;
-		const chunks = [];
-		req.on("data", (chunk) => {
-			size += chunk.length;
-			if (size > MAX_BODY) {
-				reject(new Error("too large"));
-				req.destroy();
-			} else chunks.push(chunk);
-		});
-		req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-		req.on("error", reject);
-	});
 }
 
 // [{role: "user"|"model", text}] ending with the user's message, or null if malformed.
@@ -243,8 +130,9 @@ async function askGemini(messages, signal) {
 			coolingUntil.set(model, Date.now() + COOLDOWN);
 			const detail = await response.text().catch(() => "");
 			console.error(`Gemini ${model} returned ${response.status}: ${detail.slice(0, 200).replace(/\s+/g, " ")}`);
-			// Bad requests won't get better on another model.
-			if (response.status === 400 || response.status === 401 || response.status === 403) return null;
+			// A rejected key won't work on another model either.
+			if (response.status === 401 || response.status === 403) return { keyRejected: true };
+			if (response.status === 400) return null;
 		} catch (err) {
 			clearTimeout(timer);
 			if (signal.aborted) return null;
@@ -298,11 +186,16 @@ async function chat(req, res) {
 
 	const response = await askGemini(messages, upstream.signal);
 	if (upstream.signal.aborted) return;
-	if (!response) {
+	if (!response || response.keyRejected) {
 		// Nothing was produced, so give the message back.
 		forget(browser);
 		everyone.pop();
-		return sendJson(req, res, 502, { error: "The AI is busy right now. Try again in a moment." });
+		if (response?.keyRejected) console.error("Gemini rejected GEMINI_API_KEY; set a valid key.");
+		return sendJson(req, res, 502, {
+			error: response?.keyRejected
+				? "The AI isn't set up right on this server (its API key was rejected)."
+				: "The AI is busy right now. Try again in a moment.",
+		});
 	}
 
 	res.writeHead(200, {

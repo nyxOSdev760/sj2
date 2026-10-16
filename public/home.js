@@ -111,17 +111,14 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
-		// Built-in pages (skyline://ai) get the sparkle.
+		// Built-in pages: a robot for skyline://ai, a chat bubble for skyline://chat.
 		if (shortcut.url.startsWith("skyline:")) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
 			svg.classList.add("internal-icon");
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-			path.setAttribute(
-				"d",
-				"M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"
-			);
+			path.setAttribute("d", shortcut.url.startsWith("skyline://chat") ? "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" : "M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2");
 			svg.append(path);
 			return svg;
 		}

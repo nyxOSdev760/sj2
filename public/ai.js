@@ -268,8 +268,8 @@ self.SkylineAI = (() => {
 		init,
 		open,
 		close,
-		toggle() {
-			panel.hidden ? open() : close();
+		get isOpen() {
+			return !panel.hidden;
 		},
 	};
 })();

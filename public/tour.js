@@ -22,13 +22,13 @@ self.Tour = (() => {
 			label: "Welcome",
 			icon: "sparkles",
 			title: `Welcome to ${APP}`,
-			body: "A fast web proxy with tabs, history and ad blocking built in. Take 20 seconds to get comfortable.",
+			body: "A fast web proxy with tabs, AI, live chat and ad blocking built in. Take 20 seconds to get comfortable.",
 		},
 		{
 			label: "Tabs",
 			icon: "tabs",
 			title: "Open as many tabs as you want",
-			body: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History under the ☰ menu.",
+			body: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, the clock in the bar at the bottom.",
 		},
 		{
 			label: "Shortcuts",

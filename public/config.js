@@ -4,10 +4,12 @@
 // the next fastest takes over. Entries are a host ("example.com", tried at /wisp/ and /),
 // a full URL ("wss://example.com/path/"), or "self" for this site's own /wisp/ endpoint
 // (the Node server). `npm run build` drops "self" for static hosting.
-// `aiEndpoint` is where Skyline AI lives: the Node server's api/ai/ by default (it holds
-// the Gemini key, see src/ai.js). Static builds take AI_ENDPOINT to point at one.
+// `aiEndpoint` / `chatEndpoint` are where Skyline AI and Chat live: the Node server's
+// api/ai/ and api/chat/ (src/ai.js, src/chat.js). Static builds take AI_ENDPOINT /
+// CHAT_ENDPOINT to point at one.
 self.SJ2_CONFIG = {
 	aiEndpoint: "api/ai/",
+	chatEndpoint: "api/chat/",
 	wispServers: [
 		"self",
 		"w2.qwq.sh",

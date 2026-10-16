@@ -16,6 +16,9 @@ services:
         value: "1"
       - key: AI_COOKIE_SECRET
         generateValue: true
+      # Optional: words that get chat messages rejected, comma-separated.
+      - key: CHAT_BLOCKED_WORDS
+        sync: false
       # Lets the GitHub Pages copy of Skyline use this server's AI.
       - key: AI_ALLOWED_ORIGINS
         value: https://nyxosdev760.github.io

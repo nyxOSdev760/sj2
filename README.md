@@ -50,9 +50,26 @@ The **☰ menu** has Ask AI, History, Bookmark this page and Take the tour. The
 address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
+## Chat
+
+The chat bubble in the bottom bar opens a live chat room shared by everyone on the same
+Skyline server (`src/chat.js`, `public/chat.js`). People pick a nickname, see who's online,
+and get an unread badge while the chat is closed. The last 100 messages are kept in memory,
+so a restart clears them.
+
+Messages are plain text (no HTML), up to 500 characters, at most one every 1.5 seconds and
+15 a minute per browser. Names are 2–20 letters, numbers, spaces, dots or dashes.
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `CHAT_ENABLED` | on | Set to `0` to turn chat off |
+| `CHAT_BLOCKED_WORDS` | (none) | Comma-separated words that get a message or name rejected |
+
+The bottom bar holds Home, Music (SoundCloud), Chat, AI and History.
+
 ## Skyline AI
 
-A chat drawer (the ✦ button in the toolbar, the **AI** tile, ☰ → Ask AI, or `skyline://ai`)
+A chat drawer (the robot in the bottom bar, the **AI** tile, ☰ → Ask AI, or `skyline://ai`)
 powered by Google Gemini. The Node server relays chats so the API key never reaches the
 browser, and every visitor gets a daily limit.
 
@@ -178,6 +195,8 @@ rate-limit you.
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
 | Skyline AI drawer / Gemini relay with limits | `public/ai.js` / `src/ai.js` |
+| Live chat drawer / chat room server | `public/chat.js` / `src/chat.js` |
+| Browser IDs and API helpers shared by AI and chat | `src/visitors.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |

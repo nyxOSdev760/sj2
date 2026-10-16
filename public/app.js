@@ -431,6 +431,7 @@ async function main() {
 		els.home.hidden = !!tab.url;
 		els.bar.value = tab.url || HOME_URL;
 		setBarIcon(tab.url);
+		updateDock();
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
 		if (!tab.url) {
 			els.search.value = "";
@@ -475,7 +476,8 @@ async function main() {
 		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
 		if (page) {
 			if (page === "history") openHistory();
-			else if (page === "ai") SkylineAI.open();
+			else if (page === "ai") openPanel("ai");
+			else if (page === "chat") openPanel("chat");
 			else if (page === "settings") els.settingsPanel.showModal();
 			else goHome(tab);
 			return;
@@ -511,6 +513,7 @@ async function main() {
 		}
 		tab.title = title;
 		if (changed) updateTabLabel(tab);
+		if (changed && tab === activeTab) updateDock();
 		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== tab.url) {
 			els.bar.value = tab.url;
 			setBarIcon(tab.url);
@@ -603,8 +606,57 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	// AI and Chat drawers, one at a time, opened from the bottom bar (and skyline://ai, /chat).
+	const panels = { ai: SkylineAI, chat: SkylineChat };
+	function openPanel(name) {
+		for (const [key, panel] of Object.entries(panels)) if (key !== name) panel.close();
+		panels[name].open();
+		updateDock();
+	}
 	SkylineAI.init();
-	$("ai-button").addEventListener("click", () => SkylineAI.toggle());
+	SkylineChat.init({
+		unreadChanged(count) {
+			const badge = document.querySelector('[data-dock="chat"] .dock-badge');
+			badge.hidden = !count;
+			badge.textContent = count > 99 ? "99+" : String(count);
+		},
+	});
+
+	// The bottom bar. The highlighted button follows what's on screen.
+	const MUSIC_URL = "https://soundcloud.com/";
+	const dockButtons = [...document.querySelectorAll("[data-dock]")];
+	function updateDock() {
+		let current = null;
+		if (SkylineChat.isOpen) current = "chat";
+		else if (SkylineAI.isOpen) current = "ai";
+		else if (!activeTab?.url) current = "home";
+		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
+		for (const button of dockButtons) {
+			button.classList.toggle("active", button.dataset.dock === current);
+			if (button.dataset.dock === current) button.setAttribute("aria-current", "page");
+			else button.removeAttribute("aria-current");
+		}
+	}
+	for (const button of dockButtons) {
+		button.addEventListener("click", () => {
+			const target = button.dataset.dock;
+			if (target === "ai" || target === "chat") {
+				if (panels[target].isOpen) panels[target].close();
+				else openPanel(target);
+			} else if (target === "history") {
+				openHistory();
+			} else {
+				SkylineAI.close();
+				SkylineChat.close();
+				if (target === "home") goHome(activeTab);
+				else navigate(MUSIC_URL).catch(() => {});
+			}
+			updateDock();
+		});
+	}
+	// Panels also close themselves (Escape, their × button), so watch them.
+	const watchPanels = new MutationObserver(updateDock);
+	for (const id of ["ai-panel", "chat-panel"]) watchPanels.observe($(id), { attributes: true, attributeFilter: ["hidden"] });
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skyline://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
@@ -722,7 +774,7 @@ async function main() {
 		const url = activeTab.frame && currentRealUrl(activeTab);
 		switch (item.dataset.action) {
 			case "ai":
-				SkylineAI.open();
+				openPanel("ai");
 				break;
 			case "history":
 				openHistory();
