@@ -780,12 +780,14 @@ async function main() {
 	applyTheme(settings.get("theme", "lavender"));
 
 	// Home screen wallpaper: a photo, or an animation drawn on the canvas.
+	const DEFAULT_WALLPAPER = "gtr-sunset";
 	const animations = { snow: Snowfall, night: Constellation };
 	let stopAnimation = null;
 	function applyWallpaper(name) {
-		if (![...els.wallpaper.options].some((o) => o.value === name)) name = "clouds";
+		if (![...els.wallpaper.options].some((o) => o.value === name)) name = DEFAULT_WALLPAPER;
 		els.wallpaper.value = name;
 		els.home.dataset.wallpaper = name;
+		els.home.classList.toggle("photo", !animations[name]);
 		stopAnimation?.();
 		stopAnimation = animations[name]?.start($("stars")) ?? null;
 	}
@@ -793,7 +795,7 @@ async function main() {
 		settings.set("wallpaper", els.wallpaper.value);
 		applyWallpaper(els.wallpaper.value);
 	});
-	applyWallpaper(settings.get("wallpaper", "clouds"));
+	applyWallpaper(settings.get("wallpaper", DEFAULT_WALLPAPER));
 
 	createTab();
 	Tour.openIfNew();

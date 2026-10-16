@@ -117,15 +117,28 @@ a {
 }
 
 /* Wallpapers. Night (the default styles above) is the constellation with a glow. */
-#home-screen[data-wallpaper="clouds"] {
-	background: #1f86e0 url("wallpapers/clouds.jpg") center 65% / cover no-repeat;
+/* Photo wallpapers; the position keeps each car in view on wide screens. */
+#home-screen[data-wallpaper="gtr-sunset"] {
+	background: #3a3150 url("wallpapers/gtr-sunset.jpg") center 48% / cover no-repeat;
+}
+
+#home-screen[data-wallpaper="r34-night"] {
+	background: #000 url("wallpapers/r34-night.jpg") center 80% / cover no-repeat;
+}
+
+#home-screen[data-wallpaper="maybach-night"] {
+	background: #111 url("wallpapers/maybach-night.jpg") center 62% / cover no-repeat;
+}
+
+#home-screen[data-wallpaper="maybach-driveway"] {
+	background: #3d4a7a url("wallpapers/maybach-driveway.jpg") center 58% / cover no-repeat;
 }
 
 #home-screen[data-wallpaper="snow"] {
 	background: radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
 }
 
-#home-screen[data-wallpaper="clouds"]::after {
+#home-screen.photo::after {
 	display: none;
 }
 
@@ -133,7 +146,7 @@ a {
 	background: radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.28), transparent 70%);
 }
 
-#home-screen[data-wallpaper="clouds"] .logo::before {
+#home-screen.photo .logo::before {
 	display: none;
 }
 
