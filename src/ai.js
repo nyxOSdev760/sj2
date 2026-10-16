@@ -2,18 +2,17 @@
 // and caps how much each visitor can use.
 //
 // Visitors are told apart by a signed browser-ID cookie, so people sharing one Wi-Fi
-// each get their own limit. Clearing cookies gets a new ID, so each network (IP
-// address) also has a looser cap of its own.
+// each get their own limit. (Clearing cookies gets a fresh ID and limit; the global cap
+// is what protects the bill.)
 //
 //   GEMINI_API_KEY         required to turn AI on (keep it out of the repo)
 //   GEMINI_MODEL           model, or a comma-separated list tried in order when one is
 //                          overloaded or unavailable (default: see MODELS below)
 //   AI_DAILY_LIMIT         messages per browser per rolling 24 hours (default 30)
-//   AI_NETWORK_DAILY_LIMIT messages per network (IP address) per 24 hours (default 150)
 //   AI_GLOBAL_DAILY_LIMIT  messages for everyone together per 24 hours (default 1000)
 //   AI_ALLOWED_ORIGINS     extra sites allowed to call this, comma-separated (for a
 //                          static copy of Skyline hosted elsewhere)
-//   TRUST_PROXY=1          take the visitor's IP from X-Forwarded-For (behind nginx etc.)
+//   TRUST_PROXY=1          behind nginx etc.: trust X-Forwarded-Proto to mark cookies Secure
 //   AI_COOKIE_SECRET       signs browser IDs; without it a random one is made at start,
 //                          so IDs (like the counts) reset when the server restarts
 
@@ -28,7 +27,6 @@ const FIRST_BYTE_TIMEOUT = 20000;
 const COOLDOWN = 5 * 60 * 1000; // skip a model this long after it fails
 const coolingUntil = new Map(); // model -> time it may be tried again
 const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT) || 30;
-const NETWORK_DAILY_LIMIT = Number(process.env.AI_NETWORK_DAILY_LIMIT) || 150;
 const GLOBAL_DAILY_LIMIT = Number(process.env.AI_GLOBAL_DAILY_LIMIT) || 1000;
 const COOKIE_SECRET = process.env.AI_COOKIE_SECRET || randomBytes(32).toString("hex");
 const COOKIE = "skyline_ai";
@@ -51,7 +49,7 @@ Be friendly, direct and concise. Use short paragraphs, and Markdown code blocks 
 export const aiEnabled = Boolean(KEY);
 export const aiModel = MODELS.join(", ");
 
-// "b:<browser id>" or "n:<ip>" -> timestamps of messages in the last day
+// browser ID -> timestamps of its messages in the last day
 const usage = new Map();
 let everyone = [];
 
@@ -64,14 +62,6 @@ setInterval(() => {
 	}
 	everyone = everyone.filter((t) => now - t < DAY);
 }, 60 * 60 * 1000).unref();
-
-function network(req) {
-	if (TRUST_PROXY) {
-		const forwarded = req.headers["x-forwarded-for"];
-		if (forwarded) return String(forwarded).split(",")[0].trim();
-	}
-	return req.socket.remoteAddress || "unknown";
-}
 
 function sign(id) {
 	return createHmac("sha256", COOKIE_SECRET).update(id).digest("base64url");
@@ -133,16 +123,8 @@ function forget(key) {
 	usage.get(key)?.pop();
 }
 
-// How many messages this browser can still send: the lower of its own allowance and
-// its network's.
-function remainingFor(browser, net, now) {
-	return Math.max(
-		0,
-		Math.min(
-			DAILY_LIMIT - recentUses(`b:${browser}`, now).length,
-			NETWORK_DAILY_LIMIT - recentUses(`n:${net}`, now).length
-		)
-	);
+function remainingFor(browser, now) {
+	return Math.max(0, DAILY_LIMIT - recentUses(browser, now).length);
 }
 
 // Same-site requests are always fine; other sites only when listed.
@@ -276,9 +258,7 @@ async function chat(req, res) {
 
 	const now = Date.now();
 	const browser = req.aiBrowser;
-	const net = network(req);
-	const mine = recentUses(`b:${browser}`, now);
-	const onNetwork = recentUses(`n:${net}`, now);
+	const mine = recentUses(browser, now);
 	everyone = everyone.filter((t) => now - t < DAY);
 	const limitHeaders = { "X-AI-Remaining": "0", "X-AI-Limit": String(DAILY_LIMIT) };
 	if (mine.length >= DAILY_LIMIT) {
@@ -290,25 +270,15 @@ async function chat(req, res) {
 			limitHeaders
 		);
 	}
-	if (onNetwork.length >= NETWORK_DAILY_LIMIT) {
-		return sendJson(
-			req,
-			res,
-			429,
-			{ error: "Your network has used all its AI messages for today.", resetAt: onNetwork[0] + DAY },
-			limitHeaders
-		);
-	}
 	if (mine.length && now - mine.at(-1) < MIN_GAP) {
 		return sendJson(req, res, 429, { error: "Slow down a little and try again." });
 	}
 	if (everyone.length >= GLOBAL_DAILY_LIMIT) {
 		return sendJson(req, res, 429, { error: "Skyline AI is out of messages for today. Try again tomorrow." });
 	}
-	record(`b:${browser}`, now);
-	record(`n:${net}`, now);
+	record(browser, now);
 	everyone.push(now);
-	const remaining = remainingFor(browser, net, now);
+	const remaining = remainingFor(browser, now);
 
 	const upstream = new AbortController();
 	res.on("close", () => upstream.abort());
@@ -317,8 +287,7 @@ async function chat(req, res) {
 	if (upstream.signal.aborted) return;
 	if (!response) {
 		// Nothing was produced, so give the message back.
-		forget(`b:${browser}`);
-		forget(`n:${net}`);
+		forget(browser);
 		everyone.pop();
 		return sendJson(req, res, 502, { error: "The AI is busy right now. Try again in a moment." });
 	}
@@ -376,7 +345,7 @@ export async function handleAi(req, res, pathname) {
 		sendJson(req, res, 200, {
 			enabled: aiEnabled,
 			limit: DAILY_LIMIT,
-			remaining: aiEnabled ? remainingFor(req.aiBrowser, network(req), Date.now()) : DAILY_LIMIT,
+			remaining: aiEnabled ? remainingFor(req.aiBrowser, Date.now()) : DAILY_LIMIT,
 		});
 	} else if (pathname === "/api/ai/chat" && req.method === "POST") {
 		await chat(req, res);

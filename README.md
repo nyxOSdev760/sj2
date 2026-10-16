@@ -69,16 +69,15 @@ GEMINI_API_KEY=your-key npm start
 | `GEMINI_API_KEY` | (none, AI is off) | Your Gemini API key |
 | `GEMINI_MODEL` | `gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest` | Models tried in order; one that's overloaded or slow is skipped for 5 minutes |
 | `AI_DAILY_LIMIT` | `30` | Messages per browser per rolling 24 hours |
-| `AI_NETWORK_DAILY_LIMIT` | `150` | Messages per network (IP address) per 24 hours, so clearing cookies can't reset the limit forever |
 | `AI_GLOBAL_DAILY_LIMIT` | `1000` | Messages for everyone together per 24 hours, a cap on your bill |
-| `TRUST_PROXY` | off | Set to `1` behind nginx/Caddy/Cloudflare so visitors are told apart by `X-Forwarded-For` |
+| `TRUST_PROXY` | off | Set to `1` behind nginx/Caddy/Cloudflare (HTTPS there) so the ID cookie is marked Secure |
 | `AI_ALLOWED_ORIGINS` | (none) | Other sites allowed to use this server's AI, comma-separated |
 | `AI_COOKIE_SECRET` | random at start | Signs browser IDs; set it so IDs survive restarts |
 
 Each browser gets a signed, HttpOnly ID cookie and its own limit, so people sharing a
-Wi-Fi network don't share one allowance. (Websites can't see MAC addresses.) A browser that
-clears its cookies gets a new ID, which is why each network also has its own, looser cap.
-Counts are kept in memory, so a restart resets them. Messages
+Wi-Fi network don't share one allowance. (Websites can't see MAC addresses.) Clearing
+cookies or using a private window gets a fresh ID and a fresh limit; `AI_GLOBAL_DAILY_LIMIT`
+is what keeps the total in check. Counts are kept in memory, so a restart resets them. Messages
 are capped at 4,000 characters and the last 20 turns. Other websites can't use your server's
 AI unless listed in `AI_ALLOWED_ORIGINS`.
 
