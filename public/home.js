@@ -40,12 +40,12 @@ self.Shortcuts = (() => {
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
 		{ name: "Twitch", url: "https://www.twitch.tv/" },
-		{ name: "Tidal", url: "https://listen.tidal.com/" },
+		{ name: "Music", url: "https://listen.tidal.com/" },
 	];
 
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
-	const ADDED_LATER = [{ version: 2, name: "Tidal", url: "https://listen.tidal.com/" }];
+	const ADDED_LATER = [{ version: 2, name: "Music", url: "https://listen.tidal.com/" }];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
 	function load() {
@@ -53,6 +53,8 @@ self.Shortcuts = (() => {
 			const saved = JSON.parse(localStorage.getItem(KEY));
 			if (Array.isArray(saved)) {
 				const list = saved.filter((s) => s && s.name && s.url);
+				// The Tidal tile was renamed to Music.
+				for (const s of list) if (s.name === "Tidal" && s.url.includes("tidal.com")) s.name = "Music";
 				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
 				for (const extra of ADDED_LATER) {
 					const host = new URL(extra.url).hostname;

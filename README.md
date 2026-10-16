@@ -1,4 +1,4 @@
-# Saint Vicious
+# Skyline
 
 A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
 service-worker-based interception proxy from Mercury Workshop.
@@ -33,14 +33,14 @@ which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
-The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Tidal to start). Tap **Add**
+The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Music (Tidal) to start). Tap **Add**
 to pin any site, the trash can to remove one, or use **☰ → Bookmark this page** while browsing.
 Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in your browser;
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
 The **☰ menu** has History, Bookmark this page, Open outside the proxy and Take the tour. The
-address bar shows `saints://home` on the home screen; `saints://history` and `saints://settings`
+address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
 ## Ad and tracker blocking (AdGuard DNS)
@@ -67,7 +67,7 @@ those requests are blocked at lookup time and never connect:
 
 ## Static hosting
 
-Saint Vicious can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
+Skyline can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
 or any plain file host, including from a subpath like `https://you.github.io/sj2/`.
 A static host can't run the Wisp server, so the browser connects to external ones instead.
 
@@ -138,5 +138,5 @@ can't be used to reach the host's own network.
   (`0.0.14`) checks the Scramjet version at runtime, so the two are pinned exactly in
   `package.json`. Upgrade them together.
 - Licensed AGPL-3.0, matching the Scramjet 2 packages it serves.
-- The logo font is [Fruktur](https://github.com/SorkinType/Fruktur), served from
-  `public/fonts/` under the SIL Open Font License (`public/fonts/fruktur-OFL.txt`).
+- The logo font is [Outfit](https://github.com/Outfitio/Outfit-Fonts), served from
+  `public/fonts/` under the SIL Open Font License (`public/fonts/outfit-OFL.txt`).

@@ -106,7 +106,7 @@ server.on("upgrade", (req, socket, head) => {
 });
 
 server.listen(port, host, () => {
-	console.log(`Saint Vicious listening on http://localhost:${port}`);
+	console.log(`Skyline listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
 });
 

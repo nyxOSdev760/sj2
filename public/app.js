@@ -274,8 +274,8 @@ function currentTitle(tab) {
 }
 
 // Internal pages shown in the address bar, e.g. the home screen.
-const HOME_URL = "saints://home";
-const INTERNAL = /^saints:\/\/(\w+)\/?$/i;
+const HOME_URL = "skyline://home";
+const INTERNAL = /^skyline:\/\/(\w+)\/?$/i;
 
 const BAR_ICONS = {
 	home: "M3 11l9-7 9 7M5 10v10h14V10",
@@ -580,7 +580,7 @@ async function main() {
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
-	// Selecting the whole address on focus, so typing replaces saints://home or the URL.
+	// Selecting the whole address on focus, so typing replaces skyline://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
 
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
