@@ -6,15 +6,49 @@
 	font-display: swap;
 }
 
+/* Lavender (default): a soft, cool light theme. */
 :root {
+	--bg: #e9e7f6;
+	--panel: #f3f1fb;
+	--surface: rgb(250 249 255 / 0.78);
+	--raised: #fbfaff;
+	--chip: #e6e3f5;
+	--hover: #e0dcf2;
+	--border: #d2cdea;
+	--text: #1d1a33;
+	--body-text: #4b4768;
+	--muted: #6e6a8c;
+	--accent: #6b57e8;
+	--on-accent: #fff;
+	--accent-soft: #d6cdfc;
+	--on-accent-soft: #241a5e;
+	--secure: #15803d;
+	--error: #d33a4a;
+	--shadow: rgb(70 55 150 / 0.18);
+	--backdrop: rgb(45 38 90 / 0.3);
+	color-scheme: light;
+}
+
+/* AMOLED dark. */
+:root[data-theme="dark"] {
 	--bg: #000;
 	--panel: #000;
+	--surface: rgb(14 14 18 / 0.9);
+	--raised: #07070a;
+	--chip: #111116;
 	--hover: #141414;
 	--border: #2a2f3a;
 	--text: #e7e9ee;
+	--body-text: #c9cbd3;
 	--muted: #8b91a0;
 	--accent: #7c5cff;
+	--on-accent: #fff;
+	--accent-soft: #c4b5fd;
+	--on-accent-soft: #120c24;
+	--secure: #4ade80;
 	--error: #ff6b6b;
+	--shadow: rgb(0 0 0 / 0.6);
+	--backdrop: rgb(0 0 0 / 0.55);
 	color-scheme: dark;
 }
 
@@ -84,7 +118,7 @@ a {
 
 /* Wallpapers. Night (the default styles above) is the constellation with a glow. */
 #home-screen[data-wallpaper="clouds"] {
-	background: #1f86e0 url("wallpapers/clouds.jpg") center 22% / cover no-repeat;
+	background: #1f86e0 url("wallpapers/clouds.jpg") center 65% / cover no-repeat;
 }
 
 #home-screen[data-wallpaper="snow"] {
@@ -103,15 +137,14 @@ a {
 	display: none;
 }
 
-/* Keep text readable on the bright photo. */
-#home-screen[data-wallpaper="clouds"] .logo span {
-	filter: drop-shadow(0 2px 3px rgb(20 30 90 / 0.35)) drop-shadow(0 4px 22px rgb(20 30 90 / 0.5));
-}
-
-#home-screen[data-wallpaper="clouds"] .shortcut-label,
-#home-screen[data-wallpaper="clouds"] .status {
+/* Labels sit on the wallpaper, so they're white with a shadow whatever the theme. */
+#home-screen .shortcut-label,
+#home-screen > .status {
 	color: #fff;
-	text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
+	font-weight: 500;
+	text-shadow:
+		0 1px 2px rgb(28 22 70 / 0.75),
+		0 0 10px rgb(28 22 70 / 0.5);
 }
 
 /* Name, search and shortcuts rise in one after another on load. */
@@ -162,13 +195,15 @@ a {
 	text-align: center;
 }
 
-/* Lavender with a soft top-to-bottom sheen. On the inner span so the glow stays behind it. */
+/* White fading into lavender, with a lavender glow. On the inner span so the halo
+   behind the name (.logo::before) stays underneath it. */
 .logo span {
-	background: linear-gradient(180deg, #b4a3f6 0%, #e9e3ff 75%);
+	background: linear-gradient(180deg, #ffffff 10%, #efeaff 50%, #c5b6ff 100%);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
-	filter: drop-shadow(0 0 28px rgb(255 255 255 / 0.12));
+	filter: drop-shadow(0 1px 2px rgb(70 50 160 / 0.45)) drop-shadow(0 0 12px rgb(214 202 255 / 0.95))
+		drop-shadow(0 0 36px rgb(167 145 255 / 0.6));
 }
 
 /* Soft glow behind the name. */
@@ -205,8 +240,8 @@ select:focus {
 	padding: 6px 6px 6px 20px;
 	border: 1px solid var(--border);
 	border-radius: 999px;
-	background: rgb(10 10 14 / 0.85);
-	box-shadow: 0 10px 40px rgb(0 0 0 / 0.5);
+	background: var(--surface);
+	box-shadow: 0 10px 40px var(--shadow);
 	backdrop-filter: blur(8px);
 }
 
@@ -296,7 +331,8 @@ select:focus {
 	height: 64px;
 	border: 1px solid var(--border);
 	border-radius: 20px;
-	background: rgb(14 14 18 / 0.9);
+	background: var(--surface);
+	backdrop-filter: blur(10px);
 	transition:
 		border-color 0.15s,
 		transform 0.15s;
@@ -358,7 +394,7 @@ select:focus {
 	padding: 0;
 	border: 1px solid var(--border);
 	border-radius: 50%;
-	background: #0b0b0e;
+	background: var(--raised);
 	color: var(--muted);
 	cursor: pointer;
 	opacity: 0;
@@ -491,7 +527,7 @@ select:focus {
 }
 
 .bar-icon.secure {
-	stroke: #4ade80;
+	stroke: var(--secure);
 }
 
 #bar {
@@ -517,9 +553,9 @@ select:focus {
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	background:
-		radial-gradient(120% 80% at 0% 0%, rgb(124 92 255 / 0.16), transparent 60%),
-		rgb(8 8 11 / 0.96);
-	box-shadow: 0 18px 50px rgb(0 0 0 / 0.6);
+		radial-gradient(120% 80% at 0% 0%, rgb(124 92 255 / 0.12), transparent 60%),
+		var(--raised);
+	box-shadow: 0 18px 50px var(--shadow);
 	backdrop-filter: blur(12px);
 	animation: menu-in 0.14s ease-out;
 }
@@ -620,8 +656,8 @@ select:focus {
 
 .tab.active {
 	border-color: transparent;
-	background: #c4b5fd;
-	color: #120c24;
+	background: var(--accent-soft);
+	color: var(--on-accent-soft);
 	font-weight: 600;
 }
 
@@ -723,7 +759,7 @@ select:focus {
 }
 
 .panel::backdrop {
-	background: rgb(0 0 0 / 0.5);
+	background: var(--backdrop);
 }
 
 .panel-head {
@@ -847,13 +883,13 @@ select:focus {
 	padding: 0;
 	border: 1px solid var(--border);
 	border-radius: 28px;
-	background: #07070a;
+	background: var(--raised);
 	color: var(--text);
-	box-shadow: 0 30px 80px rgb(0 0 0 / 0.7);
+	box-shadow: 0 30px 80px var(--shadow);
 }
 
 .tour::backdrop {
-	background: rgb(0 0 0 / 0.55);
+	background: var(--backdrop);
 	backdrop-filter: blur(14px);
 }
 
@@ -889,7 +925,7 @@ select:focus {
 	padding: 5px;
 	list-style: none;
 	border-radius: 999px;
-	background: #111116;
+	background: var(--chip);
 }
 
 .tour-pill {
@@ -907,8 +943,8 @@ select:focus {
 
 .tour-pill.done {
 	border-color: transparent;
-	background: #c4b5fd;
-	color: #120c24;
+	background: var(--accent-soft);
+	color: var(--on-accent-soft);
 }
 
 .tour-pill.done svg {
@@ -925,8 +961,8 @@ select:focus {
 	flex: 0 1 auto;
 	padding: 0 14px 0 4px;
 	border-color: transparent;
-	background: #c4b5fd;
-	color: #120c24;
+	background: var(--accent-soft);
+	color: var(--on-accent-soft);
 }
 
 .tour-num {
@@ -939,7 +975,7 @@ select:focus {
 }
 
 .tour-pill.current .tour-num {
-	background: rgb(18 12 36 / 0.15);
+	background: rgb(18 12 36 / 0.12);
 }
 
 .tour-pill-label {
@@ -971,7 +1007,7 @@ select:focus {
 	margin-top: 8px;
 	border-radius: 50%;
 	background: rgb(124 92 255 / 0.16);
-	color: #c4b5fd;
+	color: var(--accent);
 }
 
 .tour-badge svg {
@@ -987,7 +1023,7 @@ select:focus {
 
 .tour-body {
 	margin: 0;
-	color: #c9cbd3;
+	color: var(--body-text);
 	font-size: 16px;
 	line-height: 1.6;
 }
@@ -1006,7 +1042,7 @@ select:focus {
 	padding: 12px 20px;
 	border: 1px solid var(--border);
 	border-radius: 999px;
-	background: #111116;
+	background: var(--chip);
 	color: var(--text);
 	font: inherit;
 	font-size: 15px;
@@ -1022,8 +1058,13 @@ select:focus {
 .tour-button.primary {
 	margin-left: auto;
 	border-color: transparent;
-	background: #c4b5fd;
-	color: #120c24;
+	background: var(--accent-soft);
+	color: var(--on-accent-soft);
+}
+
+.tour-button:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
 }
 
 .tour-button:hover {

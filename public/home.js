@@ -99,7 +99,8 @@ self.Shortcuts = (() => {
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-			path.setAttribute("fill", brand.color);
+			// White logos (TikTok, Tidal) follow the text colour so they show on light tiles.
+			path.setAttribute("fill", brand.color === "#fff" ? "currentColor" : brand.color);
 			path.setAttribute("d", brand.d);
 			svg.append(path);
 			return svg;

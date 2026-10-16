@@ -39,7 +39,8 @@ Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in 
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
-The home screen wallpaper is set under *Settings → Wallpaper*: **Clouds** (a photo, the
+The default theme is **Lavender**, a soft cool light theme; *Settings → Theme* switches to
+**AMOLED dark**. The home screen wallpaper is set under *Settings → Wallpaper*: **Clouds** (a photo, the
 default), **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
 animations pause while a page is open or the tab is hidden, and stay still for people who
 prefer reduced motion.

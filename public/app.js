@@ -44,6 +44,7 @@ const els = {
 	menu: $("menu"),
 	menuButton: $("menu-button"),
 	wallpaper: $("wallpaper"),
+	theme: $("theme"),
 	historySearch: $("history-search"),
 	historyList: $("history-list"),
 };
@@ -756,6 +757,19 @@ async function main() {
 		setStatus("Finding a Wisp server…");
 		reconnect();
 	});
+
+	function applyTheme(name) {
+		const dark = name === "dark";
+		els.theme.value = dark ? "dark" : "lavender";
+		if (dark) document.documentElement.dataset.theme = "dark";
+		else delete document.documentElement.dataset.theme;
+		document.querySelector('meta[name="theme-color"]').content = dark ? "#000000" : "#e9e7f6";
+	}
+	els.theme.addEventListener("change", () => {
+		settings.set("theme", els.theme.value);
+		applyTheme(els.theme.value);
+	});
+	applyTheme(settings.get("theme", "lavender"));
 
 	// Home screen wallpaper: a photo, or an animation drawn on the canvas.
 	const animations = { snow: Snowfall, night: Constellation };
