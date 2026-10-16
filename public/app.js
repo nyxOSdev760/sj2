@@ -695,9 +695,7 @@ async function main() {
 		if (!open) return;
 		const canUsePage = !!(activeTab.url && activeTab.frame);
 		for (const item of menuItems) {
-			if (item.dataset.action === "bookmark" || item.dataset.action === "external") {
-				item.disabled = !canUsePage;
-			}
+			if (item.dataset.action === "bookmark") item.disabled = !canUsePage;
 		}
 		menuItems.find((item) => !item.disabled)?.focus();
 	}
@@ -731,9 +729,6 @@ async function main() {
 				break;
 			case "bookmark":
 				if (url) openShortcutForm(activeTab.title || hostOf(url), url);
-				break;
-			case "external":
-				if (url) window.open(url, "_blank", "noopener");
 				break;
 			case "tour":
 				Tour.open();

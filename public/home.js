@@ -49,6 +49,7 @@ self.Shortcuts = (() => {
 	const ADDED_LATER = [
 		{ version: 2, name: "Music", url: "https://soundcloud.com/" },
 		{ version: 3, name: "AI", url: "skyline://ai" },
+		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 

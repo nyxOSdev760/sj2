@@ -208,17 +208,15 @@ a {
 	text-align: center;
 }
 
-/* White fading into cream with a thin black outline. On the inner span so the halo
+/* White fading into cream. On the inner span so the halo
    behind the name (.logo::before) stays underneath it. */
 .logo span {
 	background: linear-gradient(180deg, #ffffff 15%, #fdf6e3 55%, #f3e3bd 100%);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
-	/* A thin black outline built from tight shadows, which follow only the letters' outer
-	   edge (text-stroke would also trace the font's overlapping inner shapes). */
-	filter: drop-shadow(1.5px 0 0 #000) drop-shadow(-1.5px 0 0 #000) drop-shadow(0 1.5px 0 #000)
-		drop-shadow(0 -1.5px 0 #000) drop-shadow(0 6px 16px rgb(0 0 0 / 0.22));
+	/* A soft shadow so it stays readable on bright wallpapers. */
+	filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.35)) drop-shadow(0 8px 24px rgb(0 0 0 / 0.25));
 }
 
 /* Soft glow behind the name. */

@@ -41,12 +41,12 @@ Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in 
 
 The default theme is **Lavender**, a soft cool light theme; *Settings → Theme* switches to
 **AMOLED dark**. The home screen wallpaper is set under *Settings → Wallpaper*: four car photos (**GT-R sunset**, the
-default, **R34 night**, **Maybach night** and **Maybach driveway**, in `public/wallpapers/`),
+default, **Night drive**, **Maybach night** and **Maybach driveway**, in `public/wallpapers/`),
 **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
 animations pause while a page is open or the tab is hidden, and stay still for people who
 prefer reduced motion.
 
-The **☰ menu** has History, Bookmark this page, Open outside the proxy and Take the tour. The
+The **☰ menu** has Ask AI, History, Bookmark this page and Take the tour. The
 address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
