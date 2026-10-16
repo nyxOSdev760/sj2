@@ -782,6 +782,9 @@ async function main() {
 			case "bookmark":
 				if (url) openShortcutForm(activeTab.title || hostOf(url), url);
 				break;
+			case "credits":
+				$("credits-panel").showModal();
+				break;
 			case "tour":
 				Tour.open();
 				break;
@@ -796,7 +799,8 @@ async function main() {
 		renderHistory();
 	});
 	// Clicking the backdrop (outside a panel) closes it.
-	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel]) {
+	$("credits-close").addEventListener("click", () => $("credits-panel").close());
+	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel, $("credits-panel")]) {
 		panel.addEventListener("click", (e) => {
 			if (e.target === panel) panel.close();
 		});

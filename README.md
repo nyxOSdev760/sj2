@@ -212,6 +212,13 @@ rate-limit you.
 The Wisp server refuses connections to private and loopback addresses so the proxy
 can't be used to reach the host's own network.
 
+## Credits
+
+Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
+[Scramjet](https://github.com/MercuryWorkshop/scramjet) by Mercury Workshop, with
+[AdGuard DNS](https://adguard-dns.io), Google Gemini, the Outfit font and
+[Simple Icons](https://simpleicons.org).
+
 ## Notes
 
 - Scramjet 2 is still published as an alpha (`2.0.67-alpha.2`); the controller

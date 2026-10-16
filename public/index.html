@@ -66,6 +66,10 @@
 						Bookmark this page
 					</button>
 					<hr />
+					<button type="button" role="menuitem" data-action="credits">
+						<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-9.3-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z" /></svg>
+						Credits
+					</button>
 					<button type="button" role="menuitem" data-action="tour">
 						<svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" /></svg>
 						Take the tour
@@ -247,6 +251,24 @@
 					</div>
 				</div>
 			</form>
+		</dialog>
+
+		<dialog id="credits-panel" class="panel credits" aria-labelledby="credits-title">
+			<header class="panel-head">
+				<h2 id="credits-title">Credits</h2>
+				<button id="credits-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<div class="credits-body">
+				<p class="credits-logo">Skyline</p>
+				<p class="credits-made">Made by</p>
+				<p class="credits-names"><span>Wilbert</span> <span class="credits-and">&amp;</span> <span>Claude</span></p>
+				<p class="credits-built">
+					Built with Scramjet by Mercury Workshop, AdGuard DNS, Google Gemini, the Outfit font and
+					Simple Icons.
+				</p>
+			</div>
 		</dialog>
 
 		<dialog id="history-panel" class="panel" aria-labelledby="history-title">
