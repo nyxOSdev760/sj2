@@ -478,6 +478,7 @@ async function main() {
 			if (page === "history") openHistory();
 			else if (page === "ai") openPanel("ai");
 			else if (page === "chat") openPanel("chat");
+			else if (page === "games") openGames();
 			else if (page === "settings") els.settingsPanel.showModal();
 			else goHome(tab);
 			return;
@@ -622,6 +623,38 @@ async function main() {
 		},
 	});
 
+	// Games: free game sites, opened through the proxy like any other site.
+	const GAME_SITES = [
+		{ name: "Poki", url: "https://poki.com/", color: "#2f80ed", about: "Thousands of free games" },
+		{ name: "CrazyGames", url: "https://www.crazygames.com/", color: "#6c4cf5", about: "New games every day" },
+		{ name: "Coolmath Games", url: "https://www.coolmathgames.com/", color: "#e2412b", about: "Puzzle and logic classics" },
+		{ name: "Duck Math", url: "https://duckmath.org/", color: "#f2b705", about: "Popular browser games" },
+	];
+	function openGames() {
+		const list = $("games-list");
+		list.replaceChildren(
+			...GAME_SITES.map((site) => {
+				const card = el("button", "game-site");
+				card.type = "button";
+				const badge = el("span", "game-badge", site.name[0]);
+				badge.style.background = site.color;
+				const text = el("span", "game-text");
+				text.append(el("span", "game-name", site.name), el("span", "game-about", site.about));
+				card.append(badge, text);
+				card.addEventListener("click", (e) => {
+					$("games-panel").close();
+					SkylineAI.close();
+					SkylineChat.close();
+					const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+					navigate(site.url, tab).catch(() => {});
+				});
+				return card;
+			})
+		);
+		$("games-panel").showModal();
+	}
+	$("games-close").addEventListener("click", () => $("games-panel").close());
+
 	// The bottom bar. The highlighted button follows what's on screen.
 	const MUSIC_URL = "https://soundcloud.com/";
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
@@ -631,6 +664,9 @@ async function main() {
 		else if (SkylineAI.isOpen) current = "ai";
 		else if (!activeTab?.url) current = "home";
 		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
+		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
+			current = "games";
+		}
 		for (const button of dockButtons) {
 			button.classList.toggle("active", button.dataset.dock === current);
 			if (button.dataset.dock === current) button.setAttribute("aria-current", "page");
@@ -645,6 +681,8 @@ async function main() {
 				else openPanel(target);
 			} else if (target === "history") {
 				openHistory();
+			} else if (target === "games") {
+				openGames();
 			} else {
 				SkylineAI.close();
 				SkylineChat.close();
@@ -800,7 +838,7 @@ async function main() {
 	});
 	// Clicking the backdrop (outside a panel) closes it.
 	$("credits-close").addEventListener("click", () => $("credits-panel").close());
-	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel, $("credits-panel")]) {
+	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel, $("credits-panel"), $("games-panel")]) {
 		panel.addEventListener("click", (e) => {
 			if (e.target === panel) panel.close();
 		});

@@ -37,6 +37,7 @@ self.Shortcuts = (() => {
 
 	const DEFAULTS = [
 		{ name: "AI", url: "skyline://ai" },
+		{ name: "Games", url: "skyline://games" },
 		{ name: "YouTube", url: "https://www.youtube.com/" },
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
@@ -50,6 +51,7 @@ self.Shortcuts = (() => {
 		{ version: 2, name: "Music", url: "https://soundcloud.com/" },
 		{ version: 3, name: "AI", url: "skyline://ai" },
 		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
+		{ version: 5, name: "Games", url: "skyline://games" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
@@ -76,8 +78,13 @@ self.Shortcuts = (() => {
 						}
 					};
 					if (extra.version > version && !list.some((s) => site(s.url) === site(extra.url)) && list.length < MAX) {
-						if (extra.url.startsWith("skyline:")) list.unshift({ name: extra.name, url: extra.url });
-						else list.push({ name: extra.name, url: extra.url });
+						const tile = { name: extra.name, url: extra.url };
+						// Built-in tiles go after the other built-in ones at the front.
+						if (extra.url.startsWith("skyline:")) {
+							let at = 0;
+							while (at < list.length && list[at].url.startsWith("skyline:")) at++;
+							list.splice(at, 0, tile);
+						} else list.push(tile);
 					}
 				}
 				localStorage.setItem(VERSION_KEY, String(ADDED_LATER.at(-1).version));
@@ -111,14 +118,16 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
-		// Built-in pages: a robot for skyline://ai, a chat bubble for skyline://chat.
+		// Built-in pages: a robot for skyline://ai, a gamepad for skyline://games, a chat
+		// bubble for skyline://chat.
 		if (shortcut.url.startsWith("skyline:")) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
 			svg.classList.add("internal-icon");
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-			path.setAttribute("d", shortcut.url.startsWith("skyline://chat") ? "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" : "M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2");
+			const GAMEPAD = "M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z";
+			path.setAttribute("d", shortcut.url.startsWith("skyline://games") ? GAMEPAD : shortcut.url.startsWith("skyline://chat") ? "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" : "M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2");
 			svg.append(path);
 			return svg;
 		}

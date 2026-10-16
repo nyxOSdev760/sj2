@@ -65,7 +65,9 @@ Messages are plain text (no HTML), up to 500 characters, at most one every 1.5 s
 | `CHAT_ENABLED` | on | Set to `0` to turn chat off |
 | `CHAT_BLOCKED_WORDS` | (none) | Comma-separated words that get a message or name rejected |
 
-The bottom bar holds Home, Music (SoundCloud), Chat, AI and History.
+The bottom bar holds Home, Games, Music (SoundCloud), Chat, AI and History. **Games** (also a
+home tile and `skyline://games`) opens a picker of free game sites, Poki, CrazyGames, Coolmath
+Games and Duck Math, which load through the proxy like any other site.
 
 ## Skyline AI
 

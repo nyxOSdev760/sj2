@@ -154,6 +154,9 @@
 			<button type="button" data-dock="home" title="Home" aria-label="Home">
 				<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
 			</button>
+			<button type="button" data-dock="games" title="Games" aria-label="Games">
+				<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" /></svg>
+			</button>
 			<button type="button" data-dock="music" title="Music" aria-label="Music">
 				<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg>
 			</button>
@@ -251,6 +254,16 @@
 					</div>
 				</div>
 			</form>
+		</dialog>
+
+		<dialog id="games-panel" class="panel games" aria-labelledby="games-title">
+			<header class="panel-head">
+				<h2 id="games-title">Games</h2>
+				<button id="games-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<div id="games-list" class="games-list"></div>
 		</dialog>
 
 		<dialog id="credits-panel" class="panel credits" aria-labelledby="credits-title">
