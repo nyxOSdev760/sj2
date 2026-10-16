@@ -39,6 +39,11 @@ Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in 
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
+The home screen wallpaper is set under *Settings → Wallpaper*: **Clouds** (a photo, the
+default), **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
+animations pause while a page is open or the tab is hidden, and stay still for people who
+prefer reduced motion.
+
 The **☰ menu** has History, Bookmark this page, Open outside the proxy and Take the tour. The
 address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
 open those panels. A five-step welcome tour shows on the first visit.
@@ -114,7 +119,7 @@ rate-limit you.
 | Piece | Where |
 | --- | --- |
 | Static site (UI, tabs, history, `sw.js`, `config.js`) | `public/` |
-| Shortcuts, constellation background, welcome tour | `public/home.js`, `public/tour.js` |
+| Shortcuts, animated wallpapers, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |

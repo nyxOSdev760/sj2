@@ -43,6 +43,7 @@ const els = {
 	shortcutError: $("shortcut-error"),
 	menu: $("menu"),
 	menuButton: $("menu-button"),
+	wallpaper: $("wallpaper"),
 	historySearch: $("history-search"),
 	historyList: $("history-list"),
 };
@@ -756,7 +757,22 @@ async function main() {
 		reconnect();
 	});
 
-	Constellation.start($("stars"));
+	// Home screen wallpaper: a photo, or an animation drawn on the canvas.
+	const animations = { snow: Snowfall, night: Constellation };
+	let stopAnimation = null;
+	function applyWallpaper(name) {
+		if (![...els.wallpaper.options].some((o) => o.value === name)) name = "clouds";
+		els.wallpaper.value = name;
+		els.home.dataset.wallpaper = name;
+		stopAnimation?.();
+		stopAnimation = animations[name]?.start($("stars")) ?? null;
+	}
+	els.wallpaper.addEventListener("change", () => {
+		settings.set("wallpaper", els.wallpaper.value);
+		applyWallpaper(els.wallpaper.value);
+	});
+	applyWallpaper(settings.get("wallpaper", "clouds"));
+
 	createTab();
 	Tour.openIfNew();
 }

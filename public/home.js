@@ -139,35 +139,59 @@ self.Shortcuts = (() => {
 	};
 })();
 
-// Drifting points joined by faint lines, drawn behind the home screen.
-self.Constellation = (() => {
-	function start(canvas, color = "167 139 250") {
-		const ctx = canvas.getContext("2d");
-		const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-		let width = 0;
-		let height = 0;
-		let points = [];
+// Animated wallpapers drawn on the home screen's canvas. Each start() returns a stop().
+// They only animate while the home screen is on screen and the page is visible.
+function animateCanvas(canvas, { setup, frame, still }) {
+	const ctx = canvas.getContext("2d");
+	const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+	let width = 0;
+	let height = 0;
+	let stopped = false;
+	let timer = 0;
+	let raf = 0;
 
-		function resize() {
-			const dpr = Math.min(devicePixelRatio || 1, 2);
-			width = canvas.clientWidth;
-			height = canvas.clientHeight;
-			if (!width || !height) return;
-			canvas.width = width * dpr;
-			canvas.height = height * dpr;
-			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-			const count = Math.min(90, Math.round((width * height) / 14000));
-			points = Array.from({ length: count }, () => ({
-				x: Math.random() * width,
-				y: Math.random() * height,
-				vx: (Math.random() - 0.5) * 0.25,
-				vy: (Math.random() - 0.5) * 0.25,
-				r: Math.random() * 1.2 + 0.6,
-			}));
-			if (reduced) draw();
+	function resize() {
+		const dpr = Math.min(devicePixelRatio || 1, 2);
+		width = canvas.clientWidth;
+		height = canvas.clientHeight;
+		if (!width || !height) return;
+		canvas.width = width * dpr;
+		canvas.height = height * dpr;
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		setup(width, height);
+		if (reduced) still(ctx, width, height);
+	}
+
+	function loop() {
+		if (stopped) return;
+		if (!document.hidden && canvas.offsetParent !== null) {
+			if (canvas.clientWidth !== width || canvas.clientHeight !== height) resize();
+			frame(ctx, width, height);
+			raf = requestAnimationFrame(loop);
+		} else {
+			timer = setTimeout(loop, 400);
 		}
+	}
 
-		function draw() {
+	const observer = new ResizeObserver(resize);
+	observer.observe(canvas);
+	resize();
+	if (!reduced) loop();
+
+	return () => {
+		stopped = true;
+		cancelAnimationFrame(raf);
+		clearTimeout(timer);
+		observer.disconnect();
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	};
+}
+
+// Drifting points joined by faint lines.
+self.Constellation = {
+	start(canvas, color = "167 139 250") {
+		let points = [];
+		function draw(ctx, width, height) {
 			ctx.clearRect(0, 0, width, height);
 			const reach = Math.min(140, Math.max(90, width / 8));
 			for (let i = 0; i < points.length; i++) {
@@ -185,41 +209,83 @@ self.Constellation = (() => {
 					}
 				}
 			}
+			ctx.fillStyle = `rgb(${color} / 0.7)`;
 			for (const p of points) {
-				ctx.fillStyle = `rgb(${color} / 0.7)`;
 				ctx.beginPath();
 				ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
 				ctx.fill();
 			}
 		}
+		return animateCanvas(canvas, {
+			setup(width, height) {
+				const count = Math.min(90, Math.round((width * height) / 14000));
+				points = Array.from({ length: count }, () => ({
+					x: Math.random() * width,
+					y: Math.random() * height,
+					vx: (Math.random() - 0.5) * 0.25,
+					vy: (Math.random() - 0.5) * 0.25,
+					r: Math.random() * 1.2 + 0.6,
+				}));
+			},
+			frame(ctx, width, height) {
+				for (const p of points) {
+					p.x += p.vx;
+					p.y += p.vy;
+					if (p.x < -10) p.x = width + 10;
+					else if (p.x > width + 10) p.x = -10;
+					if (p.y < -10) p.y = height + 10;
+					else if (p.y > height + 10) p.y = -10;
+				}
+				draw(ctx, width, height);
+			},
+			still: draw,
+		});
+	},
+};
 
-		function step() {
-			for (const p of points) {
-				p.x += p.vx;
-				p.y += p.vy;
-				if (p.x < -10) p.x = width + 10;
-				else if (p.x > width + 10) p.x = -10;
-				if (p.y < -10) p.y = height + 10;
-				else if (p.y > height + 10) p.y = -10;
+// Falling snow: near flakes are bigger, brighter and faster, and every flake sways.
+self.Snowfall = {
+	start(canvas) {
+		let flakes = [];
+		let t = 0;
+		function draw(ctx, width, height) {
+			ctx.clearRect(0, 0, width, height);
+			for (const f of flakes) {
+				ctx.fillStyle = `rgb(255 255 255 / ${f.alpha})`;
+				ctx.beginPath();
+				ctx.arc(f.x + Math.sin(t * f.sway + f.phase) * f.drift, f.y, f.r, 0, Math.PI * 2);
+				ctx.fill();
 			}
-			draw();
 		}
-
-		// Only animate while the home screen is on screen and the page is visible.
-		function loop() {
-			if (!document.hidden && canvas.offsetParent !== null) {
-				if (canvas.clientWidth !== width || canvas.clientHeight !== height) resize();
-				step();
-				requestAnimationFrame(loop);
-			} else {
-				setTimeout(loop, 400);
-			}
-		}
-
-		new ResizeObserver(resize).observe(canvas);
-		resize();
-		if (!reduced) loop();
-	}
-
-	return { start };
-})();
+		return animateCanvas(canvas, {
+			setup(width, height) {
+				const count = Math.min(260, Math.round((width * height) / 5000));
+				flakes = Array.from({ length: count }, () => {
+					const depth = Math.random();
+					return {
+						x: Math.random() * width,
+						y: Math.random() * height,
+						r: 0.8 + depth * 2.6,
+						speed: 0.35 + depth * 1.2,
+						alpha: 0.35 + depth * 0.6,
+						drift: 6 + depth * 18,
+						sway: 0.01 + Math.random() * 0.02,
+						phase: Math.random() * Math.PI * 2,
+					};
+				});
+			},
+			frame(ctx, width, height) {
+				t++;
+				for (const f of flakes) {
+					f.y += f.speed;
+					if (f.y > height + 6) {
+						f.y = -6;
+						f.x = Math.random() * width;
+					}
+				}
+				draw(ctx, width, height);
+			},
+			still: draw,
+		});
+	},
+};

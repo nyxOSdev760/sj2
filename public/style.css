@@ -82,6 +82,38 @@ a {
 	animation: glow-in 1.2s ease-out both;
 }
 
+/* Wallpapers. Night (the default styles above) is the constellation with a glow. */
+#home-screen[data-wallpaper="clouds"] {
+	background: #1f86e0 url("wallpapers/clouds.jpg") center 22% / cover no-repeat;
+}
+
+#home-screen[data-wallpaper="snow"] {
+	background: radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
+}
+
+#home-screen[data-wallpaper="clouds"]::after {
+	display: none;
+}
+
+#home-screen[data-wallpaper="snow"]::after {
+	background: radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.28), transparent 70%);
+}
+
+#home-screen[data-wallpaper="clouds"] .logo::before {
+	display: none;
+}
+
+/* Keep text readable on the bright photo. */
+#home-screen[data-wallpaper="clouds"] .logo span {
+	filter: drop-shadow(0 2px 3px rgb(20 30 90 / 0.35)) drop-shadow(0 4px 22px rgb(20 30 90 / 0.5));
+}
+
+#home-screen[data-wallpaper="clouds"] .shortcut-label,
+#home-screen[data-wallpaper="clouds"] .status {
+	color: #fff;
+	text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
+}
+
 /* Name, search and shortcuts rise in one after another on load. */
 .logo,
 .search,
@@ -130,9 +162,9 @@ a {
 	text-align: center;
 }
 
-/* White with a soft top-to-bottom sheen. On the inner span so the glow stays behind it. */
+/* Lavender with a soft top-to-bottom sheen. On the inner span so the glow stays behind it. */
 .logo span {
-	background: linear-gradient(180deg, #c9c9d2 0%, #ffffff 70%);
+	background: linear-gradient(180deg, #b4a3f6 0%, #e9e3ff 75%);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
