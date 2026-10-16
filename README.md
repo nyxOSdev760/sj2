@@ -62,31 +62,47 @@ those requests are blocked at lookup time and never connect:
 
 ## Static hosting
 
-sj2 can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
+Saint Vicious can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
 or any plain file host, including from a subpath like `https://you.github.io/sj2/`.
-A static host can't run the Wisp server, so the browser connects to an external one instead.
+A static host can't run the Wisp server, so the browser connects to external ones instead.
 
 ```sh
 npm install
-npm run build                                   # uses wss://wisp.mercurywork.shop/
-WISP_URL=wss://wisp.example.com/ npm run build  # or your own Wisp server
+npm run build                                          # uses the list in public/config.js
+WISP_URL=wss://wisp.example.com/,other.example npm run build  # or your own list
 ```
 
 Upload the generated `dist/` folder. Visitors can also point the site at a different Wisp
-server under **Settings → Wisp server** (saved in their browser).
+server under **Settings → Wisp server** (saved in their browser); the built-in list stays as
+the fallback if it stops responding.
 
 **GitHub Pages:** the included workflow (`.github/workflows/pages.yml`) builds and deploys on
 every push to `master`. Turn it on once under *Settings → Pages → Build and deployment →
-Source: GitHub Actions*. To use your own Wisp server, add a repository variable named
-`WISP_URL` (*Settings → Secrets and variables → Actions → Variables*).
+Source: GitHub Actions*. To use your own Wisp servers, add a repository variable named
+`WISP_URL` with a comma-separated list (*Settings → Secrets and variables → Actions →
+Variables*).
 
 **Netlify / Cloudflare Pages / Vercel:** build command `npm run build`, output directory
-`dist`, and set the `WISP_URL` environment variable if you want a different Wisp server.
+`dist`, and set the `WISP_URL` environment variable if you want different Wisp servers.
 
 To host your own Wisp server, run this project's Node server (`npm start`, which serves one on
 `/wisp/`) or `npx -p @mercuryworkshop/wisp-js wisp-js-server` anywhere that accepts WebSockets.
-The default public server is run by a third party, so it can see which hosts you connect
-to (not the contents of HTTPS pages, since TLS is end-to-end) and may go down or rate-limit you.
+The public servers in the default list are run by third parties, so they can see which hosts
+you connect to (not the contents of HTTPS pages, since TLS is end-to-end) and may go down or
+rate-limit you.
+
+## Wisp server fallback
+
+`public/config.js` lists the Wisp servers (`wispServers`). Entries are a host (tried at both
+`/wisp/` and `/`), a full `ws://`/`wss://` URL, or `self` for the Node server's own `/wisp/`.
+
+- **On open**, every server is probed in parallel and the fastest one that answers like a real
+  Wisp server is used (Settings shows which: *Automatic · using …*). A server typed into
+  Settings is tried first.
+- **While browsing**, if a request fails, the current server is health-checked. If it's down,
+  the next fastest server takes over without a reload, and the failed page load is retried.
+  If the server is fine, the site itself failed and nothing changes.
+- See `public/wisp.js`.
 
 ## How it works
 
@@ -94,6 +110,7 @@ to (not the contents of HTTPS pages, since TLS is end-to-end) and may go down or
 | --- | --- |
 | Static site (UI, tabs, history, `sw.js`, `config.js`) | `public/` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
+| Wisp server picking and failover | `public/wisp.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |

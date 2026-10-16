@@ -1,15 +1,28 @@
 // Builds a fully static copy of the site into dist/ for hosts like GitHub Pages,
-// Netlify or Cloudflare Pages. With no Node server there, the browser connects to
-// an external Wisp server instead (WISP_URL, overridable per-user in Settings).
-import { cp, rm, mkdir, writeFile } from "node:fs/promises";
+// Netlify or Cloudflare Pages. With no Node server there, the browser uses the external
+// Wisp servers from public/config.js, or a comma-separated WISP_URL list instead.
+import { cp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
+import vm from "node:vm";
 import { mounts, root } from "../src/mounts.js";
 
 const out = join(root, "dist");
-const wisp = process.env.WISP_URL || "wss://wisp.mercurywork.shop/";
 
-if (!/^wss?:\/\//.test(wisp)) {
-	console.error(`WISP_URL must start with ws:// or wss:// (got "${wisp}")`);
+const context = { self: {} };
+vm.runInNewContext(await readFile(join(root, "public", "config.js"), "utf8"), context);
+const configured = context.self.SJ2_CONFIG.wispServers.filter((s) => s !== "self");
+const wispServers = process.env.WISP_URL
+	? process.env.WISP_URL.split(",").map((s) => s.trim()).filter(Boolean)
+	: configured;
+
+for (const server of wispServers) {
+	if (!/^(wss?:\/\/)?[^\s/:]+(:\d+)?(\/\S*)?$/.test(server)) {
+		console.error(`Invalid Wisp server "${server}" (use a host or a ws:// / wss:// URL)`);
+		process.exit(1);
+	}
+}
+if (!wispServers.length) {
+	console.error("No Wisp servers configured");
 	process.exit(1);
 }
 
@@ -33,9 +46,9 @@ for (const [prefix, dir] of mounts) {
 
 await writeFile(
 	join(out, "config.js"),
-	`self.SJ2_CONFIG = ${JSON.stringify({ wisp }, null, "\t")};\n`
+	`self.SJ2_CONFIG = ${JSON.stringify({ wispServers }, null, "\t")};\n`
 );
 // Stop GitHub Pages' Jekyll step from dropping files/folders it considers special.
 await writeFile(join(out, ".nojekyll"), "");
 
-console.log(`Built static site in dist/ (Wisp server: ${wisp})`);
+console.log(`Built static site in dist/ (Wisp servers: ${wispServers.join(", ")})`);

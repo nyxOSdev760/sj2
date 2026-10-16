@@ -16,13 +16,6 @@ const PATHS = {
 	epoxy: path("epoxy/index.js"),
 };
 
-// config.js sets an external Wisp server for static hosting; otherwise use our own.
-function defaultWisp() {
-	const local = new URL("wisp/", BASE);
-	local.protocol = location.protocol === "https:" ? "wss:" : "ws:";
-	return self.SJ2_CONFIG?.wisp || local.href;
-}
-
 const $ = (id) => document.getElementById(id);
 const els = {
 	tabs: $("tabs"),
@@ -145,8 +138,7 @@ async function registerServiceWorker(path) {
 }
 
 const transportScripts = new Set();
-async function createTransport(name) {
-	const wisp = els.wisp.value.trim() || defaultWisp();
+async function createTransport(name, wisp) {
 	if (name === "epoxy") {
 		if (!transportScripts.has(name)) await loadScript(PATHS.epoxy);
 		transportScripts.add(name);
@@ -158,8 +150,33 @@ async function createTransport(name) {
 }
 
 // Every transport is wrapped so ad and tracker hosts are checked against AdGuard DNS.
-async function createFilteredTransport(name) {
-	return AdGuardDNS.wrap(await createTransport(name));
+async function connectWisp(url) {
+	return AdGuardDNS.wrap(await createTransport(els.transport.value, url));
+}
+
+// Picks the Wisp server to use: a server typed into Settings if it answers, otherwise the
+// fastest of config.js's list, skipping servers in `exclude` that already went down.
+async function pickWisp(exclude = new Set()) {
+	const custom = els.wisp.value.trim();
+	const own = custom ? WispPool.expand(custom).filter((url) => !exclude.has(url)) : [];
+	if (own.length) {
+		try {
+			return await WispPool.fastest(own);
+		} catch {
+			console.warn(`Wisp server ${custom} isn't responding; trying the built-in list.`);
+		}
+	}
+	const all = WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"]);
+	let urls = all.filter((url) => !exclude.has(url));
+	if (!urls.length) {
+		exclude.clear(); // every server has failed once; give them all another chance
+		urls = all;
+	}
+	return WispPool.fastest(urls);
+}
+
+function showWisp(url) {
+	els.wisp.placeholder = `Automatic · using ${WispPool.label(url)}`;
 }
 
 async function boot() {
@@ -172,7 +189,27 @@ async function boot() {
 	const sw = await registerServiceWorker(PATHS.sw);
 	await loadScript(PATHS.scramjet);
 	await loadScript(PATHS.controllerApi);
-	const transport = await createFilteredTransport(els.transport.value);
+
+	let url;
+	try {
+		url = await pickWisp();
+	} catch (err) {
+		// Nothing answered the probe; start with the first server anyway, and failover
+		// keeps trying the others once requests are made.
+		console.warn(err);
+		url = WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"])[0];
+	}
+	showWisp(url);
+	const failover = new WispPool.FailoverTransport({
+		url,
+		transport: await connectWisp(url),
+		connectTo: connectWisp,
+		pick: pickWisp,
+		onSwitch: (from, to) => {
+			showWisp(to);
+			setStatus(`${WispPool.label(from)} stopped responding, switched to ${WispPool.label(to)}.`);
+		},
+	});
 
 	const { Controller, config } = $scramjetController;
 	config.prefix = PATHS.prefix;
@@ -180,9 +217,9 @@ async function boot() {
 	config.wasmPath = PATHS.wasm;
 	config.injectPath = PATHS.controllerInject;
 
-	const controller = new Controller({ serviceworker: sw, transport });
+	const controller = new Controller({ serviceworker: sw, transport: failover });
 	await controller.wait();
-	return { controller };
+	return { controller, failover };
 }
 
 function toUrl(input) {
@@ -258,7 +295,7 @@ function el(tag, className, text) {
 
 async function main() {
 	els.transport.value = settings.get("transport", "libcurl");
-	els.wisp.placeholder = defaultWisp();
+	els.wisp.placeholder = "Automatic";
 	els.wisp.value = settings.get("wisp", "");
 	els.engine.value = settings.get("engine", els.engine.options[0].value);
 	if (!els.engine.value) els.engine.selectedIndex = 0;
@@ -534,27 +571,31 @@ async function main() {
 		settings.set("saveHistory", els.saveHistory.checked ? "1" : "0");
 	});
 
-	async function reconnect(message) {
+	// Rebuilds the transport, on `url` or on a freshly picked server.
+	async function reconnect(url) {
 		if (!proxy) return;
 		try {
-			proxy.controller.setTransport(await createFilteredTransport(els.transport.value));
-			setStatus(message);
+			url ??= await pickWisp();
+			proxy.failover.use(url, await connectWisp(url));
+			showWisp(url);
+			setStatus(`Using ${els.transport.value} via ${WispPool.label(url)}.`);
 		} catch (err) {
-			setStatus("Couldn't switch transport: " + err.message, true);
+			setStatus("Couldn't connect: " + err.message, true);
 		}
 	}
 	els.transport.addEventListener("change", () => {
 		settings.set("transport", els.transport.value);
-		reconnect(`Switched to ${els.transport.value}.`);
+		reconnect(proxy?.failover.url);
 	});
 	els.wisp.addEventListener("change", () => {
 		const value = els.wisp.value.trim();
-		if (value && !/^wss?:\/\/[^/]/.test(value)) {
-			setStatus("Wisp server must be a ws:// or wss:// URL.", true);
+		if (value && !/^(wss?:\/\/)?[^\s/]+(\/\S*)?$/i.test(value)) {
+			setStatus("Wisp server must be a host name or a ws:// / wss:// URL.", true);
 			return;
 		}
 		settings.set("wisp", value);
-		reconnect(`Using Wisp server ${value || defaultWisp()}.`);
+		setStatus("Finding a Wisp server…");
+		reconnect();
 	});
 
 	createTab();
