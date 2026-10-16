@@ -6,7 +6,7 @@ import { join, extname, resolve, sep } from "node:path";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import { mounts } from "./mounts.js";
 import { handleAi, aiEnabled, aiModel } from "./ai.js";
-import { handleChat, chatEnabled } from "./chat.js";
+import { handleChat, chatEnabled, chatAdminEnabled } from "./chat.js";
 
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || "0.0.0.0";
@@ -123,7 +123,7 @@ server.listen(port, host, () => {
 	console.log(`Skyline listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
 	console.log(aiEnabled ? `AI: on (${aiModel})` : "AI: off (set GEMINI_API_KEY to turn it on)");
-	console.log(`Chat: ${chatEnabled ? "on" : "off"}`);
+	console.log(`Chat: ${chatEnabled ? "on" : "off"}${chatEnabled && chatAdminEnabled ? " (admin controls on)" : ""}`);
 });
 
 function shutdown() {

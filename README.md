@@ -64,6 +64,15 @@ Messages are plain text (no HTML), up to 500 characters, at most one every 1.5 s
 | --- | --- | --- |
 | `CHAT_ENABLED` | on | Set to `0` to turn chat off |
 | `CHAT_BLOCKED_WORDS` | (none) | Comma-separated words that get a message or name rejected |
+| `CHAT_ADMIN_PASSWORD` | (none, admin off) | Turns on admin controls |
+
+**Admin controls:** type `/admin` in the chat box and enter `CHAT_ADMIN_PASSWORD`. Every
+message then gets a ⋯ menu (Delete message, Mute 10 minutes / 1 hour / 1 day, Unmute), and an
+admin bar has Clear chat and Exit admin (`/logout` works too). Your messages show an Admin
+badge. Deletes and clears disappear for everyone right away; muted people are told how long
+is left. Five wrong passwords lock logins from that browser and network for 15 minutes.
+Admin logins and mutes last until the server restarts, and mutes follow the browser, so
+someone can get around one by clearing their cookies.
 
 The bottom bar holds Home, Music (SoundCloud), Chat, AI and History.
 

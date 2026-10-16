@@ -10,8 +10,11 @@ self.SkylineChat = (() => {
 
 	const $ = (id) => document.getElementById(id);
 	let panel, log, form, input, nameForm, nameInput, nameError, error, onlineEl;
+	let adminForm, adminInput, adminError, adminBar, menu;
 	let source = null;
 	let me = null;
+	let isAdmin = false;
+	let history = []; // messages on screen, so they can be redrawn with admin controls
 	let unread = 0;
 	let onUnread = () => {};
 
@@ -49,22 +52,45 @@ self.SkylineChat = (() => {
 		return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
 	}
 
-	function add(message) {
-		log.querySelector(".chat-empty")?.remove();
-		const stick = nearBottom();
+	function render(message) {
 		const item = el("div", "chat-msg");
+		item.dataset.id = message.id;
 		if (message.from === me) item.classList.add("mine");
 		const head = el("div", "chat-meta");
 		const who = el("span", "chat-name-tag", message.name);
 		who.style.color = colorFor(message.name);
-		const when = el(
-			"time",
-			"chat-time",
-			new Date(message.time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+		head.append(who);
+		if (message.admin) head.append(el("span", "chat-admin-badge", "Admin"));
+		head.append(
+			el("time", "chat-time", new Date(message.time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }))
 		);
-		head.append(who, when);
+		if (isAdmin) {
+			const more = el("button", "chat-more", "⋯");
+			more.type = "button";
+			more.title = "Admin actions";
+			more.setAttribute("aria-label", "Admin actions");
+			more.addEventListener("click", (e) => {
+				e.stopPropagation();
+				openMenu(more, message);
+			});
+			head.append(more);
+		}
 		item.append(head, el("div", "chat-text", message.text)); // text only, never HTML
-		log.append(item);
+		return item;
+	}
+
+	function redraw() {
+		closeMenu();
+		if (!history.length) return showEmpty("No messages yet. Say hi!");
+		log.replaceChildren(...history.map(render));
+	}
+
+	function add(message) {
+		log.querySelector(".chat-empty")?.remove();
+		const stick = nearBottom();
+		history.push(message);
+		if (history.length > 200) history.shift();
+		log.append(render(message));
 		while (log.children.length > 200) log.firstElementChild.remove();
 		if (stick || message.from === me) log.scrollTop = log.scrollHeight;
 		if (panel.hidden && message.from !== me) {
@@ -92,9 +118,9 @@ self.SkylineChat = (() => {
 			const data = JSON.parse(e.data);
 			me = data.you;
 			if (data.token) store.set(TOKEN_KEY, data.token);
-			log.replaceChildren();
-			if (data.messages.length) data.messages.forEach(add);
-			else showEmpty("No messages yet. Say hi!");
+			setAdmin(Boolean(data.admin));
+			history = data.messages.slice();
+			redraw();
 			unread = 0;
 			onUnread(0);
 			setOnline(data.online);
@@ -102,6 +128,16 @@ self.SkylineChat = (() => {
 		});
 		source.addEventListener("message", (e) => add(JSON.parse(e.data)));
 		source.addEventListener("online", (e) => setOnline(JSON.parse(e.data).online));
+		source.addEventListener("delete", (e) => {
+			const { id } = JSON.parse(e.data);
+			history = history.filter((m) => m.id !== id);
+			log.querySelector(`.chat-msg[data-id="${Number(id)}"]`)?.remove();
+			if (!history.length) showEmpty("No messages yet. Say hi!");
+		});
+		source.addEventListener("clear", () => {
+			history = [];
+			showEmpty("The chat was cleared.");
+		});
 		source.onerror = () => {
 			if (source.readyState === EventSource.CLOSED) {
 				// The server answered with an error (no chat here) rather than dropping out.
@@ -131,24 +167,107 @@ self.SkylineChat = (() => {
 		input.style.height = Math.min(input.scrollHeight, 140) + "px";
 	}
 
+	async function post(path, body) {
+		const res = await fetch(new URL(path, endpoint), {
+			method: "POST",
+			headers: { "Content-Type": "text/plain;charset=UTF-8" },
+			body: JSON.stringify({ ...body, token: store.get(TOKEN_KEY) }),
+			credentials: crossSite ? "include" : "same-origin",
+		}).catch(() => {
+			throw new Error("You're offline.");
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(data.error || "Something went wrong.");
+		return data;
+	}
+
 	async function send() {
 		const text = input.value.trim();
 		if (!text) return;
 		error.textContent = "";
+		// Hidden commands for the site's admins.
+		if (text === "/admin") {
+			input.value = "";
+			return showAdminForm(true);
+		}
+		if (text === "/logout" && isAdmin) {
+			input.value = "";
+			return logout();
+		}
 		try {
-			const res = await fetch(new URL("send", endpoint), {
-				method: "POST",
-				headers: { "Content-Type": "text/plain;charset=UTF-8" },
-				body: JSON.stringify({ name: store.get(NAME_KEY), text, token: store.get(TOKEN_KEY) }),
-				credentials: crossSite ? "include" : "same-origin",
-			});
-			const data = await res.json().catch(() => ({}));
-			if (!res.ok) throw new Error(data.error || "Couldn't send that.");
+			await post("send", { name: store.get(NAME_KEY), text });
 			input.value = "";
 			autosize();
 		} catch (err) {
-			error.textContent = err.message === "Failed to fetch" ? "You're offline." : err.message;
+			error.textContent = err.message;
 		}
+	}
+
+	// Admin controls.
+	function setAdmin(value) {
+		isAdmin = value;
+		adminBar.hidden = !value;
+		panel.classList.toggle("chat-is-admin", value);
+	}
+
+	function showAdminForm(show) {
+		adminForm.hidden = !show;
+		form.hidden = show;
+		adminError.textContent = "";
+		adminInput.value = "";
+		(show ? adminInput : input).focus();
+	}
+
+	async function logout() {
+		await post("admin/logout", {}).catch(() => {});
+		setAdmin(false);
+		redraw();
+	}
+
+	async function act(action, body, done) {
+		error.textContent = "";
+		try {
+			await post(`admin/${action}`, body);
+			if (done) done();
+		} catch (err) {
+			error.textContent = err.message;
+		}
+	}
+
+	function closeMenu() {
+		menu?.remove();
+		menu = null;
+	}
+
+	function openMenu(anchor, message) {
+		closeMenu();
+		menu = el("div", "chat-menu");
+		menu.setAttribute("role", "menu");
+		const item = (label, run, danger) => {
+			const button = el("button", danger ? "danger" : null, label);
+			button.type = "button";
+			button.setAttribute("role", "menuitem");
+			button.addEventListener("click", () => {
+				closeMenu();
+				run();
+			});
+			menu.append(button);
+		};
+		item("Delete message", () => act("delete", { id: message.id }), true);
+		if (message.from !== me) {
+			const mute = (minutes, label) =>
+				item(label, () =>
+					act("mute", { from: message.from, minutes }, () => {
+						error.textContent = minutes ? `${message.name} is muted.` : `${message.name} is unmuted.`;
+					})
+				);
+			mute(10, "Mute 10 minutes");
+			mute(60, "Mute 1 hour");
+			mute(24 * 60, "Mute 1 day");
+			mute(0, "Unmute");
+		}
+		anchor.closest(".chat-msg").append(menu);
+		menu.querySelector("button").focus();
 	}
 
 	function open() {
@@ -198,9 +317,36 @@ self.SkylineChat = (() => {
 			showNameForm(false);
 		});
 		$("chat-rename").addEventListener("click", () => showNameForm(true));
+
+		adminForm = $("chat-admin-form");
+		adminInput = $("chat-admin-password");
+		adminError = $("chat-admin-error");
+		adminBar = $("chat-admin-bar");
+		adminForm.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			adminError.textContent = "";
+			try {
+				await post("admin/login", { password: adminInput.value });
+				setAdmin(true);
+				showAdminForm(false);
+				redraw();
+			} catch (err) {
+				adminError.textContent = err.message;
+			}
+		});
+		$("chat-admin-cancel").addEventListener("click", () => showAdminForm(false));
+		$("chat-admin-logout").addEventListener("click", logout);
+		$("chat-clear").addEventListener("click", () => {
+			if (confirm("Delete every message in the chat for everyone?")) act("clear", {});
+		});
+		document.addEventListener("click", (e) => {
+			if (menu && !menu.contains(e.target)) closeMenu();
+		});
 		$("chat-close").addEventListener("click", close);
 		document.addEventListener("keydown", (e) => {
-			if (e.key === "Escape" && !panel.hidden && !document.querySelector("dialog[open]")) close();
+			if (e.key !== "Escape" || panel.hidden || document.querySelector("dialog[open]")) return;
+			if (menu) closeMenu();
+			else close();
 		});
 		showEmpty("Connecting…");
 	}

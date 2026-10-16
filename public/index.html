@@ -127,6 +127,11 @@
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
 				</button>
 			</header>
+			<div id="chat-admin-bar" class="chat-admin-bar" hidden>
+				<span>Admin mode</span>
+				<button id="chat-clear" class="text-button" type="button">Clear chat</button>
+				<button id="chat-admin-logout" class="text-button" type="button">Exit admin</button>
+			</div>
 			<div id="chat-log" class="ai-log chat-log" aria-live="polite"></div>
 			<form id="chat-name-form" class="chat-name-form" hidden>
 				<label for="chat-name">Pick a name for chat</label>
@@ -135,6 +140,15 @@
 					<button class="text-button primary" type="submit">Join</button>
 				</div>
 				<p id="chat-name-error" class="status error" role="alert"></p>
+			</form>
+			<form id="chat-admin-form" class="chat-name-form" hidden>
+				<label for="chat-admin-password">Admin password</label>
+				<div class="chat-name-row">
+					<input id="chat-admin-password" type="password" autocomplete="current-password" />
+					<button class="text-button primary" type="submit">Log in</button>
+					<button id="chat-admin-cancel" class="text-button" type="button">Cancel</button>
+				</div>
+				<p id="chat-admin-error" class="status error" role="alert"></p>
 			</form>
 			<form id="chat-form" class="ai-form">
 				<textarea id="chat-input" rows="1" maxlength="500" placeholder="Message everyone…" aria-label="Message everyone"></textarea>

@@ -16,6 +16,9 @@ services:
         value: "1"
       - key: AI_COOKIE_SECRET
         generateValue: true
+      # Optional: a password for chat admin controls (type /admin in chat).
+      - key: CHAT_ADMIN_PASSWORD
+        sync: false
       # Optional: words that get chat messages rejected, comma-separated.
       - key: CHAT_BLOCKED_WORDS
         sync: false
