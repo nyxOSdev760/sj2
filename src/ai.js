@@ -1,14 +1,23 @@
 // Skyline AI: relays chats to Google Gemini so the API key never reaches the browser,
 // and caps how much each visitor can use.
 //
+// Visitors are told apart by a signed browser-ID cookie, so people sharing one Wi-Fi
+// each get their own limit. Clearing cookies gets a new ID, so each network (IP
+// address) also has a looser cap of its own.
+//
 //   GEMINI_API_KEY         required to turn AI on (keep it out of the repo)
 //   GEMINI_MODEL           model, or a comma-separated list tried in order when one is
 //                          overloaded or unavailable (default: see MODELS below)
-//   AI_DAILY_LIMIT         messages per visitor per rolling 24 hours (default 30)
+//   AI_DAILY_LIMIT         messages per browser per rolling 24 hours (default 30)
+//   AI_NETWORK_DAILY_LIMIT messages per network (IP address) per 24 hours (default 150)
 //   AI_GLOBAL_DAILY_LIMIT  messages for everyone together per 24 hours (default 1000)
 //   AI_ALLOWED_ORIGINS     extra sites allowed to call this, comma-separated (for a
 //                          static copy of Skyline hosted elsewhere)
 //   TRUST_PROXY=1          take the visitor's IP from X-Forwarded-For (behind nginx etc.)
+//   AI_COOKIE_SECRET       signs browser IDs; without it a random one is made at start,
+//                          so IDs (like the counts) reset when the server restarts
+
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const KEY = process.env.GEMINI_API_KEY || "";
 const MODELS = (process.env.GEMINI_MODEL || "gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest")
@@ -19,7 +28,10 @@ const FIRST_BYTE_TIMEOUT = 20000;
 const COOLDOWN = 5 * 60 * 1000; // skip a model this long after it fails
 const coolingUntil = new Map(); // model -> time it may be tried again
 const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT) || 30;
+const NETWORK_DAILY_LIMIT = Number(process.env.AI_NETWORK_DAILY_LIMIT) || 150;
 const GLOBAL_DAILY_LIMIT = Number(process.env.AI_GLOBAL_DAILY_LIMIT) || 1000;
+const COOKIE_SECRET = process.env.AI_COOKIE_SECRET || randomBytes(32).toString("hex");
+const COOKIE = "skyline_ai";
 const ALLOWED_ORIGINS = (process.env.AI_ALLOWED_ORIGINS || "")
 	.split(",")
 	.map((s) => s.trim().replace(/\/$/, ""))
@@ -27,7 +39,7 @@ const ALLOWED_ORIGINS = (process.env.AI_ALLOWED_ORIGINS || "")
 const TRUST_PROXY = process.env.TRUST_PROXY === "1";
 
 const DAY = 24 * 60 * 60 * 1000;
-const MIN_GAP = 2000; // between messages from one visitor
+const MIN_GAP = 2000; // between messages from one browser
 const MAX_BODY = 64 * 1024;
 const MAX_TURNS = 20;
 const MAX_MESSAGE = 4000;
@@ -39,20 +51,21 @@ Be friendly, direct and concise. Use short paragraphs, and Markdown code blocks 
 export const aiEnabled = Boolean(KEY);
 export const aiModel = MODELS.join(", ");
 
-const usage = new Map(); // visitor IP -> timestamps of their messages in the last day
+// "b:<browser id>" or "n:<ip>" -> timestamps of messages in the last day
+const usage = new Map();
 let everyone = [];
 
 setInterval(() => {
 	const now = Date.now();
-	for (const [ip, times] of usage) {
+	for (const [key, times] of usage) {
 		const recent = times.filter((t) => now - t < DAY);
-		if (recent.length) usage.set(ip, recent);
-		else usage.delete(ip);
+		if (recent.length) usage.set(key, recent);
+		else usage.delete(key);
 	}
 	everyone = everyone.filter((t) => now - t < DAY);
 }, 60 * 60 * 1000).unref();
 
-function visitor(req) {
+function network(req) {
 	if (TRUST_PROXY) {
 		const forwarded = req.headers["x-forwarded-for"];
 		if (forwarded) return String(forwarded).split(",")[0].trim();
@@ -60,10 +73,76 @@ function visitor(req) {
 	return req.socket.remoteAddress || "unknown";
 }
 
-function recentUses(ip, now) {
-	const times = (usage.get(ip) || []).filter((t) => now - t < DAY);
-	usage.set(ip, times);
+function sign(id) {
+	return createHmac("sha256", COOKIE_SECRET).update(id).digest("base64url");
+}
+
+function readCookie(req, name) {
+	for (const part of String(req.headers.cookie || "").split(";")) {
+		const at = part.indexOf("=");
+		if (at !== -1 && part.slice(0, at).trim() === name) return part.slice(at + 1).trim();
+	}
+	return null;
+}
+
+// The browser's ID from its signed cookie, or a new one (sent back as a cookie).
+function browserId(req, res) {
+	const value = readCookie(req, COOKIE);
+	if (value) {
+		const [id, mac] = value.split(".");
+		const expected = Buffer.from(sign(id || ""));
+		const given = Buffer.from(mac || "");
+		if (id && given.length === expected.length && timingSafeEqual(given, expected)) return id;
+	}
+	const id = randomBytes(16).toString("base64url");
+	const crossSite = Boolean(req.headers.origin && ALLOWED_ORIGINS.includes(req.headers.origin));
+	const secure =
+		crossSite || req.socket.encrypted || (TRUST_PROXY && req.headers["x-forwarded-proto"] === "https");
+	res.setHeader(
+		"Set-Cookie",
+		[
+			`${COOKIE}=${id}.${sign(id)}`,
+			"Path=/api/ai/",
+			"Max-Age=31536000",
+			"HttpOnly",
+			// A static copy on another site needs SameSite=None (which requires Secure).
+			crossSite ? "SameSite=None" : "SameSite=Lax",
+			secure ? "Secure" : "",
+		]
+			.filter(Boolean)
+			.join("; ")
+	);
+	return id;
+}
+
+// Timestamps for `key` within the last day (empty lists aren't stored).
+function recentUses(key, now) {
+	const times = (usage.get(key) || []).filter((t) => now - t < DAY);
+	if (times.length) usage.set(key, times);
+	else usage.delete(key);
 	return times;
+}
+
+function record(key, now) {
+	const times = recentUses(key, now);
+	times.push(now);
+	usage.set(key, times);
+}
+
+function forget(key) {
+	usage.get(key)?.pop();
+}
+
+// How many messages this browser can still send: the lower of its own allowance and
+// its network's.
+function remainingFor(browser, net, now) {
+	return Math.max(
+		0,
+		Math.min(
+			DAILY_LIMIT - recentUses(`b:${browser}`, now).length,
+			NETWORK_DAILY_LIMIT - recentUses(`n:${net}`, now).length
+		)
+	);
 }
 
 // Same-site requests are always fine; other sites only when listed.
@@ -83,6 +162,7 @@ function corsHeaders(req) {
 	if (!origin || !ALLOWED_ORIGINS.includes(origin)) return {};
 	return {
 		"Access-Control-Allow-Origin": origin,
+		"Access-Control-Allow-Credentials": "true",
 		"Access-Control-Expose-Headers": "X-AI-Remaining, X-AI-Limit",
 		Vary: "Origin",
 	};
@@ -194,18 +274,29 @@ async function chat(req, res) {
 	}
 	if (!messages?.length) return sendJson(req, res, 400, { error: "Bad request." });
 
-	const ip = visitor(req);
 	const now = Date.now();
-	const mine = recentUses(ip, now);
+	const browser = req.aiBrowser;
+	const net = network(req);
+	const mine = recentUses(`b:${browser}`, now);
+	const onNetwork = recentUses(`n:${net}`, now);
 	everyone = everyone.filter((t) => now - t < DAY);
+	const limitHeaders = { "X-AI-Remaining": "0", "X-AI-Limit": String(DAILY_LIMIT) };
 	if (mine.length >= DAILY_LIMIT) {
-		const resetAt = mine[0] + DAY;
 		return sendJson(
 			req,
 			res,
 			429,
-			{ error: `You've used all ${DAILY_LIMIT} AI messages for today.`, resetAt },
-			{ "X-AI-Remaining": "0", "X-AI-Limit": String(DAILY_LIMIT) }
+			{ error: `You've used all ${DAILY_LIMIT} AI messages for today.`, resetAt: mine[0] + DAY },
+			limitHeaders
+		);
+	}
+	if (onNetwork.length >= NETWORK_DAILY_LIMIT) {
+		return sendJson(
+			req,
+			res,
+			429,
+			{ error: "Your network has used all its AI messages for today.", resetAt: onNetwork[0] + DAY },
+			limitHeaders
 		);
 	}
 	if (mine.length && now - mine.at(-1) < MIN_GAP) {
@@ -214,9 +305,10 @@ async function chat(req, res) {
 	if (everyone.length >= GLOBAL_DAILY_LIMIT) {
 		return sendJson(req, res, 429, { error: "Skyline AI is out of messages for today. Try again tomorrow." });
 	}
-	mine.push(now);
+	record(`b:${browser}`, now);
+	record(`n:${net}`, now);
 	everyone.push(now);
-	const remaining = DAILY_LIMIT - mine.length;
+	const remaining = remainingFor(browser, net, now);
 
 	const upstream = new AbortController();
 	res.on("close", () => upstream.abort());
@@ -225,7 +317,8 @@ async function chat(req, res) {
 	if (upstream.signal.aborted) return;
 	if (!response) {
 		// Nothing was produced, so give the message back.
-		mine.pop();
+		forget(`b:${browser}`);
+		forget(`n:${net}`);
 		everyone.pop();
 		return sendJson(req, res, 502, { error: "The AI is busy right now. Try again in a moment." });
 	}
@@ -278,13 +371,12 @@ export async function handleAi(req, res, pathname) {
 		sendJson(req, res, 403, { error: "Not allowed from this site." });
 		return true;
 	}
+	req.aiBrowser = browserId(req, res);
 	if (pathname === "/api/ai/status" && req.method === "GET") {
-		const now = Date.now();
-		const used = aiEnabled ? recentUses(visitor(req), now).length : 0;
 		sendJson(req, res, 200, {
 			enabled: aiEnabled,
 			limit: DAILY_LIMIT,
-			remaining: Math.max(0, DAILY_LIMIT - used),
+			remaining: aiEnabled ? remainingFor(req.aiBrowser, network(req), Date.now()) : DAILY_LIMIT,
 		});
 	} else if (pathname === "/api/ai/chat" && req.method === "POST") {
 		await chat(req, res);

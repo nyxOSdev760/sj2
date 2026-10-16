@@ -4,6 +4,9 @@
 // holds the Gemini key and enforces each visitor's daily limit.
 self.SkylineAI = (() => {
 	const endpoint = new URL(self.SJ2_CONFIG?.aiEndpoint || "api/ai/", new URL("./", location.href));
+	// The browser-ID cookie that gives each browser its own limit has to be sent along,
+	// including to an AI server on another site.
+	const credentials = endpoint.origin === location.origin ? "same-origin" : "include";
 	const SUGGESTIONS = ["Explain something simply", "Help me write a message", "Give me a study plan"];
 
 	const $ = (id) => document.getElementById(id);
@@ -123,7 +126,7 @@ self.SkylineAI = (() => {
 
 	async function refreshStatus() {
 		try {
-			const res = await fetch(new URL("status", endpoint), { cache: "no-store" });
+			const res = await fetch(new URL("status", endpoint), { cache: "no-store", credentials });
 			if (!res.ok) throw new Error(String(res.status));
 			status = await res.json();
 		} catch {
@@ -159,6 +162,7 @@ self.SkylineAI = (() => {
 				headers: { "Content-Type": "text/plain;charset=UTF-8" },
 				body: JSON.stringify({ messages }),
 				signal: controller.signal,
+				credentials,
 			});
 			const left = res.headers.get("X-AI-Remaining");
 			if (left != null && status) status.remaining = Number(left);
