@@ -219,7 +219,8 @@ can't be used to reach the host's own network.
 Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
 [Scramjet](https://github.com/MercuryWorkshop/scramjet) by Mercury Workshop, with
 [AdGuard DNS](https://adguard-dns.io), Google Gemini, the Outfit font and
-[Simple Icons](https://simpleicons.org).
+[Simple Icons](https://simpleicons.org). The game-site banners and logos in `public/games/`
+belong to Poki, CrazyGames, Coolmath Games and Duck Math, and are only used to link to them.
 
 ## Notes
 

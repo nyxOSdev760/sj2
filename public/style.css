@@ -890,25 +890,26 @@ select:focus {
 	filter: brightness(1.12);
 }
 
-/* Games picker. */
+/* Games picker: a grid of cards with each site's banner and logo. */
 .games {
-	width: min(460px, calc(100vw - 32px));
+	width: min(720px, calc(100vw - 24px));
 }
 
 .games-list {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
 	padding: 16px;
+	overflow-y: auto;
 }
 
 .game-site {
 	display: flex;
-	align-items: center;
-	gap: 14px;
-	padding: 12px 14px;
+	flex-direction: column;
+	overflow: hidden;
+	padding: 0;
 	border: 1px solid var(--border);
-	border-radius: 16px;
+	border-radius: 18px;
 	background: var(--surface);
 	color: var(--text);
 	font: inherit;
@@ -916,42 +917,86 @@ select:focus {
 	cursor: pointer;
 	transition:
 		border-color 0.15s,
-		transform 0.15s;
+		transform 0.15s,
+		box-shadow 0.15s;
 }
 
 .game-site:hover,
 .game-site:focus-visible {
 	border-color: var(--accent);
-	transform: translateY(-1px);
+	box-shadow: 0 12px 30px var(--shadow);
+	transform: translateY(-2px);
 	outline: none;
 }
 
-.game-badge {
-	display: grid;
-	place-items: center;
-	width: 46px;
-	height: 46px;
+.game-banner {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1.9;
+	object-fit: cover;
+	background: var(--chip);
+}
+
+.game-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px 12px;
+}
+
+.game-icon {
+	width: 36px;
+	height: 36px;
 	flex: none;
-	border-radius: 14px;
-	color: #fff;
-	font-size: 22px;
-	font-weight: 800;
+	border-radius: 10px;
+	object-fit: cover;
 }
 
 .game-text {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	min-width: 0;
 }
 
 .game-name {
-	font-size: 16px;
+	overflow: hidden;
+	font-size: 15px;
 	font-weight: 700;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .game-about {
+	overflow: hidden;
 	color: var(--muted);
-	font-size: 13px;
+	font-size: 12px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+	.games-list {
+		gap: 10px;
+		padding: 12px;
+	}
+
+	.game-info {
+		padding: 8px 10px 10px;
+	}
+
+	.game-icon {
+		width: 28px;
+		height: 28px;
+		border-radius: 8px;
+	}
+
+	.game-name {
+		font-size: 14px;
+	}
+
+	.game-about {
+		display: none;
+	}
 }
 
 /* Credits. */
@@ -1234,9 +1279,11 @@ select:focus {
 		color 0.15s;
 }
 
-.dock button:hover {
-	background: var(--hover);
-	color: var(--text);
+@media (hover: hover) {
+	.dock button:hover {
+		background: var(--hover);
+		color: var(--text);
+	}
 }
 
 .dock button.active {

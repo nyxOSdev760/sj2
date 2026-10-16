@@ -624,11 +624,12 @@ async function main() {
 	});
 
 	// Games: free game sites, opened through the proxy like any other site.
+	// Each card shows the site's own banner and logo (public/games/).
 	const GAME_SITES = [
-		{ name: "Poki", url: "https://poki.com/", color: "#2f80ed", about: "Thousands of free games" },
-		{ name: "CrazyGames", url: "https://www.crazygames.com/", color: "#6c4cf5", about: "New games every day" },
-		{ name: "Coolmath Games", url: "https://www.coolmathgames.com/", color: "#e2412b", about: "Puzzle and logic classics" },
-		{ name: "Duck Math", url: "https://duckmath.org/", color: "#f2b705", about: "Popular browser games" },
+		{ name: "Poki", url: "https://poki.com/", art: "poki", about: "Thousands of free games" },
+		{ name: "CrazyGames", url: "https://www.crazygames.com/", art: "crazy", about: "New games every day" },
+		{ name: "Coolmath Games", url: "https://www.coolmathgames.com/", art: "cool", about: "Puzzle and logic classics" },
+		{ name: "Duck Math", url: "https://duckmath.org/", art: "duck", about: "Popular browser games" },
 	];
 	function openGames() {
 		const list = $("games-list");
@@ -636,11 +637,18 @@ async function main() {
 			...GAME_SITES.map((site) => {
 				const card = el("button", "game-site");
 				card.type = "button";
-				const badge = el("span", "game-badge", site.name[0]);
-				badge.style.background = site.color;
+				const banner = el("img", "game-banner");
+				banner.src = `games/${site.art}.jpg`;
+				banner.alt = "";
+				banner.loading = "lazy";
+				const info = el("span", "game-info");
+				const icon = el("img", "game-icon");
+				icon.src = `games/${site.art}-icon.png`;
+				icon.alt = "";
 				const text = el("span", "game-text");
 				text.append(el("span", "game-name", site.name), el("span", "game-about", site.about));
-				card.append(badge, text);
+				info.append(icon, text);
+				card.append(banner, info);
 				card.addEventListener("click", (e) => {
 					$("games-panel").close();
 					SkylineAI.close();
