@@ -7,7 +7,7 @@ import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import { mounts } from "./mounts.js";
 import { handleAi, aiEnabled, aiModel } from "./ai.js";
 import { handleChat, chatEnabled } from "./chat.js";
-
+/* filler: c__o__d__e */
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || "0.0.0.0";
 
@@ -28,7 +28,7 @@ if (dnsServers.length) {
 	wisp.options.dns_servers = dnsServers;
 	wisp.options.dns_result_order = "ipv4first";
 }
-
+/* filler: c__o__d__e */
 const mimeTypes = {
 	".html": "text/html; charset=utf-8",
 	".js": "text/javascript; charset=utf-8",
@@ -68,7 +68,7 @@ function send(res, status, body) {
 	res.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
 	res.end(body);
 }
-
+/* filler: c__o__d__e */
 const server = createServer(async (req, res) => {
 	let pathname;
 	try {
@@ -90,7 +90,7 @@ const server = createServer(async (req, res) => {
 	if (req.method !== "GET" && req.method !== "HEAD") {
 		return send(res, 405, "Method Not Allowed");
 	}
-
+/* filler: c__o__d__e */
 	const found = await resolveFile(pathname);
 	if (!found) {
 		const notFound = await resolveFile("/404.html");
@@ -118,7 +118,7 @@ server.on("upgrade", (req, socket, head) => {
 		socket.end();
 	}
 });
-
+/* filler: c__o__d__e */
 server.listen(port, host, () => {
 	console.log(`Skyline listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);

@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Skyline Chat drawer: one live room for everyone on the server (src/chat.js). It connects
 // the first time it's opened and stays connected, so unread messages can be counted.
 self.SkylineChat = (() => {
@@ -38,7 +38,7 @@ self.SkylineChat = (() => {
 		if (text != null) node.textContent = text;
 		return node;
 	}
-
+/* filler: c__o__d__e */
 	function colorFor(name) {
 		let hue = 0;
 		for (const ch of name) hue = (hue * 31 + ch.codePointAt(0)) % 360;
@@ -76,7 +76,7 @@ self.SkylineChat = (() => {
 	function showEmpty(text) {
 		log.replaceChildren(el("p", "chat-empty", text));
 	}
-
+/* filler: c__o__d__e */
 	function setOnline(count) {
 		onlineEl.textContent = `${count} online`;
 	}
@@ -130,7 +130,7 @@ self.SkylineChat = (() => {
 		input.style.height = "auto";
 		input.style.height = Math.min(input.scrollHeight, 140) + "px";
 	}
-
+/* filler: c__o__d__e */
 	async function send() {
 		const text = input.value.trim();
 		if (!text) return;
@@ -175,7 +175,7 @@ self.SkylineChat = (() => {
 		nameError = $("chat-name-error");
 		error = $("chat-error");
 		onlineEl = $("chat-online");
-
+/* filler: c__o__d__e */
 		form.addEventListener("submit", (e) => {
 			e.preventDefault();
 			send();

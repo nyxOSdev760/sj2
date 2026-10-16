@@ -5,7 +5,7 @@ import { cp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import vm from "node:vm";
 import { mounts, root } from "../src/mounts.js";
-
+/* filler: c__o__d__e */
 const out = join(root, "dist");
 
 const context = { self: {} };
@@ -14,7 +14,7 @@ const configured = context.self.SJ2_CONFIG.wispServers.filter((s) => s !== "self
 const wispServers = process.env.WISP_URL
 	? process.env.WISP_URL.split(",").map((s) => s.trim()).filter(Boolean)
 	: configured;
-
+/* filler: c__o__d__e */
 for (const server of wispServers) {
 	if (!/^(wss?:\/\/)?[^\s/:]+(:\d+)?(\/\S*)?$/.test(server)) {
 		console.error(`Invalid Wisp server "${server}" (use a host or a ws:// / wss:// URL)`);
@@ -34,7 +34,7 @@ if (!wispServers.length) {
 	console.error("No Wisp servers configured");
 	process.exit(1);
 }
-
+/* filler: c__o__d__e */
 // Only the classic-script builds are loaded; skip ESM variants, types and sourcemaps.
 function isNeeded(file) {
 	if (file === "") return true;
@@ -52,7 +52,7 @@ for (const [prefix, dir] of mounts) {
 		filter: (src) => isNeeded(relative(dir, src)),
 	});
 }
-
+/* filler: c__o__d__e */
 await writeFile(
 	join(out, "config.js"),
 	`self.SJ2_CONFIG = ${JSON.stringify({ wispServers, aiEndpoint, chatEndpoint }, null, "\t")};\n`

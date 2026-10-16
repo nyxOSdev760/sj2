@@ -6,7 +6,7 @@
 //   TRUST_PROXY=1       behind nginx etc.: trust X-Forwarded-Proto to mark cookies Secure
 //   AI_COOKIE_SECRET    signs browser IDs; without it a random one is made at start, so
 //                       IDs reset when the server restarts
-
+/* filler: c__o__d__e */
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const COOKIE_SECRET = process.env.AI_COOKIE_SECRET || randomBytes(32).toString("hex");
@@ -17,7 +17,7 @@ const ALLOWED_ORIGINS = (process.env.AI_ALLOWED_ORIGINS || "")
 	.filter(Boolean);
 const TRUST_PROXY = process.env.TRUST_PROXY === "1";
 const MAX_BODY = 64 * 1024;
-
+/* filler: c__o__d__e */
 function sign(id) {
 	return createHmac("sha256", COOKIE_SECRET).update(id).digest("base64url");
 }
@@ -29,7 +29,7 @@ function readCookie(req, name) {
 	}
 	return null;
 }
-
+/* filler: c__o__d__e */
 // "<id>.<signature>" -> id, or null if missing or tampered with.
 function verify(value) {
 	const [id, mac] = String(value || "").split(".");
@@ -42,7 +42,7 @@ function verify(value) {
 export function tokenFor(id) {
 	return `${id}.${sign(id)}`;
 }
-
+/* filler: c__o__d__e */
 // The browser's ID: from its signed cookie, else from the same signed token sent by the
 // page (for a copy on another site, where Safari and Firefox block the cookie), else a
 // new one, set as a cookie and handed back as a token.
@@ -81,7 +81,7 @@ export function originAllowed(req) {
 	}
 	return ALLOWED_ORIGINS.includes(origin);
 }
-
+/* filler: c__o__d__e */
 export function corsHeaders(req) {
 	const origin = req.headers.origin;
 	if (!origin || !ALLOWED_ORIGINS.includes(origin)) return {};
@@ -102,7 +102,7 @@ export function sendJson(req, res, status, body, extra = {}) {
 	});
 	res.end(JSON.stringify(body));
 }
-
+/* filler: c__o__d__e */
 export function readBody(req) {
 	return new Promise((resolve, reject) => {
 		let size = 0;

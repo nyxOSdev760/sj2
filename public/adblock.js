@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Ad and tracker blocking through AdGuard DNS (94.140.14.14 / 94.140.15.15).
 //
 // AdGuard DNS answers 0.0.0.0 for ad and tracker domains. Before the proxy opens a
@@ -35,7 +35,7 @@ self.AdGuardDNS = (() => {
 			.replace(/\//g, "_")
 			.replace(/=+$/, "");
 	}
-
+/* filler: c__o__d__e */
 	function skipName(view, offset) {
 		while (offset < view.byteLength) {
 			const len = view.getUint8(offset);
@@ -89,7 +89,7 @@ self.AdGuardDNS = (() => {
 		const addresses = parseAddresses(body);
 		return addresses.length > 0 && addresses.every((ip) => ip === "0.0.0.0");
 	}
-
+/* filler: c__o__d__e */
 	function isBlocked(transport, hostname) {
 		hostname = hostname.toLowerCase().replace(/\.$/, "");
 		if (!hostname || hostname === DOH_HOST || isIpLiteral(hostname)) {
@@ -134,7 +134,7 @@ self.AdGuardDNS = (() => {
 			body: new TextEncoder().encode(html).buffer,
 		};
 	}
-
+/* filler: c__o__d__e */
 	// Wraps a Scramjet transport (libcurl or epoxy) so blocked hosts never connect.
 	class FilteredTransport {
 		constructor(inner) {
@@ -156,7 +156,7 @@ self.AdGuardDNS = (() => {
 			}
 			return this.inner.request(remote, method, body, headers, signal);
 		}
-
+/* filler: c__o__d__e */
 		connect(url, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
 			let connection = null;
 			let closed = null;

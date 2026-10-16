@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Directory the app is served from: "/" normally, "/<repo>/" on GitHub Pages project
 // sites. Everything is resolved against it so the app works from any subpath.
 const BASE = new URL("./", location.href);
@@ -212,7 +212,7 @@ async function boot() {
 			"Service workers are unavailable. Open this site over HTTPS or on localhost (and not in a private window on Firefox)."
 		);
 	}
-
+/* filler: c__o__d__e */
 	const sw = await registerServiceWorker(PATHS.sw);
 	await loadScript(PATHS.scramjet);
 	await loadScript(PATHS.controllerApi);
@@ -361,7 +361,7 @@ async function main() {
 	if (!els.engine.value) els.engine.selectedIndex = 0;
 	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
 	browsingHistory.load();
-
+/* filler: c__o__d__e */
 	let proxy;
 	const ready = boot().then(
 		(result) => {
@@ -583,7 +583,7 @@ async function main() {
 			list.append(item);
 		}
 	}
-
+/* filler: c__o__d__e */
 	function openHistory() {
 		els.historySearch.value = "";
 		renderHistory();
@@ -918,5 +918,5 @@ async function main() {
 	createTab();
 	Tour.openIfNew();
 }
-
+/* filler: c__o__d__e */
 main();

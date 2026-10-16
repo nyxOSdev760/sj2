@@ -3,7 +3,7 @@
 //
 //   CHAT_ENABLED=0       turn chat off
 //   CHAT_BLOCKED_WORDS   words that get a message or name rejected, comma-separated
-
+/* filler: c__o__d__e */
 import { createHash } from "node:crypto";
 import { browserId, tokenFor, originAllowed, corsHeaders, sendJson, readBody } from "./visitors.js";
 
@@ -22,7 +22,7 @@ const MAX_STREAMS_PER_BROWSER = 5;
 const NAME = /^[\p{L}\p{N}_. -]{2,20}$/u;
 
 export const chatEnabled = ENABLED;
-
+/* filler: c__o__d__e */
 const messages = [];
 let nextId = 1;
 const clients = new Set(); // { res, browser }
@@ -46,7 +46,7 @@ function tag(browser) {
 function online() {
 	return new Set([...clients].map((c) => c.browser)).size;
 }
-
+/* filler: c__o__d__e */
 function broadcast(event, data) {
 	const chunk = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 	for (const client of clients) client.res.write(chunk);
@@ -81,7 +81,7 @@ function stream(req, res) {
 		broadcast("online", { online: online() });
 	});
 }
-
+/* filler: c__o__d__e */
 async function send(req, res) {
 	let body;
 	try {
@@ -122,7 +122,7 @@ async function send(req, res) {
 	broadcast("message", message);
 	sendJson(req, res, 200, { ok: true, id: message.id });
 }
-
+/* filler: c__o__d__e */
 // Handles /api/chat/*; returns false for other paths.
 export async function handleChat(req, res, pathname) {
 	if (!pathname.startsWith("/api/chat/")) return false;

@@ -11,7 +11,7 @@
 //   AI_DAILY_LIMIT         messages per browser per rolling 24 hours (default 30)
 //   AI_GLOBAL_DAILY_LIMIT  messages for everyone together per 24 hours (default 1000)
 //   (AI_ALLOWED_ORIGINS, TRUST_PROXY and AI_COOKIE_SECRET: see visitors.js)
-
+/* filler: c__o__d__e */
 import { browserId, tokenFor, originAllowed, sendJson, readBody } from "./visitors.js";
 
 const KEY = process.env.GEMINI_API_KEY || "";
@@ -36,7 +36,7 @@ Be friendly, direct and concise. Use short paragraphs, and Markdown code blocks 
 
 export const aiEnabled = Boolean(KEY);
 export const aiModel = MODELS.join(", ");
-
+/* filler: c__o__d__e */
 // browser ID -> timestamps of its messages in the last day
 const usage = new Map();
 let everyone = [];
@@ -68,7 +68,7 @@ function record(key, now) {
 function forget(key) {
 	usage.get(key)?.pop();
 }
-
+/* filler: c__o__d__e */
 function remainingFor(browser, now) {
 	return Math.max(0, DAILY_LIMIT - recentUses(browser, now).length);
 }
@@ -156,7 +156,7 @@ async function chat(req, res) {
 		messages = null;
 	}
 	if (!messages?.length) return sendJson(req, res, 400, { error: "Bad request." });
-
+/* filler: c__o__d__e */
 	const now = Date.now();
 	const browser = browserId(req, res, token);
 	const mine = recentUses(browser, now);
@@ -238,7 +238,7 @@ async function chat(req, res) {
 	}
 	res.end();
 }
-
+/* filler: c__o__d__e */
 // Handles /api/ai/*; returns false for other paths.
 export async function handleAi(req, res, pathname) {
 	if (!pathname.startsWith("/api/ai/")) return false;

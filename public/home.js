@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Home screen pieces: the editable shortcut tiles and the constellation background.
 
 self.Shortcuts = (() => {
@@ -44,7 +44,7 @@ self.Shortcuts = (() => {
 		{ name: "Twitch", url: "https://www.twitch.tv/" },
 		{ name: "Music", url: "https://soundcloud.com/" },
 	];
-
+/* filler: c__o__d__e */
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
 	const ADDED_LATER = [
@@ -106,7 +106,7 @@ self.Shortcuts = (() => {
 			// storage unavailable; shortcuts just won't persist
 		}
 	}
-
+/* filler: c__o__d__e */
 	function brandFor(url) {
 		let host;
 		try {
@@ -188,7 +188,7 @@ function animateCanvas(canvas, { setup, frame, still }) {
 	let stopped = false;
 	let timer = 0;
 	let raf = 0;
-
+/* filler: c__o__d__e */
 	function resize() {
 		const dpr = Math.min(devicePixelRatio || 1, 2);
 		width = canvas.clientWidth;
@@ -225,7 +225,7 @@ function animateCanvas(canvas, { setup, frame, still }) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 	};
 }
-
+/* filler: c__o__d__e */
 // Drifting points joined by faint lines.
 self.Constellation = {
 	start(canvas, color = "167 139 250") {

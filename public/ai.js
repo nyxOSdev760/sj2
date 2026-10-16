@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Skyline AI chat drawer. It talks to the Node server's /api/ai/ (src/ai.js), which
 // holds the Gemini key and enforces each visitor's daily limit.
 self.SkylineAI = (() => {
@@ -45,7 +45,7 @@ self.SkylineAI = (() => {
 			}
 		}
 	}
-
+/* filler: c__o__d__e */
 	// A small Markdown subset: ``` code blocks, # headings, - / 1. lists, paragraphs.
 	function renderMarkdown(target, text) {
 		target.replaceChildren();
@@ -132,7 +132,7 @@ self.SkylineAI = (() => {
 				: "Ask anything…";
 		form.querySelector("button").disabled = input.disabled;
 	}
-
+/* filler: c__o__d__e */
 	async function refreshStatus() {
 		try {
 			const url = new URL("status", endpoint);
@@ -219,7 +219,7 @@ self.SkylineAI = (() => {
 			if (!input.disabled) input.focus();
 		}
 	}
-
+/* filler: c__o__d__e */
 	function open() {
 		panel.hidden = false;
 		document.body.classList.add("ai-open");
@@ -263,7 +263,7 @@ self.SkylineAI = (() => {
 		});
 		renderEmpty();
 	}
-
+/* filler: c__o__d__e */
 	return {
 		init,
 		open,

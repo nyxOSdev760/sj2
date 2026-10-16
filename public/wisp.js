@@ -1,5 +1,5 @@
 "use strict";
-
+/* filler: c__o__d__e */
 // Wisp server fallback. The site carries a list of Wisp servers (config.js); on start
 // every one is probed in parallel and the fastest real Wisp server is used. If that
 // server stops responding later, the next fastest takes over without a reload.
@@ -66,7 +66,7 @@ self.WispPool = (() => {
 			throw new Error("None of the Wisp servers responded");
 		}
 	}
-
+/* filler: c__o__d__e */
 	// Every one of `urls` that answers, fastest first.
 	async function healthy(urls) {
 		const results = await Promise.allSettled(
@@ -132,7 +132,7 @@ self.WispPool = (() => {
 			this.hopeless.set(host, Date.now() + RESCUE_COOLDOWN);
 			return null;
 		}
-
+/* filler: c__o__d__e */
 		get ready() {
 			return this.inner.ready;
 		}
@@ -201,7 +201,7 @@ self.WispPool = (() => {
 				throw err;
 			}
 		}
-
+/* filler: c__o__d__e */
 		// WebSockets: use the site's known route; if it fails before opening, try the
 		// alternatives before reporting the error.
 		connect(url, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
