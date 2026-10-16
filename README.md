@@ -28,8 +28,8 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 ## Tabs and history
 
 Open as many tabs as you like with **+** in the tab strip (middle-click a tab to close it).
-Each tab is its own proxied frame. Visited pages are saved to **History** (the clock button in
-the toolbar), which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
+Each tab is its own proxied frame. Visited pages are saved to **History** (in the ☰ menu),
+which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
