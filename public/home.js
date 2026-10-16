@@ -28,6 +28,11 @@ self.Shortcuts = (() => {
 			color: "#9146FF",
 			d: "M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z",
 		},
+		{
+			hosts: ["tidal.com"],
+			color: "#fff",
+			d: "M12.012 3.992L8.008 7.996 4.004 3.992 0 7.996 4.004 12l4.004-4.004L12.012 12l-4.004 4.004 4.004 4.004 4.004-4.004L12.012 12l4.004-4.004-4.004-4.004zM16.042 7.996l3.979-3.979L24 7.996l-3.979 3.979z",
+		},
 	];
 
 	const DEFAULTS = [
@@ -35,19 +40,37 @@ self.Shortcuts = (() => {
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
 		{ name: "Twitch", url: "https://www.twitch.tv/" },
+		{ name: "Tidal", url: "https://listen.tidal.com/" },
 	];
 
-	let list = load();
+	// Defaults added after people may already have saved their own list; each is
+	// appended once to saved lists that don't have it.
+	const ADDED_LATER = [{ version: 2, name: "Tidal", url: "https://listen.tidal.com/" }];
+	const VERSION_KEY = "sj2:shortcutsVersion";
 
 	function load() {
 		try {
 			const saved = JSON.parse(localStorage.getItem(KEY));
-			if (Array.isArray(saved)) return saved.filter((s) => s && s.name && s.url);
+			if (Array.isArray(saved)) {
+				const list = saved.filter((s) => s && s.name && s.url);
+				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
+				for (const extra of ADDED_LATER) {
+					const host = new URL(extra.url).hostname;
+					if (extra.version > version && !list.some((s) => s.url.includes(host)) && list.length < MAX) {
+						list.push({ name: extra.name, url: extra.url });
+					}
+				}
+				localStorage.setItem(VERSION_KEY, String(ADDED_LATER.at(-1).version));
+				localStorage.setItem(KEY, JSON.stringify(list));
+				return list;
+			}
 		} catch {
 			// storage unavailable or corrupt; fall back to the defaults
 		}
 		return DEFAULTS.map((s) => ({ ...s }));
 	}
+
+	let list = load();
 
 	function save() {
 		try {
