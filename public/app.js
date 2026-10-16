@@ -34,6 +34,15 @@ const els = {
 	settingsPanel: $("settings-panel"),
 	settingsStatus: $("settings-status"),
 	historyPanel: $("history-panel"),
+	barIcon: $("bar-icon"),
+	shortcuts: $("shortcuts"),
+	shortcutPanel: $("shortcut-panel"),
+	shortcutForm: $("shortcut-form"),
+	shortcutName: $("shortcut-name"),
+	shortcutUrl: $("shortcut-url"),
+	shortcutError: $("shortcut-error"),
+	menu: $("menu"),
+	menuButton: $("menu-button"),
 	historySearch: $("history-search"),
 	historyList: $("history-list"),
 };
@@ -264,6 +273,34 @@ function currentTitle(tab) {
 	}
 }
 
+// Internal pages shown in the address bar, e.g. the home screen.
+const HOME_URL = "saints://home";
+const INTERNAL = /^saints:\/\/(\w+)\/?$/i;
+
+const BAR_ICONS = {
+	home: "M3 11l9-7 9 7M5 10v10h14V10",
+	lock: "M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4",
+	globe: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
+};
+
+function setBarIcon(url) {
+	const name = !url ? "home" : url.startsWith("https:") ? "lock" : "globe";
+	els.barIcon.firstElementChild.setAttribute("d", BAR_ICONS[name]);
+	els.barIcon.classList.toggle("secure", name === "lock");
+}
+
+// "youtube.com" or "https://youtube.com/x" -> absolute http(s) URL, or null.
+function normalizeUrl(value) {
+	value = value.trim();
+	if (!value) return null;
+	try {
+		const url = new URL(/^[a-z][\w+.-]*:/i.test(value) ? value : "https://" + value);
+		return /^https?:$/.test(url.protocol) && url.hostname.includes(".") ? url.href : null;
+	} catch {
+		return null;
+	}
+}
+
 function hostOf(url) {
 	try {
 		return new URL(url).hostname;
@@ -369,7 +406,8 @@ async function main() {
 			if (t.iframe) t.iframe.hidden = !active || !t.url;
 		}
 		els.home.hidden = !!tab.url;
-		els.bar.value = tab.url;
+		els.bar.value = tab.url || HOME_URL;
+		setBarIcon(tab.url);
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
 		if (!tab.url) {
 			els.search.value = "";
@@ -411,6 +449,13 @@ async function main() {
 	}
 
 	async function navigate(input, tab = activeTab) {
+		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
+		if (page) {
+			if (page === "history") openHistory();
+			else if (page === "settings") els.settingsPanel.showModal();
+			else goHome(tab);
+			return;
+		}
 		const url = toUrl(input);
 		if (!url) return;
 		if (!proxy) setStatus("Still starting, one moment…");
@@ -444,6 +489,7 @@ async function main() {
 		if (changed) updateTabLabel(tab);
 		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== tab.url) {
 			els.bar.value = tab.url;
+			setBarIcon(tab.url);
 		}
 	}
 	setInterval(() => tabs.forEach(syncTab), 500);
@@ -532,25 +578,137 @@ async function main() {
 	$("forward").addEventListener("click", () => activeTab.url && activeTab.frame?.forward());
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
-	$("show-history").addEventListener("click", openHistory);
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
-	$("external").addEventListener("click", () => {
-		const url = activeTab.frame && currentRealUrl(activeTab);
-		if (url) window.open(url, "_blank", "noopener");
-	});
+	// Selecting the whole address on focus, so typing replaces saints://home or the URL.
+	els.bar.addEventListener("focus", () => els.bar.select());
 
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
-	for (const shortcut of document.querySelectorAll(".shortcut")) {
-		const { url } = shortcut.dataset;
-		shortcut.addEventListener("click", (e) => {
-			const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
-			navigate(url, tab).catch(() => {});
+	function renderShortcuts() {
+		const items = Shortcuts.list.map((shortcut, index) => {
+			const item = el("div", "shortcut-item");
+			const open = el("button", "shortcut");
+			open.type = "button";
+			open.title = `${shortcut.name}\n${shortcut.url}`;
+			const tile = el("span", "shortcut-icon");
+			tile.append(Shortcuts.iconFor(shortcut));
+			open.append(tile, el("span", "shortcut-label", shortcut.name));
+			open.addEventListener("click", (e) => {
+				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+				navigate(shortcut.url, tab).catch(() => {});
+			});
+			open.addEventListener("auxclick", (e) => {
+				if (e.button === 1) navigate(shortcut.url, createTab({ activate: false })).catch(() => {});
+			});
+			const remove = el("button", "shortcut-remove");
+			remove.type = "button";
+			remove.title = `Remove ${shortcut.name}`;
+			remove.setAttribute("aria-label", `Remove ${shortcut.name}`);
+			remove.innerHTML =
+				'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>';
+			remove.addEventListener("click", () => {
+				Shortcuts.remove(index);
+				renderShortcuts();
+			});
+			item.append(open, remove);
+			return item;
 		});
-		shortcut.addEventListener("auxclick", (e) => {
-			if (e.button === 1) navigate(url, createTab({ activate: false })).catch(() => {});
-		});
+		if (!Shortcuts.full) {
+			const add = el("button", "shortcut shortcut-add");
+			add.type = "button";
+			const tile = el("span", "shortcut-icon");
+			tile.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>';
+			add.append(tile, el("span", "shortcut-label", "Add"));
+			add.addEventListener("click", () => openShortcutForm());
+			const item = el("div", "shortcut-item");
+			item.append(add);
+			items.push(item);
+		}
+		els.shortcuts.replaceChildren(...items);
 	}
+
+	function openShortcutForm(name = "", url = "") {
+		if (Shortcuts.full) {
+			setStatus("You've hit the shortcut limit. Remove one first.", true);
+			return;
+		}
+		els.shortcutName.value = name;
+		els.shortcutUrl.value = url;
+		els.shortcutError.textContent = "";
+		els.shortcutPanel.showModal();
+		(name ? els.shortcutUrl : els.shortcutName).focus();
+	}
+
+	els.shortcutForm.addEventListener("submit", (e) => {
+		const url = normalizeUrl(els.shortcutUrl.value);
+		if (!url) {
+			e.preventDefault();
+			els.shortcutError.textContent = "Enter a web address like example.com.";
+			return;
+		}
+		Shortcuts.add(els.shortcutName.value.trim() || hostOf(url), url);
+		renderShortcuts();
+	});
+	for (const id of ["shortcut-close", "shortcut-cancel"]) {
+		$(id).addEventListener("click", () => els.shortcutPanel.close());
+	}
+	$("reset-shortcuts").addEventListener("click", () => {
+		Shortcuts.reset();
+		renderShortcuts();
+		setStatus("Home shortcuts reset.");
+	});
+	renderShortcuts();
+
+	// The ☰ menu.
+	const menuItems = [...els.menu.querySelectorAll("[role=menuitem]")];
+	function setMenu(open) {
+		els.menu.hidden = !open;
+		els.menuButton.setAttribute("aria-expanded", String(open));
+		if (!open) return;
+		const canUsePage = !!(activeTab.url && activeTab.frame);
+		for (const item of menuItems) {
+			if (item.dataset.action === "bookmark" || item.dataset.action === "external") {
+				item.disabled = !canUsePage;
+			}
+		}
+		menuItems.find((item) => !item.disabled)?.focus();
+	}
+	els.menuButton.addEventListener("click", () => setMenu(els.menu.hidden));
+	document.addEventListener("click", (e) => {
+		if (!els.menu.hidden && !e.target.closest(".menu-wrap")) setMenu(false);
+	});
+	els.menu.addEventListener("keydown", (e) => {
+		const enabled = menuItems.filter((item) => !item.disabled);
+		const at = enabled.indexOf(document.activeElement);
+		if (e.key === "Escape") {
+			setMenu(false);
+			els.menuButton.focus();
+		} else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+			e.preventDefault();
+			const step = e.key === "ArrowDown" ? 1 : -1;
+			enabled[(at + step + enabled.length) % enabled.length]?.focus();
+		}
+	});
+	els.menu.addEventListener("click", (e) => {
+		const item = e.target.closest("[role=menuitem]");
+		if (!item || item.disabled) return;
+		setMenu(false);
+		const url = activeTab.frame && currentRealUrl(activeTab);
+		switch (item.dataset.action) {
+			case "history":
+				openHistory();
+				break;
+			case "bookmark":
+				if (url) openShortcutForm(activeTab.title || hostOf(url), url);
+				break;
+			case "external":
+				if (url) window.open(url, "_blank", "noopener");
+				break;
+			case "tour":
+				Tour.open();
+				break;
+		}
+	});
 
 	els.historySearch.addEventListener("input", renderHistory);
 	$("history-close").addEventListener("click", () => els.historyPanel.close());
@@ -560,7 +718,7 @@ async function main() {
 		renderHistory();
 	});
 	// Clicking the backdrop (outside a panel) closes it.
-	for (const panel of [els.settingsPanel, els.historyPanel]) {
+	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel]) {
 		panel.addEventListener("click", (e) => {
 			if (e.target === panel) panel.close();
 		});
@@ -598,7 +756,9 @@ async function main() {
 		reconnect();
 	});
 
+	Constellation.start($("stars"));
 	createTab();
+	Tour.openIfNew();
 }
 
 main();

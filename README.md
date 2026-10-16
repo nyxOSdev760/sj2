@@ -33,10 +33,15 @@ the toolbar), which you can search, open in the current tab (Ctrl/Cmd- or middle
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
-The home screen has shortcuts to YouTube, TikTok, Discord and Twitch
-(Ctrl/Cmd- or middle-click opens one in a new tab). They're plain buttons in
-`public/index.html`, so edit that list to change them. Icons are from
-[Simple Icons](https://simpleicons.org) (CC0).
+The home screen has shortcut tiles (YouTube, TikTok, Discord and Twitch to start). Tap **Add**
+to pin any site, the trash can to remove one, or use **☰ → Bookmark this page** while browsing.
+Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in your browser;
+*Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
+[Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
+
+The **☰ menu** has History, Bookmark this page, Open outside the proxy and Take the tour. The
+address bar shows `saints://home` on the home screen; `saints://history` and `saints://settings`
+open those panels. A five-step welcome tour shows on the first visit.
 
 ## Ad and tracker blocking (AdGuard DNS)
 
@@ -109,6 +114,7 @@ rate-limit you.
 | Piece | Where |
 | --- | --- |
 | Static site (UI, tabs, history, `sw.js`, `config.js`) | `public/` |
+| Shortcuts, constellation background, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
