@@ -1,4 +1,4 @@
-// Skyline Chat: one live room for everyone on this server. The last 100 messages are kept
+// Skeld Chat: one live room for everyone on this server. The last 100 messages are kept
 // in memory (a restart clears them) and pushed to browsers with server-sent events.
 //
 //   CHAT_ENABLED=0       turn chat off

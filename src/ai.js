@@ -1,4 +1,4 @@
-// Skyline AI: relays chats to Google Gemini so the API key never reaches the browser,
+// Skeld AI: relays chats to Google Gemini so the API key never reaches the browser,
 // and caps how much each visitor can use.
 //
 // Visitors are told apart by a signed browser-ID cookie, so people sharing one Wi-Fi
@@ -31,7 +31,7 @@ const MAX_TURNS = 20;
 const MAX_MESSAGE = 4000;
 const MAX_TOTAL = 20000;
 
-const SYSTEM = `You are Skyline AI, the assistant built into Skyline, a web browser.
+const SYSTEM = `You are Skeld AI, the assistant built into Skeld, a web browser.
 Be friendly, direct and concise. Use short paragraphs, and Markdown code blocks for code.`;
 
 export const aiEnabled = Boolean(KEY);
@@ -175,7 +175,7 @@ async function chat(req, res) {
 		return sendJson(req, res, 429, { error: "Slow down a little and try again." });
 	}
 	if (everyone.length >= GLOBAL_DAILY_LIMIT) {
-		return sendJson(req, res, 429, { error: "Skyline AI is out of messages for today. Try again tomorrow." });
+		return sendJson(req, res, 429, { error: "Skeld AI is out of messages for today. Try again tomorrow." });
 	}
 	record(browser, now);
 	everyone.push(now);

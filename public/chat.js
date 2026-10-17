@@ -1,8 +1,8 @@
 "use strict";
 /* filler: c__o__d__e */
-// Skyline Chat drawer: one live room for everyone on the server (src/chat.js). It connects
+// Skeld Chat drawer: one live room for everyone on the server (src/chat.js). It connects
 // the first time it's opened and stays connected, so unread messages can be counted.
-self.SkylineChat = (() => {
+self.SkeldChat = (() => {
 	const endpoint = new URL(self.SJ2_CONFIG?.chatEndpoint || "api/chat/", new URL("./", location.href));
 	const crossSite = endpoint.origin !== location.origin;
 	const NAME_KEY = "sj2:chatName";

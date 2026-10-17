@@ -1,8 +1,8 @@
 "use strict";
 /* filler: c__o__d__e */
-// Skyline AI chat drawer. It talks to the Node server's /api/ai/ (src/ai.js), which
+// Skeld AI chat drawer. It talks to the Node server's /api/ai/ (src/ai.js), which
 // holds the Gemini key and enforces each visitor's daily limit.
-self.SkylineAI = (() => {
+self.SkeldAI = (() => {
 	const endpoint = new URL(self.SJ2_CONFIG?.aiEndpoint || "api/ai/", new URL("./", location.href));
 	// The browser-ID cookie that gives each browser its own limit has to be sent along,
 	// including to an AI server on another site.
@@ -101,7 +101,7 @@ self.SkylineAI = (() => {
 		const title = el("p", "ai-empty-title", "Ask me anything! I know everything.");
 		empty.append(title);
 		if (status && !status.enabled) {
-			empty.append(el("p", null, "Skyline AI isn't available on this server."));
+			empty.append(el("p", null, "Skeld AI isn't available on this server."));
 		} else {
 			const chips = el("div", "ai-chips");
 			for (const text of SUGGESTIONS) {

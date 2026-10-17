@@ -296,8 +296,8 @@ function currentTitle(tab) {
 }
 
 // Internal pages shown in the address bar, e.g. the home screen.
-const HOME_URL = "skyline://home";
-const INTERNAL = /^skyline:\/\/(\w+)\/?$/i;
+const HOME_URL = "skeld://home";
+const INTERNAL = /^(?:skeld|skyline):\/\/(\w+)\/?$/i; // skyline:// from before the rename
 
 const BAR_ICONS = {
 	home: "M3 11l9-7 9 7M5 10v10h14V10",
@@ -615,15 +615,15 @@ async function main() {
 		updateDock();
 	}
 
-	// AI and Chat drawers, one at a time, opened from the bottom bar (and skyline://ai, /chat).
-	const panels = { ai: SkylineAI, chat: SkylineChat };
+	// AI and Chat drawers, one at a time, opened from the bottom bar (and skeld://ai, /chat).
+	const panels = { ai: SkeldAI, chat: SkeldChat };
 	function openPanel(name) {
 		for (const [key, panel] of Object.entries(panels)) if (key !== name) panel.close();
 		panels[name].open();
 		updateDock();
 	}
-	SkylineAI.init();
-	SkylineChat.init({
+	SkeldAI.init();
+	SkeldChat.init({
 		unreadChanged(count) {
 			const badge = document.querySelector('[data-dock="chat"] .dock-badge');
 			badge.hidden = !count;
@@ -659,8 +659,8 @@ async function main() {
 				card.append(banner, info);
 				card.addEventListener("click", (e) => {
 					$("games-panel").close();
-					SkylineAI.close();
-					SkylineChat.close();
+					SkeldAI.close();
+					SkeldChat.close();
 					const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
 					navigate(site.url, tab).catch(() => {});
 				});
@@ -676,8 +676,8 @@ async function main() {
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
 		let current = "browser";
-		if (SkylineChat.isOpen) current = "chat";
-		else if (SkylineAI.isOpen) current = "ai";
+		if (SkeldChat.isOpen) current = "chat";
+		else if (SkeldAI.isOpen) current = "ai";
 		else if (document.body.dataset.view === "desktop") current = "desktop";
 		else if (!activeTab?.url) current = "browser";
 		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
@@ -702,8 +702,8 @@ async function main() {
 		} else if (target === "apps") {
 			$("apps-panel").showModal();
 		} else {
-			SkylineAI.close();
-			SkylineChat.close();
+			SkeldAI.close();
+			SkeldChat.close();
 			if (target === "desktop") setView("desktop");
 			else if (target === "browser") setView("browser");
 			else navigate(MUSIC_URL).catch(() => {});
@@ -724,7 +724,7 @@ async function main() {
 	for (const id of ["ai-panel", "chat-panel"])
 		watchPanels.observe($(id), { attributes: true, attributeFilter: ["hidden"] });
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
-	// Selecting the whole address on focus, so typing replaces skyline://home or the URL.
+	// Selecting the whole address on focus, so typing replaces skeld://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
 
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
@@ -737,7 +737,7 @@ async function main() {
 			const tile = el("span", "shortcut-icon");
 			tile.append(Shortcuts.iconFor(shortcut));
 			open.append(tile, el("span", "shortcut-label", shortcut.name));
-			// skyline:// tiles (like AI) open a panel, not a page, so never in a new tab.
+			// skeld:// tiles (like AI) open a panel, not a page, so never in a new tab.
 			const internal = INTERNAL.test(shortcut.url);
 			open.addEventListener("click", (e) => {
 				const tab = !internal && (e.ctrlKey || e.metaKey) ? createTab({ activate: false }) : activeTab;

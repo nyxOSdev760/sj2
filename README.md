@@ -1,4 +1,4 @@
-# Skyline
+# Skeld
 
 A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
 service-worker-based interception proxy from Mercury Workshop.
@@ -47,13 +47,13 @@ animations pause while a page is open or the tab is hidden, and stay still for p
 prefer reduced motion.
 
 The **☰ menu** has Ask AI, History, Bookmark this page and Take the tour. The
-address bar shows `skyline://home` on the home screen; `skyline://history` and `skyline://settings`
+address bar shows `skeld://home` on the home screen; `skeld://history` and `skeld://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
 ## Chat
 
 The chat bubble in the bottom bar opens a live chat room shared by everyone on the same
-Skyline server (`src/chat.js`, `public/chat.js`). People pick a nickname, see who's online,
+Skeld server (`src/chat.js`, `public/chat.js`). People pick a nickname, see who's online,
 and get an unread badge while the chat is closed. The last 100 messages are kept in memory,
 so a restart clears them.
 
@@ -66,12 +66,12 @@ Messages are plain text (no HTML), up to 500 characters, at most one every 1.5 s
 | `CHAT_BLOCKED_WORDS` | (none) | Comma-separated words that get a message or name rejected |
 
 The bottom bar holds Home, Games, Music (SoundCloud), Chat, AI and History. **Games** (also a
-home tile and `skyline://games`) opens a picker of free game sites, Poki, CrazyGames, Coolmath
+home tile and `skeld://games`) opens a picker of free game sites, Poki, CrazyGames, Coolmath
 Games and Duck Math, which load through the proxy like any other site.
 
-## Skyline AI
+## Skeld AI
 
-A chat drawer (the robot in the bottom bar, the **AI** tile, ☰ → Ask AI, or `skyline://ai`)
+A chat drawer (the robot in the bottom bar, the **AI** tile, ☰ → Ask AI, or `skeld://ai`)
 powered by Google Gemini. The Node server relays chats so the API key never reaches the
 browser, and every visitor gets a daily limit.
 
@@ -102,7 +102,7 @@ AI unless listed in `AI_ALLOWED_ORIGINS`.
 
 ### AI on GitHub Pages
 
-Pages only serves files, so it can't hold the key. Run the Skyline server on a host that
+Pages only serves files, so it can't hold the key. Run the Skeld server on a host that
 can (it's free on Render) and point the Pages build at it:
 
 1. On [Render](https://render.com): **New → Blueprint**, pick this repo. `render.yaml` sets
@@ -113,7 +113,7 @@ can (it's free on Render) and point the Pages build at it:
 3. Re-run the Pages deploy (*Actions → Deploy to GitHub Pages → Run workflow*), or push.
 
 `render.yaml` already allows `https://nyxosdev760.github.io` in `AI_ALLOWED_ORIGINS`; change
-it if your Pages address differs. The Render server is also a complete Skyline on its own,
+it if your Pages address differs. The Render server is also a complete Skeld on its own,
 with AI, server-side AdGuard DNS and its own Wisp server, so you can simply use that URL.
 
 Browsers that block cookies between sites (Safari, Firefox) still keep their limit: the
@@ -143,7 +143,7 @@ those requests are blocked at lookup time and never connect:
 
 ## Static hosting
 
-Skyline can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
+Skeld can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
 or any plain file host, including from a subpath like `https://you.github.io/sj2/`.
 A static host can't run the Wisp server, so the browser connects to external ones instead.
 
@@ -196,7 +196,7 @@ rate-limit you.
 | Shortcuts, animated wallpapers, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
-| Skyline AI drawer / Gemini relay with limits | `public/ai.js` / `src/ai.js` |
+| Skeld AI drawer / Gemini relay with limits | `public/ai.js` / `src/ai.js` |
 | Live chat drawer / chat room server | `public/chat.js` / `src/chat.js` |
 | Browser IDs and API helpers shared by AI and chat | `src/visitors.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |

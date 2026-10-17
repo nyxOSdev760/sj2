@@ -122,7 +122,7 @@ self.AdGuardDNS = (() => {
 		const html = `<!doctype html><meta charset="utf-8"><title>Blocked</title>
 <body style="font:16px system-ui,sans-serif;max-width:560px;margin:15vh auto;padding:0 16px;color:#333">
 <h1 style="font-size:22px">Blocked by AdGuard DNS</h1>
-<p><b>${hostname}</b> is on AdGuard's list of ad and tracker domains, so Skyline didn't load it.</p></body>`;
+<p><b>${hostname}</b> is on AdGuard's list of ad and tracker domains, so Skeld didn't load it.</p></body>`;
 		return {
 			status: 403,
 			statusText: "Blocked by AdGuard DNS",

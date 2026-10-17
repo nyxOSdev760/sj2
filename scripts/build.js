@@ -21,7 +21,7 @@ for (const server of wispServers) {
 		process.exit(1);
 	}
 }
-// A static host can't run the AI relay; point AI_ENDPOINT at a Skyline Node server
+// A static host can't run the AI relay; point AI_ENDPOINT at a Skeld Node server
 // (https://example.com/api/ai/) that lists this site in AI_ALLOWED_ORIGINS.
 const aiEndpoint = process.env.AI_ENDPOINT || context.self.SJ2_CONFIG.aiEndpoint || "api/ai/";
 const chatEndpoint =

@@ -1,8 +1,8 @@
-// Shared by Skyline's server features (AI, chat): telling browsers apart, which other
+// Shared by Skeld's server features (AI, chat): telling browsers apart, which other
 // sites may call the API, and small HTTP helpers.
 //
 //   AI_ALLOWED_ORIGINS  other sites allowed to call the API, comma-separated (for a
-//                       static copy of Skyline hosted elsewhere)
+//                       static copy of Skeld hosted elsewhere)
 //   TRUST_PROXY=1       behind nginx etc.: trust X-Forwarded-Proto to mark cookies Secure
 //   AI_COOKIE_SECRET    signs browser IDs; without it a random one is made at start, so
 //                       IDs reset when the server restarts

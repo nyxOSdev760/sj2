@@ -720,7 +720,7 @@ select:focus {
 	stroke-linejoin: round;
 }
 
-/* Address bar with a status icon: home on skyline:// pages, lock on https. */
+/* Address bar with a status icon: home on skeld:// pages, lock on https. */
 .bar {
 	position: relative;
 	display: flex;
@@ -1563,7 +1563,7 @@ select:focus {
 	text-align: center;
 }
 
-/* Skyline AI and Chat drawers (they stop above the bottom bar). */
+/* Skeld AI and Chat drawers (they stop above the bottom bar). */
 .ai-panel {
 	position: fixed;
 	top: 0;

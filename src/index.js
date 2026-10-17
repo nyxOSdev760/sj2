@@ -120,7 +120,7 @@ server.on("upgrade", (req, socket, head) => {
 });
 /* filler: c__o__d__e */
 server.listen(port, host, () => {
-	console.log(`Skyline listening on http://localhost:${port}`);
+	console.log(`Skeld listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
 	console.log(aiEnabled ? `AI: on (${aiModel})` : "AI: off (set GEMINI_API_KEY to turn it on)");
 	console.log(`Chat: ${chatEnabled ? "on" : "off"}`);
