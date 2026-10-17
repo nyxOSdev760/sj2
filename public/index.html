@@ -30,6 +30,10 @@
 			<header class="topbar">
 				<h1 class="topbar-name">Skeld</h1>
 				<span class="topbar-spacer"></span>
+				<button id="to-browser-mode" class="topbar-link" type="button">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z" /></svg>
+					Browser mode
+				</button>
 				<button id="fullscreen" class="topbar-button" type="button" title="Full screen" aria-label="Full screen">
 					<svg viewBox="0 0 24 24" aria-hidden="true">
 						<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
@@ -214,6 +218,7 @@
 					<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
 				</svg>
 			</button>
+			<span class="dock-sep" aria-hidden="true"></span>
 			<button type="button" data-dock="browser" title="Browser" aria-label="Browser">
 				<svg viewBox="0 0 24 24" aria-hidden="true">
 					<path
@@ -246,6 +251,10 @@
 					/>
 				</svg>
 			</button>
+			<span class="dock-sep" aria-hidden="true"></span>
+			<button type="button" data-dock="browser-mode" title="Switch to browser mode" aria-label="Switch to browser mode">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3zM8 20h8M12 16v4" /></svg>
+			</button>
 		</nav>
 
 		<dialog id="settings-panel" class="panel" aria-labelledby="settings-title">
@@ -256,6 +265,10 @@
 				</button>
 			</header>
 			<div class="settings">
+				<label>
+					Mode
+					<button id="switch-mode" class="text-button" type="button">Switch to OS mode</button>
+				</label>
 				<label>
 					Theme
 					<select id="theme">
@@ -331,6 +344,25 @@
 					</div>
 				</div>
 			</form>
+		</dialog>
+
+		<dialog id="mode-panel" class="panel apps mode-panel" aria-labelledby="mode-title">
+			<div class="mode-body">
+				<h2 id="mode-title" class="mode-title">How do you want to use Skeld?</h2>
+				<p class="mode-sub">You can switch any time in Settings.</p>
+				<div class="mode-options">
+					<button class="mode-option" type="button" data-mode="os">
+						<span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg></span>
+						<span class="mode-name">OS mode</span>
+						<span class="mode-about">A desktop with a clock, apps, a dock and wallpapers.</span>
+					</button>
+					<button class="mode-option" type="button" data-mode="browser">
+						<span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z" /></svg></span>
+						<span class="mode-name">Browser mode</span>
+						<span class="mode-about">Just tabs and a search bar, like a normal browser.</span>
+					</button>
+				</div>
+			</div>
 		</dialog>
 
 		<dialog id="wallpaper-panel" class="panel apps" aria-labelledby="wallpaper-title">

@@ -694,7 +694,8 @@ async function main() {
 		} else if (target === "apps") {
 			$("apps-panel").showModal();
 		} else {
-			if (target === "desktop") setView("desktop");
+			if (target === "browser-mode") setMode("browser");
+			else if (target === "desktop") setView("desktop");
 			else if (target === "browser") setView("browser");
 			else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
 			else navigate(MUSIC_URL).catch(() => {});
@@ -979,8 +980,37 @@ async function main() {
 	tick();
 
 	createTab();
-	setView("desktop");
-	Tour.openIfNew();
+	// OS mode (desktop, dock) or browser mode (just the browser). Asked on the first visit.
+	function setMode(mode) {
+		settings.set("mode", mode);
+		document.body.dataset.mode = mode;
+		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
+		setView(mode === "os" ? "desktop" : "browser");
+	}
+	$("to-browser-mode").addEventListener("click", () => setMode("browser"));
+	$("switch-mode").addEventListener("click", () => {
+		els.settingsPanel.close();
+		setMode(document.body.dataset.mode === "os" ? "browser" : "os");
+	});
+	const modePanel = $("mode-panel");
+	for (const option of modePanel.querySelectorAll("[data-mode]")) {
+		option.addEventListener("click", () => {
+			setMode(option.dataset.mode);
+			modePanel.close();
+		});
+	}
+	// The picker needs an answer (Escape doesn't close it); the tour follows it.
+	modePanel.addEventListener("cancel", (e) => e.preventDefault());
+	modePanel.addEventListener("close", () => Tour.openIfNew());
+	const savedMode = settings.get("mode", "");
+	if (savedMode) {
+		setMode(savedMode === "browser" ? "browser" : "os");
+		Tour.openIfNew();
+	} else {
+		document.body.dataset.mode = "os";
+		setView("desktop");
+		modePanel.showModal();
+	}
 }
 /* filler: c__o__d__e */
 main();
