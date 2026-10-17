@@ -28,13 +28,13 @@ self.Tour = (() => {
 			label: "Tabs",
 			icon: "tabs",
 			title: "Open as many tabs as you want",
-			body: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, the clock in the bar at the bottom.",
+			body: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, under ☰ in the toolbar.",
 		},
 		{
 			label: "Shortcuts",
 			icon: "grid",
 			title: "Pin your sites",
-			body: "Your shortcuts live on the home screen. Tap Add to pin a site, the trash can to drop one, or use ☰ → Bookmark this page while you browse.",
+			body: "Your shortcuts live in Apps on the desktop. Tap Add to pin a site, the trash can to drop one, or use ☰ → Bookmark this page while you browse.",
 		},
 		{
 			label: "Blocking",
@@ -46,7 +46,7 @@ self.Tour = (() => {
 			label: "Settings",
 			icon: "gear",
 			title: "Make it yours",
-			body: "The gear in the top right has your search engine, transport, Wisp server and history settings. History never leaves this browser.",
+			body: "The gear in the dock has your search engine, transport, Wisp server and history settings. History never leaves this browser.",
 		},
 	];
 
@@ -59,7 +59,7 @@ self.Tour = (() => {
 		node.append(path);
 		return node;
 	}
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	function el(tag, className, text) {
 		const node = document.createElement(tag);
 		if (className) node.className = className;
@@ -85,7 +85,7 @@ self.Tour = (() => {
 
 	let dialog = null;
 	let current = 0;
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	function render() {
 		const card = el("div", "tour-card");
 
@@ -133,7 +133,7 @@ self.Tour = (() => {
 		next.append(last ? "Start browsing" : "Next", svg("right"));
 		next.addEventListener("click", () => (last ? close() : go(current + 1)));
 		actions.append(next);
-/* filler: c__o__d__e */
+		/* filler: c__o__d__e */
 		card.append(stepper, badge, title, body, actions);
 		dialog.replaceChildren(card);
 		next.focus();
@@ -160,7 +160,7 @@ self.Tour = (() => {
 		dialog.showModal();
 		go(0);
 	}
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	return {
 		open,
 		openIfNew() {

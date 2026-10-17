@@ -21,6 +21,8 @@ const els = {
 	tabs: $("tabs"),
 	toolbar: $("toolbar"),
 	home: $("home-screen"),
+	desktop: $("desktop"),
+	browser: $("browser"),
 	frames: $("frames"),
 	bar: $("bar"),
 	barForm: $("bar-form"),
@@ -130,10 +132,7 @@ function loadScript(src) {
 }
 
 async function registerServiceWorker(path) {
-	const reg = await navigator.serviceWorker.register(path, {
-		type: "classic",
-		updateViaCache: "none",
-	});
+	const reg = await navigator.serviceWorker.register(path, { type: "classic", updateViaCache: "none" });
 	await navigator.serviceWorker.ready;
 	if (reg.active) return reg.active;
 
@@ -212,7 +211,7 @@ async function boot() {
 			"Service workers are unavailable. Open this site over HTTPS or on localhost (and not in a private window on Firefox)."
 		);
 	}
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	const sw = await registerServiceWorker(PATHS.sw);
 	await loadScript(PATHS.scramjet);
 	await loadScript(PATHS.controllerApi);
@@ -303,7 +302,8 @@ const INTERNAL = /^skyline:\/\/(\w+)\/?$/i;
 const BAR_ICONS = {
 	home: "M3 11l9-7 9 7M5 10v10h14V10",
 	lock: "M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4",
-	globe: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
+	globe:
+		"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
 };
 
 function setBarIcon(url) {
@@ -361,7 +361,7 @@ async function main() {
 	if (!els.engine.value) els.engine.selectedIndex = 0;
 	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
 	browsingHistory.load();
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	let proxy;
 	const ready = boot().then(
 		(result) => {
@@ -485,6 +485,7 @@ async function main() {
 		}
 		const url = toUrl(input);
 		if (!url) return;
+		setView("browser");
 		if (!proxy) setStatus("Still starting, one moment…");
 		await ready;
 		if (!tabs.includes(tab)) return; // closed while the proxy was starting
@@ -551,10 +552,7 @@ async function main() {
 			const open = el("button", "history-open");
 			open.type = "button";
 			open.title = entry.url;
-			open.append(
-				el("span", "history-title", entry.title || hostOf(entry.url)),
-				el("span", "history-url", entry.url)
-			);
+			open.append(el("span", "history-title", entry.title || hostOf(entry.url)), el("span", "history-url", entry.url));
 			const time = el(
 				"time",
 				"history-time",
@@ -568,6 +566,7 @@ async function main() {
 
 			// Click opens in the current tab; Ctrl/Cmd-click or middle-click in a new one.
 			open.addEventListener("click", (e) => {
+				$("apps-panel").close();
 				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
 				navigate(entry.url, tab).catch(() => {});
 				if (tab === activeTab) els.historyPanel.close();
@@ -583,7 +582,7 @@ async function main() {
 			list.append(item);
 		}
 	}
-/* filler: c__o__d__e */
+	/* filler: c__o__d__e */
 	function openHistory() {
 		els.historySearch.value = "";
 		renderHistory();
@@ -607,6 +606,15 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	// Two views: the desktop (clock and app icons) and the browser (tabs and pages).
+	function setView(view) {
+		document.body.dataset.view = view;
+		els.desktop.hidden = view !== "desktop";
+		els.browser.hidden = view !== "browser";
+		if (view === "browser" && !activeTab?.url) els.search.focus();
+		updateDock();
+	}
+
 	// AI and Chat drawers, one at a time, opened from the bottom bar (and skyline://ai, /chat).
 	const panels = { ai: SkylineAI, chat: SkylineChat };
 	function openPanel(name) {
@@ -667,10 +675,11 @@ async function main() {
 	const MUSIC_URL = "https://soundcloud.com/";
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
-		let current = null;
+		let current = "browser";
 		if (SkylineChat.isOpen) current = "chat";
 		else if (SkylineAI.isOpen) current = "ai";
-		else if (!activeTab?.url) current = "home";
+		else if (document.body.dataset.view === "desktop") current = "desktop";
+		else if (!activeTab?.url) current = "browser";
 		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
@@ -681,28 +690,39 @@ async function main() {
 			else button.removeAttribute("aria-current");
 		}
 	}
-	for (const button of dockButtons) {
-		button.addEventListener("click", () => {
-			const target = button.dataset.dock;
-			if (target === "ai" || target === "chat") {
-				if (panels[target].isOpen) panels[target].close();
-				else openPanel(target);
-			} else if (target === "history") {
-				openHistory();
-			} else if (target === "games") {
-				openGames();
-			} else {
-				SkylineAI.close();
-				SkylineChat.close();
-				if (target === "home") goHome(activeTab);
-				else navigate(MUSIC_URL).catch(() => {});
-			}
-			updateDock();
-		});
+	// Dock buttons and desktop icons share these.
+	function launch(target) {
+		if (target === "ai" || target === "chat") {
+			if (panels[target].isOpen) panels[target].close();
+			else openPanel(target);
+		} else if (target === "games") {
+			openGames();
+		} else if (target === "settings") {
+			els.settingsPanel.showModal();
+		} else if (target === "apps") {
+			$("apps-panel").showModal();
+		} else {
+			SkylineAI.close();
+			SkylineChat.close();
+			if (target === "desktop") setView("desktop");
+			else if (target === "browser") setView("browser");
+			else navigate(MUSIC_URL).catch(() => {});
+		}
+		updateDock();
 	}
+	for (const button of dockButtons) button.addEventListener("click", () => launch(button.dataset.dock));
+	for (const button of document.querySelectorAll("[data-app]")) {
+		button.addEventListener("click", () => launch(button.dataset.app));
+	}
+	$("apps-close").addEventListener("click", () => $("apps-panel").close());
+	$("fullscreen").addEventListener("click", () => {
+		if (document.fullscreenElement) document.exitFullscreen?.();
+		else document.documentElement.requestFullscreen?.().catch(() => {});
+	});
 	// Panels also close themselves (Escape, their × button), so watch them.
 	const watchPanels = new MutationObserver(updateDock);
-	for (const id of ["ai-panel", "chat-panel"]) watchPanels.observe($(id), { attributes: true, attributeFilter: ["hidden"] });
+	for (const id of ["ai-panel", "chat-panel"])
+		watchPanels.observe($(id), { attributes: true, attributeFilter: ["hidden"] });
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skyline://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
@@ -724,6 +744,7 @@ async function main() {
 				navigate(shortcut.url, tab).catch(() => {});
 			});
 			open.addEventListener("auxclick", (e) => {
+				if (e.button === 1 && !internal) $("apps-panel").close();
 				if (e.button === 1 && !internal) navigate(shortcut.url, createTab({ activate: false })).catch(() => {});
 			});
 			const remove = el("button", "shortcut-remove");
@@ -745,7 +766,10 @@ async function main() {
 			const tile = el("span", "shortcut-icon");
 			tile.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>';
 			add.append(tile, el("span", "shortcut-label", "Add"));
-			add.addEventListener("click", () => openShortcutForm());
+			add.addEventListener("click", () => {
+				$("apps-panel").close();
+				openShortcutForm();
+			});
 			const item = el("div", "shortcut-item");
 			item.append(add);
 			items.push(item);
@@ -904,8 +928,8 @@ async function main() {
 	function applyWallpaper(name) {
 		if (![...els.wallpaper.options].some((o) => o.value === name)) name = DEFAULT_WALLPAPER;
 		els.wallpaper.value = name;
-		els.home.dataset.wallpaper = name;
-		els.home.classList.toggle("photo", !animations[name]);
+		$("wallpaper-layer").dataset.wallpaper = name;
+		$("wallpaper-layer").classList.toggle("photo", !animations[name]);
 		stopAnimation?.();
 		stopAnimation = animations[name]?.start($("stars")) ?? null;
 	}
@@ -914,8 +938,35 @@ async function main() {
 		applyWallpaper(els.wallpaper.value);
 	});
 	applyWallpaper(settings.get("wallpaper", DEFAULT_WALLPAPER));
+	// "Change wallpaper" on the home screen steps through the list.
+	$("next-wallpaper").addEventListener("click", () => {
+		const options = [...els.wallpaper.options];
+		const next = options[(options.findIndex((o) => o.value === els.wallpaper.value) + 1) % options.length];
+		settings.set("wallpaper", next.value);
+		applyWallpaper(next.value);
+	});
+
+	// The desktop's date and clocks.
+	const dateEl = $("home-date");
+	const timeEl = $("home-time");
+	const smallTimeEl = $("topbar-time");
+	function tick() {
+		const now = new Date();
+		dateEl.textContent = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+		// The big clock leaves out AM/PM.
+		timeEl.textContent = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" })
+			.formatToParts(now)
+			.filter((part) => part.type !== "dayPeriod")
+			.map((part) => part.value)
+			.join("")
+			.trim();
+		smallTimeEl.textContent = now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+		setTimeout(tick, 1000 - now.getMilliseconds() + 5);
+	}
+	tick();
 
 	createTab();
+	setView("desktop");
 	Tour.openIfNew();
 }
 /* filler: c__o__d__e */

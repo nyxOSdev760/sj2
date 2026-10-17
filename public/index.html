@@ -23,87 +23,213 @@
 		<script src="chat.js"></script>
 		<script src="app.js" defer></script>
 	</head>
-	<body>
-		<nav id="tabbar">
-			<div id="tabs" role="tablist" aria-label="Tabs"></div>
-			<button id="add-tab" class="icon" title="New tab" aria-label="New tab">
-				<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-			</button>
-		</nav>
+	<body data-view="desktop">
+		<div id="wallpaper-layer" class="wallpaper" aria-hidden="true">
+			<canvas id="stars" class="stars"></canvas>
+		</div>
 
-		<header id="toolbar">
-			<button id="back" class="icon" title="Back" aria-label="Back">
-				<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
-			</button>
-			<button id="forward" class="icon" title="Forward" aria-label="Forward">
-				<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
-			</button>
-			<button id="reload" class="icon" title="Reload" aria-label="Reload">
-				<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
-			</button>
-			<button id="home" class="icon" title="Home" aria-label="Home">
-				<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
-			</button>
-			<form id="bar-form" class="bar">
-				<svg id="bar-icon" class="bar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
-				<input id="bar" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter a URL" aria-label="Address" />
-			</form>
-			<div class="menu-wrap">
-				<button id="menu-button" class="icon" title="Menu" aria-label="Menu" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
-					<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+		<section id="desktop" class="desktop" aria-label="Desktop">
+			<header class="topbar">
+				<img class="topbar-logo" src="favicon.svg" alt="" width="26" height="26" />
+				<span class="topbar-name">Skyline</span>
+				<span class="topbar-spacer"></span>
+				<button id="fullscreen" class="topbar-button" type="button" title="Full screen" aria-label="Full screen">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
+					</svg>
 				</button>
-				<div id="menu" class="menu" role="menu" aria-label="Menu" hidden>
-					<button type="button" role="menuitem" data-action="ai">
-						<svg viewBox="0 0 24 24"><path d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2" /></svg>
-						Ask AI
+				<span id="topbar-time" class="topbar-time"></span>
+			</header>
+			<div class="desktop-main">
+				<div class="home-clock" aria-live="off">
+					<p id="home-date" class="home-date"></p>
+					<p id="home-time" class="home-time"></p>
+				</div>
+				<div class="desktop-apps">
+					<button class="desktop-app" type="button" data-app="browser">
+						<span class="desktop-app-icon"
+							><svg viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"
+								/></svg
+						></span>
+						<span class="desktop-app-label">Browser</span>
 					</button>
-					<button type="button" role="menuitem" data-action="history">
-						<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
-						History
+					<button class="desktop-app" type="button" data-app="games">
+						<span class="desktop-app-icon"
+							><svg viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z"
+								/></svg
+						></span>
+						<span class="desktop-app-label">Games</span>
 					</button>
-					<button type="button" role="menuitem" data-action="bookmark">
-						<svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z" /></svg>
-						Bookmark this page
+					<button class="desktop-app" type="button" data-app="music">
+						<span class="desktop-app-icon"
+							><svg viewBox="0 0 24 24" aria-hidden="true">
+								<path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg
+						></span>
+						<span class="desktop-app-label">Music</span>
 					</button>
-					<hr />
-					<button type="button" role="menuitem" data-action="credits">
-						<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-9.3-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z" /></svg>
-						Credits
-					</button>
-					<button type="button" role="menuitem" data-action="tour">
-						<svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" /></svg>
-						Take the tour
+					<button class="desktop-app" type="button" data-app="apps">
+						<span class="desktop-app-icon"
+							><svg viewBox="0 0 24 24" aria-hidden="true">
+								<path d="M4 4h6v6H4zM4 14h6v6H4zM14 14h6v6h-6zM17 3l4 4-4 4-4-4z" /></svg
+						></span>
+						<span class="desktop-app-label">Apps</span>
 					</button>
 				</div>
 			</div>
-			<button id="show-settings" class="icon" title="Settings" aria-label="Settings">
-				<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
-			</button>
-		</header>
-
-		<main id="home-screen">
-			<canvas id="stars" class="stars" aria-hidden="true"></canvas>
-			<h1 class="logo"><span>Skyline</span></h1>
-			<form id="search-form" class="search">
-				<svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-				<input id="search" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter a URL" aria-label="Search or enter a URL" autofocus />
-				<button class="search-go" type="submit" title="Go" aria-label="Go">
-					<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+			<footer class="home-footer">
+				<div class="home-brand">
+					<h1 class="home-brand-name">Skyline</h1>
+					<p class="home-tagline">Browse anything, anywhere.</p>
+				</div>
+				<button id="next-wallpaper" class="glass-button" type="button">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
+					</svg>
+					Change wallpaper
 				</button>
-			</form>
-			<p id="status" class="status" role="status">Starting proxy…</p>
-			<nav id="shortcuts" class="shortcuts" aria-label="Shortcuts"></nav>
-		</main>
+			</footer>
+		</section>
 
-		<div id="frames"></div>
+		<section id="browser" class="browser" aria-label="Browser" hidden>
+			<nav id="tabbar">
+				<div id="tabs" role="tablist" aria-label="Tabs"></div>
+				<button id="add-tab" class="icon" title="New tab" aria-label="New tab">
+					<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+				</button>
+			</nav>
+
+			<header id="toolbar">
+				<button id="back" class="icon" title="Back" aria-label="Back">
+					<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+				</button>
+				<button id="forward" class="icon" title="Forward" aria-label="Forward">
+					<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+				</button>
+				<button id="reload" class="icon" title="Reload" aria-label="Reload">
+					<svg viewBox="0 0 24 24">
+						<path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
+					</svg>
+				</button>
+				<button id="home" class="icon" title="Home" aria-label="Home">
+					<svg viewBox="0 0 24 24">
+						<path d="M3 11l9-7 9 7M5 10v10h14V10" />
+					</svg>
+				</button>
+				<form id="bar-form" class="bar">
+					<svg id="bar-icon" class="bar-icon" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M3 11l9-7 9 7M5 10v10h14V10" />
+					</svg>
+					<input
+						id="bar"
+						type="text"
+						autocomplete="off"
+						spellcheck="false"
+						placeholder="Search or enter a URL"
+						aria-label="Address"
+					/>
+				</form>
+				<div class="menu-wrap">
+					<button
+						id="menu-button"
+						class="icon"
+						title="Menu"
+						aria-label="Menu"
+						aria-haspopup="menu"
+						aria-expanded="false"
+						aria-controls="menu"
+					>
+						<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+					</button>
+					<div id="menu" class="menu" role="menu" aria-label="Menu" hidden>
+						<button type="button" role="menuitem" data-action="ai">
+							<svg viewBox="0 0 24 24">
+								<path
+									d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
+								/>
+							</svg>
+							Ask AI
+						</button>
+						<button type="button" role="menuitem" data-action="history">
+							<svg viewBox="0 0 24 24">
+								<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" />
+							</svg>
+							History
+						</button>
+						<button type="button" role="menuitem" data-action="bookmark">
+							<svg viewBox="0 0 24 24">
+								<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z" />
+							</svg>
+							Bookmark this page
+						</button>
+						<hr />
+						<button type="button" role="menuitem" data-action="credits">
+							<svg viewBox="0 0 24 24">
+								<path d="M12 21s-7-4.4-9.3-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z" />
+							</svg>
+							Credits
+						</button>
+						<button type="button" role="menuitem" data-action="tour">
+							<svg viewBox="0 0 24 24">
+								<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" />
+							</svg>
+							Take the tour
+						</button>
+					</div>
+				</div>
+				<button id="show-settings" class="icon" title="Settings" aria-label="Settings">
+					<svg viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="3" />
+						<path
+							d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+						/>
+					</svg>
+				</button>
+			</header>
+
+			<main id="home-screen">
+				<div class="home-main">
+					<form id="search-form" class="search">
+						<svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="11" cy="11" r="7" />
+							<path d="M20 20l-3.5-3.5" />
+						</svg>
+						<input
+							id="search"
+							type="text"
+							autocomplete="off"
+							spellcheck="false"
+							placeholder="Search or enter a URL"
+							aria-label="Search or enter a URL"
+							autofocus
+						/>
+						<button class="search-go" type="submit" title="Go" aria-label="Go">
+							<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+						</button>
+					</form>
+					<p id="status" class="status" role="status">Starting proxy…</p>
+				</div>
+			</main>
+
+			<div id="frames"></div>
+		</section>
 
 		<aside id="ai-panel" class="ai-panel" aria-labelledby="ai-title" hidden>
 			<header class="ai-head">
-				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2" /></svg>
+				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
+					/>
+				</svg>
 				<h2 id="ai-title">Skyline AI</h2>
 				<span id="ai-quota" class="ai-quota"></span>
 				<button id="ai-new" class="icon" type="button" title="New chat" aria-label="New chat">
-					<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+					<svg viewBox="0 0 24 24">
+						<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+					</svg>
 				</button>
 				<button id="ai-close" class="icon" type="button" title="Close" aria-label="Close">
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
@@ -111,7 +237,13 @@
 			</header>
 			<div id="ai-log" class="ai-log" aria-live="polite"></div>
 			<form id="ai-form" class="ai-form">
-				<textarea id="ai-input" rows="1" maxlength="4000" placeholder="Ask anything…" aria-label="Message Skyline AI"></textarea>
+				<textarea
+					id="ai-input"
+					rows="1"
+					maxlength="4000"
+					placeholder="Ask anything…"
+					aria-label="Message Skyline AI"
+				></textarea>
 				<button class="search-go" type="submit" title="Send" aria-label="Send">
 					<svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
 				</button>
@@ -121,11 +253,17 @@
 
 		<aside id="chat-panel" class="ai-panel chat-panel" aria-labelledby="chat-title" hidden>
 			<header class="ai-head">
-				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" /></svg>
+				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"
+					/>
+				</svg>
 				<h2 id="chat-title">Chat</h2>
 				<span id="chat-online" class="ai-quota"></span>
 				<button id="chat-rename" class="icon" type="button" title="Change your name" aria-label="Change your name">
-					<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+					<svg viewBox="0 0 24 24">
+						<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+					</svg>
 				</button>
 				<button id="chat-close" class="icon" type="button" title="Close" aria-label="Close">
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
@@ -135,13 +273,26 @@
 			<form id="chat-name-form" class="chat-name-form" hidden>
 				<label for="chat-name">Pick a name for chat</label>
 				<div class="chat-name-row">
-					<input id="chat-name" type="text" maxlength="20" autocomplete="nickname" spellcheck="false" placeholder="Your name" />
+					<input
+						id="chat-name"
+						type="text"
+						maxlength="20"
+						autocomplete="nickname"
+						spellcheck="false"
+						placeholder="Your name"
+					/>
 					<button class="text-button primary" type="submit">Join</button>
 				</div>
 				<p id="chat-name-error" class="status error" role="alert"></p>
 			</form>
 			<form id="chat-form" class="ai-form">
-				<textarea id="chat-input" rows="1" maxlength="500" placeholder="Message everyone…" aria-label="Message everyone"></textarea>
+				<textarea
+					id="chat-input"
+					rows="1"
+					maxlength="500"
+					placeholder="Message everyone…"
+					aria-label="Message everyone"
+				></textarea>
 				<button class="search-go" type="submit" title="Send" aria-label="Send">
 					<svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
 				</button>
@@ -151,24 +302,52 @@
 		</aside>
 
 		<nav id="dock" class="dock" aria-label="Skyline">
-			<button type="button" data-dock="home" title="Home" aria-label="Home">
-				<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10" /></svg>
+			<button type="button" data-dock="desktop" title="Desktop" aria-label="Desktop">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+				</svg>
+			</button>
+			<button type="button" data-dock="browser" title="Browser" aria-label="Browser">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"
+					/>
+				</svg>
 			</button>
 			<button type="button" data-dock="games" title="Games" aria-label="Games">
-				<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" /></svg>
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z"
+					/>
+				</svg>
 			</button>
 			<button type="button" data-dock="music" title="Music" aria-label="Music">
-				<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg>
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+				</svg>
 			</button>
 			<button type="button" data-dock="chat" title="Chat" aria-label="Chat">
-				<svg viewBox="0 0 24 24"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" /></svg>
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"
+					/>
+				</svg>
 				<span class="dock-badge" hidden></span>
 			</button>
 			<button type="button" data-dock="ai" title="AI" aria-label="AI">
-				<svg viewBox="0 0 24 24"><path d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2" /></svg>
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
+					/>
+				</svg>
 			</button>
-			<button type="button" data-dock="history" title="History" aria-label="History">
-				<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
+			<button type="button" data-dock="settings" title="Settings" aria-label="Settings">
+				<svg viewBox="0 0 24 24">
+					<circle cx="12" cy="12" r="3" />
+					<path
+						d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+					/>
+				</svg>
 			</button>
 		</nav>
 
@@ -246,7 +425,14 @@
 					</label>
 					<label>
 						URL
-						<input id="shortcut-url" type="text" autocomplete="off" spellcheck="false" placeholder="example.com" required />
+						<input
+							id="shortcut-url"
+							type="text"
+							autocomplete="off"
+							spellcheck="false"
+							placeholder="example.com"
+							required
+						/>
 					</label>
 					<p id="shortcut-error" class="status error" role="alert"></p>
 					<div class="panel-actions">
@@ -255,6 +441,16 @@
 					</div>
 				</div>
 			</form>
+		</dialog>
+
+		<dialog id="apps-panel" class="panel apps" aria-labelledby="apps-title">
+			<header class="panel-head">
+				<h2 id="apps-title">Apps</h2>
+				<button id="apps-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<nav id="shortcuts" class="shortcuts apps-grid" aria-label="Apps"></nav>
 		</dialog>
 
 		<dialog id="games-panel" class="panel games" aria-labelledby="games-title">
@@ -277,10 +473,12 @@
 			<div class="credits-body">
 				<p class="credits-logo">Skyline</p>
 				<p class="credits-made">Made by</p>
-				<p class="credits-names"><span>Wilbert</span> <span class="credits-and">&amp;</span> <span>Claude</span></p>
+				<p class="credits-names">
+					<span>Wilbert</span> <span class="credits-and">&amp;</span>
+					<span>Claude</span>
+				</p>
 				<p class="credits-built">
-					Built with Scramjet by Mercury Workshop, AdGuard DNS, Google Gemini, the Outfit font and
-					Simple Icons.
+					Built with Scramjet by Mercury Workshop, AdGuard DNS, Google Gemini, the Outfit font and Simple Icons.
 				</p>
 			</div>
 		</dialog>
@@ -288,7 +486,14 @@
 		<dialog id="history-panel" class="panel" aria-labelledby="history-title">
 			<header class="panel-head history-head">
 				<h2 id="history-title">History</h2>
-				<input id="history-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search history" aria-label="Search history" />
+				<input
+					id="history-search"
+					type="search"
+					autocomplete="off"
+					spellcheck="false"
+					placeholder="Search history"
+					aria-label="Search history"
+				/>
 				<button id="history-clear" class="text-button" type="button">Clear all</button>
 				<button id="history-close" class="icon" type="button" title="Close" aria-label="Close">
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>

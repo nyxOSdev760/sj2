@@ -67,7 +67,11 @@ body {
 	flex-direction: column;
 	background: var(--bg);
 	color: var(--text);
-	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-family:
+		system-ui,
+		-apple-system,
+		"Segoe UI",
+		sans-serif;
 }
 
 a {
@@ -78,17 +82,257 @@ a {
 	display: none !important;
 }
 
+/* Wallpaper: fixed behind the desktop and the browser's new tab page. */
+.wallpaper {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	isolation: isolate;
+	overflow: hidden;
+}
+
+/* Desktop: top bar, date and clock, app icons; brand and the wallpaper button along the
+   bottom, above the floating dock. */
+.desktop {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 0 20px calc(var(--dock-space) + 6px);
+	overflow: hidden auto;
+	color: #fff;
+}
+
+/* Browser: tabs, toolbar and pages, over the wallpaper. */
+.browser {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.topbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 56px;
+	padding-top: env(safe-area-inset-top);
+	text-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+}
+
+.topbar-logo {
+	width: 26px;
+	height: 26px;
+	filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.4));
+}
+
+.topbar-name {
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.topbar-spacer {
+	flex: 1;
+}
+
+.topbar-button {
+	display: grid;
+	place-items: center;
+	width: 36px;
+	height: 36px;
+	border: 1px solid rgb(255 255 255 / 0.18);
+	border-radius: 12px;
+	background: rgb(16 16 22 / 0.45);
+	backdrop-filter: blur(12px);
+	color: #fff;
+	cursor: pointer;
+}
+
+.topbar-button svg {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.topbar-time {
+	font-size: 14px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
+.desktop-main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 18px;
+	margin: auto 0;
+	padding: 16px 0;
+}
+
+.desktop-apps {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: clamp(14px, 4vw, 28px);
+	animation: rise-in 0.6s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.desktop-app {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #fff;
+	font: inherit;
+	cursor: pointer;
+}
+
+.desktop-app-icon {
+	display: grid;
+	place-items: center;
+	width: clamp(60px, 16vw, 76px);
+	height: clamp(60px, 16vw, 76px);
+	border: 1px solid rgb(255 255 255 / 0.22);
+	border-radius: 22px;
+	background: rgb(255 255 255 / 0.14);
+	backdrop-filter: blur(16px);
+	box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+	transition:
+		transform 0.15s,
+		background 0.15s;
+}
+
+.desktop-app:hover .desktop-app-icon {
+	background: rgb(255 255 255 / 0.24);
+	transform: translateY(-2px);
+}
+
+.desktop-app:active .desktop-app-icon {
+	transform: scale(0.95);
+}
+
+.desktop-app-icon svg {
+	width: 44%;
+	height: 44%;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.desktop-app-label {
+	font-size: 13px;
+	font-weight: 500;
+	text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
+}
+
+/* The browser's new tab page: just search, transparent over the wallpaper. */
 #home-screen {
 	position: relative;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
-	gap: 14px;
-	padding: 24px 16px;
+	padding: 24px 20px calc(var(--dock-space) + 8px);
 	overflow: hidden auto;
-	isolation: isolate;
+}
+
+.home-main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	margin: auto 0;
+}
+
+.home-clock {
+	color: #fff;
+	text-align: center;
+	text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
+}
+
+.home-date {
+	margin: 0;
+	font-size: clamp(15px, 3.6vw, 19px);
+	font-weight: 500;
+	letter-spacing: 0.02em;
+}
+
+.home-time {
+	margin: 0 0 8px;
+	font-size: clamp(64px, 19vw, 132px);
+	font-weight: 300;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.03em;
+	line-height: 1;
+}
+
+.home-footer {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px 16px;
+	width: 100%;
+	color: #fff;
+}
+
+.home-brand-name {
+	margin: 0 0 6px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.4em;
+	text-transform: uppercase;
+	text-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+}
+
+.home-tagline {
+	margin: 0;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: clamp(20px, 5vw, 28px);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	text-shadow: 0 2px 12px rgb(0 0 0 / 0.45);
+}
+
+/* Frosted glass, for controls that sit on the wallpaper. */
+.glass-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	flex: none;
+	padding: 11px 18px;
+	border: 1px solid rgb(255 255 255 / 0.2);
+	border-radius: 16px;
+	background: rgb(16 16 22 / 0.55);
+	backdrop-filter: blur(14px);
+	color: #fff;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.glass-button:hover {
+	background: rgb(16 16 22 / 0.7);
+}
+
+.glass-button svg {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
 }
 
 /* Animated constellation behind everything on the home screen. */
@@ -102,7 +346,7 @@ a {
 }
 
 /* Glow rising from the bottom edge of the home screen. */
-#home-screen::after {
+.wallpaper::after {
 	content: "";
 	position: absolute;
 	inset: auto 0 0;
@@ -118,41 +362,37 @@ a {
 
 /* Wallpapers. Night (the default styles above) is the constellation with a glow. */
 /* Photo wallpapers; the position keeps each car in view on wide screens. */
-#home-screen[data-wallpaper="gtr-sunset"] {
+.wallpaper[data-wallpaper="gtr-sunset"] {
 	background: #3a3150 url("wallpapers/gtr-sunset.jpg") center 48% / cover no-repeat;
 }
 
-#home-screen[data-wallpaper="r34-night"] {
+.wallpaper[data-wallpaper="r34-night"] {
 	background: #000 url("wallpapers/r34-night.jpg") center 80% / cover no-repeat;
 }
 
-#home-screen[data-wallpaper="maybach-night"] {
+.wallpaper[data-wallpaper="maybach-night"] {
 	background: #111 url("wallpapers/maybach-night.jpg") center 62% / cover no-repeat;
 }
 
-#home-screen[data-wallpaper="maybach-driveway"] {
+.wallpaper[data-wallpaper="maybach-driveway"] {
 	background: #3d4a7a url("wallpapers/maybach-driveway.jpg") center 58% / cover no-repeat;
 }
 
-#home-screen[data-wallpaper="snow"] {
+.wallpaper[data-wallpaper="snow"] {
 	background: radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
 }
 
-#home-screen.photo::after {
+.wallpaper.photo::after {
 	display: none;
 }
 
-#home-screen[data-wallpaper="snow"]::after {
+.wallpaper[data-wallpaper="snow"]::after {
 	background: radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.28), transparent 70%);
 }
 
-#home-screen.photo .logo::before {
-	display: none;
-}
-
 /* Labels sit on the wallpaper, so they're white with a shadow whatever the theme. */
-#home-screen .shortcut-label,
-#home-screen > .status {
+.apps-grid .shortcut-label,
+#home-screen .status {
 	color: #fff;
 	font-weight: 500;
 	text-shadow:
@@ -160,19 +400,14 @@ a {
 		0 0 10px rgb(28 22 70 / 0.5);
 }
 
-/* Name, search and shortcuts rise in one after another on load. */
-.logo,
-.search,
-.shortcuts {
+/* Clock, search and shortcuts rise in one after another on load. */
+.home-clock,
+.search {
 	animation: rise-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .search {
 	animation-delay: 0.08s;
-}
-
-.shortcuts {
-	animation-delay: 0.16s;
 }
 
 @keyframes rise-in {
@@ -189,44 +424,12 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.logo,
+	.home-clock,
 	.search,
-	.shortcuts,
-	#home-screen::after {
+	.desktop-apps,
+	.wallpaper::after {
 		animation: none;
 	}
-}
-
-.logo {
-	position: relative;
-	margin: 0 0 10px;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: clamp(56px, 15vw, 112px);
-	font-weight: 600;
-	letter-spacing: -0.035em;
-	line-height: 1.05;
-	text-align: center;
-}
-
-/* White fading into cream. On the inner span so the halo
-   behind the name (.logo::before) stays underneath it. */
-.logo span {
-	background: linear-gradient(180deg, #ffffff 15%, #fdf6e3 55%, #f3e3bd 100%);
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-	/* A soft shadow so it stays readable on bright wallpapers. */
-	filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.35)) drop-shadow(0 8px 24px rgb(0 0 0 / 0.25));
-}
-
-/* Soft glow behind the name. */
-.logo::before {
-	content: "";
-	position: absolute;
-	inset: -60% -15%;
-	z-index: -1;
-	background: radial-gradient(closest-side, rgb(124 92 255 / 0.35), transparent);
-	pointer-events: none;
 }
 
 input,
@@ -315,7 +518,7 @@ select:focus {
 	grid-template-columns: repeat(auto-fit, 84px);
 	justify-content: center;
 	gap: 14px 10px;
-	width: min(720px, 100%);
+	width: min(780px, 100%);
 	margin-top: 10px;
 }
 
@@ -342,10 +545,11 @@ select:focus {
 	place-items: center;
 	width: 64px;
 	height: 64px;
-	border: 1px solid var(--border);
+	border: 1px solid rgb(255 255 255 / 0.22);
 	border-radius: 20px;
-	background: var(--surface);
-	backdrop-filter: blur(10px);
+	background: rgb(255 255 255 / 0.16);
+	backdrop-filter: blur(14px);
+	color: #fff;
 	transition:
 		border-color 0.15s,
 		transform 0.15s;
@@ -391,7 +595,7 @@ select:focus {
 
 .shortcut-add .shortcut-icon svg {
 	fill: none;
-	stroke: var(--muted);
+	stroke: rgb(255 255 255 / 0.85);
 	stroke-width: 2;
 	stroke-linecap: round;
 }
@@ -565,9 +769,7 @@ select:focus {
 	padding: 8px;
 	border: 1px solid var(--border);
 	border-radius: 18px;
-	background:
-		radial-gradient(120% 80% at 0% 0%, rgb(124 92 255 / 0.12), transparent 60%),
-		var(--raised);
+	background: radial-gradient(120% 80% at 0% 0%, rgb(124 92 255 / 0.12), transparent 60%), var(--raised);
 	box-shadow: 0 18px 50px var(--shadow);
 	backdrop-filter: blur(12px);
 	animation: menu-in 0.14s ease-out;
@@ -717,6 +919,7 @@ select:focus {
 	flex: 1;
 	display: flex;
 	min-height: 0;
+	margin-bottom: var(--dock-space);
 }
 
 #frames iframe {
@@ -972,6 +1175,36 @@ select:focus {
 	font-size: 12px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+
+/* Phones: four smaller tiles per row so the home screen fits above the dock. */
+@media (max-width: 520px) {
+	.shortcuts {
+		grid-template-columns: repeat(4, 1fr);
+		gap: 12px 6px;
+	}
+
+	.shortcut-icon {
+		width: 56px;
+		height: 56px;
+		border-radius: 17px;
+	}
+
+	.shortcut-icon svg {
+		width: 24px;
+		height: 24px;
+	}
+
+	.shortcut-label {
+		font-size: 12px;
+	}
+
+	.shortcut-remove {
+		top: -6px;
+		right: 0;
+		width: 22px;
+		height: 22px;
+	}
 }
 
 @media (max-width: 420px) {
@@ -1247,32 +1480,40 @@ select:focus {
 	border-radius: 8px;
 }
 
-/* Bottom bar. */
+/* Bottom bar: a floating sheet of dark glass. --dock-space is the room it takes up. */
 :root {
-	--dock-height: calc(60px + env(safe-area-inset-bottom));
+	--dock-space: calc(84px + env(safe-area-inset-bottom));
 }
 
 .dock {
+	position: fixed;
+	left: 50%;
+	bottom: calc(12px + env(safe-area-inset-bottom));
+	z-index: 25;
 	display: flex;
-	justify-content: center;
-	gap: clamp(4px, 3vw, 18px);
-	flex: none;
-	height: var(--dock-height);
-	padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-	border-top: 1px solid var(--border);
-	background: var(--panel);
+	justify-content: space-between;
+	gap: 4px;
+	width: min(560px, calc(100vw - 24px));
+	height: 62px;
+	padding: 8px;
+	border: 1px solid rgb(255 255 255 / 0.14);
+	border-radius: 22px;
+	background: rgb(18 18 26 / 0.72);
+	backdrop-filter: blur(18px) saturate(1.4);
+	box-shadow: 0 14px 40px rgb(0 0 0 / 0.35);
+	transform: translateX(-50%);
 }
 
 .dock button {
 	position: relative;
 	display: grid;
 	place-items: center;
-	width: 56px;
+	flex: 1;
 	padding: 0;
 	border: 0;
 	border-radius: 14px;
 	background: transparent;
-	color: var(--muted);
+	color: rgb(255 255 255 / 0.72);
 	cursor: pointer;
 	transition:
 		background 0.15s,
@@ -1281,14 +1522,14 @@ select:focus {
 
 @media (hover: hover) {
 	.dock button:hover {
-		background: var(--hover);
-		color: var(--text);
+		background: rgb(255 255 255 / 0.1);
+		color: #fff;
 	}
 }
 
 .dock button.active {
-	background: var(--accent-soft);
-	color: var(--on-accent-soft);
+	background: rgb(255 255 255 / 0.18);
+	color: #fff;
 }
 
 .dock button:focus-visible {
@@ -1327,7 +1568,7 @@ select:focus {
 	position: fixed;
 	top: 0;
 	right: 0;
-	bottom: var(--dock-height);
+	bottom: var(--dock-space);
 	z-index: 30;
 	display: flex;
 	flex-direction: column;
@@ -1357,12 +1598,13 @@ select:focus {
 .ai-mark,
 .internal-icon {
 	fill: none;
-	stroke: var(--accent);
+	stroke: currentColor;
 	stroke-width: 2;
 	stroke-linejoin: round;
 }
 
 .ai-mark {
+	color: var(--accent);
 	width: 20px;
 	height: 20px;
 	flex: none;
@@ -1680,4 +1922,65 @@ select:focus {
 		order: 1;
 		width: 100%;
 	}
+}
+
+/* Apps: the shortcut grid on a sheet of dark glass, whatever the theme. */
+.panel.apps {
+	width: min(640px, calc(100vw - 24px));
+	border-color: rgb(255 255 255 / 0.16);
+	border-radius: 24px;
+	background: rgb(18 18 26 / 0.78);
+	backdrop-filter: blur(22px);
+	color: #fff;
+}
+
+.panel.apps .panel-head {
+	border-bottom-color: rgb(255 255 255 / 0.12);
+}
+
+.panel.apps .icon {
+	color: #fff;
+}
+
+.apps-grid {
+	margin: 0;
+	padding: 20px 14px 22px;
+	overflow-y: auto;
+}
+
+/* Browser chrome: tabs and toolbar on dark glass over the wallpaper, like the dock. */
+#tabbar,
+#toolbar,
+#home-screen .search {
+	--panel: transparent;
+	--surface: rgb(18 18 26 / 0.62);
+	--raised: #16161e;
+	--chip: rgb(255 255 255 / 0.1);
+	--hover: rgb(255 255 255 / 0.12);
+	--border: rgb(255 255 255 / 0.14);
+	--text: #f4f3fa;
+	--body-text: #d9d7e6;
+	--muted: #a9a6be;
+	--accent-soft: rgb(255 255 255 / 0.2);
+	--on-accent-soft: #fff;
+	--secure: #4ade80;
+	color-scheme: dark;
+	color: var(--text);
+}
+
+#tabbar {
+	background: rgb(12 12 18 / 0.72);
+	backdrop-filter: blur(20px);
+}
+
+#toolbar {
+	position: relative;
+	z-index: 30;
+	background: rgb(12 12 18 / 0.72);
+	backdrop-filter: blur(20px);
+}
+
+#home-screen .search {
+	backdrop-filter: blur(18px);
+	box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
 }
