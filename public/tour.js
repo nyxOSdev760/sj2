@@ -22,7 +22,7 @@ self.Tour = (() => {
 			label: "Welcome",
 			icon: "sparkles",
 			title: `Welcome to ${APP}`,
-			body: "A fast web proxy with tabs, AI, live chat and ad blocking built in. Take 20 seconds to get comfortable.",
+			body: "A fast web proxy with tabs, games, movies and ad blocking built in. Take 20 seconds to get comfortable.",
 		},
 		{
 			label: "Tabs",

@@ -119,16 +119,12 @@ a {
 	text-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
 }
 
-.topbar-logo {
-	width: 26px;
-	height: 26px;
-	filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.4));
-}
-
 .topbar-name {
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: 18px;
+	margin: 0;
+	font-size: 14px;
 	font-weight: 600;
+	letter-spacing: 0.4em;
+	text-transform: uppercase;
 }
 
 .topbar-spacer {
@@ -177,7 +173,7 @@ a {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	gap: clamp(14px, 4vw, 28px);
+	gap: clamp(10px, 3.4vw, 28px);
 	animation: rise-in 0.6s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
@@ -197,8 +193,8 @@ a {
 .desktop-app-icon {
 	display: grid;
 	place-items: center;
-	width: clamp(60px, 16vw, 76px);
-	height: clamp(60px, 16vw, 76px);
+	width: clamp(54px, 14vw, 76px);
+	height: clamp(54px, 14vw, 76px);
 	border: 1px solid rgb(255 255 255 / 0.22);
 	border-radius: 22px;
 	background: rgb(255 255 255 / 0.14);
@@ -279,29 +275,11 @@ a {
 .home-footer {
 	display: flex;
 	align-items: flex-end;
-	justify-content: space-between;
+	justify-content: flex-end;
 	flex-wrap: wrap;
 	gap: 12px 16px;
 	width: 100%;
 	color: #fff;
-}
-
-.home-brand-name {
-	margin: 0 0 6px;
-	font-size: 13px;
-	font-weight: 600;
-	letter-spacing: 0.4em;
-	text-transform: uppercase;
-	text-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
-}
-
-.home-tagline {
-	margin: 0;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: clamp(20px, 5vw, 28px);
-	font-weight: 600;
-	letter-spacing: -0.02em;
-	text-shadow: 0 2px 12px rgb(0 0 0 / 0.45);
 }
 
 /* Frosted glass, for controls that sit on the wallpaper. */
@@ -1547,363 +1525,6 @@ select:focus {
 	stroke-linejoin: round;
 }
 
-.dock-badge {
-	position: absolute;
-	top: 2px;
-	right: 6px;
-	min-width: 18px;
-	height: 18px;
-	padding: 0 5px;
-	border-radius: 999px;
-	background: var(--error);
-	color: #fff;
-	font-size: 11px;
-	font-weight: 700;
-	line-height: 18px;
-	text-align: center;
-}
-
-/* Skeld AI and Chat drawers (they stop above the bottom bar). */
-.ai-panel {
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: var(--dock-space);
-	z-index: 30;
-	display: flex;
-	flex-direction: column;
-	width: min(420px, 100vw);
-	border-left: 1px solid var(--border);
-	background: var(--raised);
-	color: var(--text);
-	box-shadow: -18px 0 50px var(--shadow);
-	animation: ai-in 0.2s ease-out;
-}
-
-@keyframes ai-in {
-	from {
-		transform: translateX(24px);
-		opacity: 0;
-	}
-}
-
-.ai-head {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 10px 12px 18px;
-	border-bottom: 1px solid var(--border);
-}
-
-.ai-mark,
-.internal-icon {
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linejoin: round;
-}
-
-.ai-mark {
-	color: var(--accent);
-	width: 20px;
-	height: 20px;
-	flex: none;
-}
-
-.ai-head h2 {
-	margin: 0;
-	font-size: 17px;
-}
-
-.ai-quota {
-	margin-left: auto;
-	padding: 3px 10px;
-	border-radius: 999px;
-	background: var(--chip);
-	color: var(--muted);
-	font-size: 12px;
-	white-space: nowrap;
-}
-
-.ai-quota:empty {
-	display: none;
-}
-
-.ai-quota.empty {
-	color: var(--error);
-}
-
-.ai-log {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
-	padding: 18px 16px;
-}
-
-.ai-empty {
-	margin: auto 0;
-	text-align: center;
-	color: var(--muted);
-}
-
-.ai-empty-title {
-	margin: 0 0 14px;
-	color: var(--text);
-	font-size: 20px;
-	font-weight: 600;
-}
-
-.ai-chips {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: 8px;
-}
-
-.ai-chip {
-	padding: 8px 14px;
-	border: 1px solid var(--border);
-	border-radius: 999px;
-	background: var(--chip);
-	color: var(--text);
-	font: inherit;
-	font-size: 13px;
-	cursor: pointer;
-}
-
-.ai-chip:hover {
-	border-color: var(--accent);
-}
-
-.ai-msg {
-	max-width: 88%;
-	font-size: 15px;
-	line-height: 1.55;
-}
-
-.ai-msg.user {
-	align-self: flex-end;
-	padding: 9px 14px;
-	border-radius: 18px 18px 4px 18px;
-	background: var(--accent);
-	color: var(--on-accent);
-	white-space: pre-wrap;
-	overflow-wrap: anywhere;
-}
-
-.ai-msg.model {
-	align-self: flex-start;
-	padding: 2px 2px;
-	overflow-wrap: anywhere;
-}
-
-.ai-msg.error {
-	padding: 9px 14px;
-	border-radius: 12px;
-	background: rgb(211 58 74 / 0.1);
-	color: var(--error);
-}
-
-.ai-msg.pending .ai-body::after {
-	content: "";
-	display: inline-block;
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: var(--accent);
-	animation: ai-pulse 1s ease-in-out infinite;
-}
-
-@keyframes ai-pulse {
-	50% {
-		opacity: 0.25;
-		transform: scale(0.7);
-	}
-}
-
-.ai-body p,
-.ai-body ul,
-.ai-body ol {
-	margin: 0 0 10px;
-}
-
-.ai-body > :last-child {
-	margin-bottom: 0;
-}
-
-.ai-body ul,
-.ai-body ol {
-	padding-left: 22px;
-}
-
-.ai-heading {
-	font-weight: 700;
-}
-
-.ai-body code {
-	padding: 1px 5px;
-	border-radius: 5px;
-	background: var(--chip);
-	font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-	font-size: 0.9em;
-}
-
-.ai-body pre {
-	margin: 0 0 10px;
-	padding: 12px;
-	overflow-x: auto;
-	border: 1px solid var(--border);
-	border-radius: 10px;
-	background: var(--chip);
-}
-
-.ai-body pre code {
-	padding: 0;
-	background: none;
-}
-
-.ai-form {
-	display: flex;
-	align-items: flex-end;
-	gap: 8px;
-	margin: 0 12px;
-	padding: 6px 6px 6px 16px;
-	border: 1px solid var(--border);
-	border-radius: 24px;
-	background: var(--surface);
-}
-
-.ai-form:focus-within {
-	border-color: var(--accent);
-}
-
-.ai-form textarea {
-	flex: 1;
-	min-width: 0;
-	max-height: 160px;
-	padding: 10px 0;
-	border: 0;
-	outline: none;
-	resize: none;
-	background: transparent;
-	color: var(--text);
-	font: inherit;
-	font-size: 15px;
-	line-height: 1.4;
-}
-
-.ai-form .search-go {
-	width: 38px;
-	height: 38px;
-}
-
-.ai-form .search-go:disabled {
-	opacity: 0.4;
-	cursor: default;
-}
-
-/* Chat. */
-.chat-log {
-	gap: 10px;
-}
-
-.chat-empty {
-	margin: auto 0;
-	color: var(--muted);
-	text-align: center;
-}
-
-.chat-msg {
-	max-width: 88%;
-	align-self: flex-start;
-	padding: 8px 12px;
-	border-radius: 4px 16px 16px 16px;
-	background: var(--chip);
-}
-
-.chat-msg.mine {
-	align-self: flex-end;
-	border-radius: 16px 4px 16px 16px;
-	background: var(--accent-soft);
-}
-
-.chat-meta {
-	display: flex;
-	align-items: baseline;
-	gap: 8px;
-	margin-bottom: 2px;
-}
-
-.chat-name-tag {
-	font-size: 13px;
-	font-weight: 700;
-}
-
-.chat-msg.mine .chat-name-tag {
-	color: var(--on-accent-soft) !important;
-}
-
-.chat-time {
-	color: var(--muted);
-	font-size: 11px;
-}
-
-.chat-text {
-	font-size: 15px;
-	line-height: 1.45;
-	white-space: pre-wrap;
-	overflow-wrap: anywhere;
-}
-
-.chat-msg.mine .chat-text {
-	color: var(--on-accent-soft);
-}
-
-.chat-name-form {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	margin: 0 12px;
-	padding: 14px;
-	border: 1px solid var(--border);
-	border-radius: 18px;
-	background: var(--surface);
-	font-weight: 600;
-}
-
-.chat-name-row {
-	display: flex;
-	gap: 8px;
-}
-
-#chat-name {
-	flex: 1;
-	min-width: 0;
-	padding: 9px 14px;
-	font-size: 15px;
-}
-
-.chat-error {
-	min-height: 0;
-	margin: 6px 16px 0;
-	color: var(--error);
-	font-size: 13px;
-}
-
-.chat-error:empty {
-	display: none;
-}
-
-.ai-note {
-	margin: 8px 0 12px;
-	color: var(--muted);
-	font-size: 11px;
-	text-align: center;
-}
-
 @media (max-width: 540px) {
 	.history-time {
 		display: none;
@@ -1983,4 +1604,125 @@ select:focus {
 #home-screen .search {
 	backdrop-filter: blur(18px);
 	box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
+}
+
+/* Wallpaper picker: a card per wallpaper; the photos double as previews. */
+.wallpaper-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+	gap: 14px;
+	padding: 18px;
+	overflow-y: auto;
+}
+
+.wallpaper-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #fff;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.wallpaper-preview {
+	display: block;
+	width: 100%;
+	aspect-ratio: 16 / 10;
+	border: 2px solid rgb(255 255 255 / 0.14);
+	border-radius: 16px;
+	background: #222 center / cover no-repeat;
+	transition:
+		border-color 0.15s,
+		transform 0.15s;
+}
+
+.wallpaper-card:hover .wallpaper-preview {
+	transform: translateY(-2px);
+}
+
+.wallpaper-card[aria-checked="true"] .wallpaper-preview,
+.wallpaper-card:focus-visible .wallpaper-preview {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px rgb(124 92 255 / 0.35);
+}
+
+.wallpaper-card:focus-visible {
+	outline: none;
+}
+
+.wallpaper-name {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 4px;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.wallpaper-card[aria-checked="true"] .wallpaper-name::after {
+	content: "✓";
+	margin-left: auto;
+	color: var(--accent-soft);
+}
+
+.wallpaper-tag {
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgb(255 255 255 / 0.14);
+	font-size: 11px;
+}
+
+.wallpaper-preview[data-wallpaper="gtr-sunset"] {
+	background-image: url("wallpapers/gtr-sunset.jpg");
+	background-position: center 48%;
+}
+
+.wallpaper-preview[data-wallpaper="r34-night"] {
+	background-image: url("wallpapers/r34-night.jpg");
+	background-position: center 80%;
+}
+
+.wallpaper-preview[data-wallpaper="maybach-night"] {
+	background-image: url("wallpapers/maybach-night.jpg");
+	background-position: center 62%;
+}
+
+.wallpaper-preview[data-wallpaper="maybach-driveway"] {
+	background-image: url("wallpapers/maybach-driveway.jpg");
+	background-position: center 58%;
+}
+
+.wallpaper-preview[data-wallpaper="snow"] {
+	background:
+		radial-gradient(circle at 20% 30%, #fff 0 1.5px, transparent 2px),
+		radial-gradient(circle at 65% 20%, #fff 0 2px, transparent 2.5px),
+		radial-gradient(circle at 80% 60%, #fff 0 1.5px, transparent 2px),
+		radial-gradient(circle at 35% 70%, #fff 0 2px, transparent 2.5px),
+		radial-gradient(circle at 50% 45%, #fff 0 1px, transparent 1.5px),
+		radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.3), transparent 70%),
+		radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
+}
+
+.wallpaper-preview[data-wallpaper="night"] {
+	background:
+		radial-gradient(circle at 15% 25%, #fff 0 1px, transparent 1.5px),
+		radial-gradient(circle at 40% 15%, #fff 0 1.2px, transparent 1.7px),
+		radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 1.5px),
+		radial-gradient(circle at 85% 18%, #fff 0 1.2px, transparent 1.7px),
+		radial-gradient(circle at 55% 55%, #fff 0 1px, transparent 1.5px),
+		radial-gradient(70% 90% at 50% 100%, rgb(124 92 255 / 0.5), transparent 70%),
+		radial-gradient(45% 70% at 20% 100%, rgb(214 51 132 / 0.3), transparent 70%),
+		#05050c;
+}
+
+@media (max-width: 420px) {
+	.wallpaper-list {
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+		padding: 14px;
+	}
 }

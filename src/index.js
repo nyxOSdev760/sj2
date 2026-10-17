@@ -5,8 +5,6 @@ import { stat } from "node:fs/promises";
 import { join, extname, resolve, sep } from "node:path";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import { mounts } from "./mounts.js";
-import { handleAi, aiEnabled, aiModel } from "./ai.js";
-import { handleChat, chatEnabled } from "./chat.js";
 /* filler: c__o__d__e */
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || "0.0.0.0";
@@ -77,16 +75,6 @@ const server = createServer(async (req, res) => {
 		return send(res, 400, "Bad Request");
 	}
 
-	try {
-		if (await handleAi(req, res, pathname)) return;
-		if (await handleChat(req, res, pathname)) return;
-	} catch (err) {
-		console.error("API handler failed:", err);
-		if (!res.headersSent) send(res, 500, "Internal Server Error");
-		else res.end();
-		return;
-	}
-
 	if (req.method !== "GET" && req.method !== "HEAD") {
 		return send(res, 405, "Method Not Allowed");
 	}
@@ -122,8 +110,6 @@ server.on("upgrade", (req, socket, head) => {
 server.listen(port, host, () => {
 	console.log(`Skeld listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
-	console.log(aiEnabled ? `AI: on (${aiModel})` : "AI: off (set GEMINI_API_KEY to turn it on)");
-	console.log(`Chat: ${chatEnabled ? "on" : "off"}`);
 });
 
 function shutdown() {

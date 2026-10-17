@@ -35,8 +35,12 @@ self.Shortcuts = (() => {
 		},
 	];
 
+	const GAMEPAD_ICON =
+		"M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z";
+	const FILM_ICON = "M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4";
+
 	const DEFAULTS = [
-		{ name: "AI", url: "skeld://ai" },
+		{ name: "Movies", url: "skeld://movies" },
 		{ name: "Games", url: "skeld://games" },
 		{ name: "YouTube", url: "https://www.youtube.com/" },
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
@@ -52,6 +56,7 @@ self.Shortcuts = (() => {
 		{ version: 3, name: "AI", url: "skeld://ai" },
 		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
 		{ version: 5, name: "Games", url: "skeld://games" },
+		{ version: 6, name: "Movies", url: "skeld://movies" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
@@ -62,6 +67,10 @@ self.Shortcuts = (() => {
 				const list = saved.filter((s) => s && s.name && s.url);
 				// Built-in tiles saved before the rename to Skeld.
 				for (const s of list) s.url = s.url.replace(/^skyline:/, "skeld:");
+				// AI and chat were removed.
+				for (let i = list.length - 1; i >= 0; i--) {
+					if (/^skeld:\/\/(ai|chat)\/?$/i.test(list[i].url)) list.splice(i, 1);
+				}
 				// The Tidal tile became Music, now on SoundCloud (Tidal blocks the proxy as a bot).
 				for (const s of list) {
 					if (/(^|\.)tidal\.com\//.test(s.url.replace(/^https?:\/\//, ""))) {
@@ -120,16 +129,14 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
-		// Built-in pages: a robot for skeld://ai, a gamepad for skeld://games, a chat
-		// bubble for skeld://chat.
+		// Built-in pages: a gamepad for skeld://games, a film strip for skeld://movies.
 		if (shortcut.url.startsWith("skeld:")) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
 			svg.classList.add("internal-icon");
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-			const GAMEPAD = "M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z";
-			path.setAttribute("d", shortcut.url.startsWith("skeld://games") ? GAMEPAD : shortcut.url.startsWith("skeld://chat") ? "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" : "M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2");
+			path.setAttribute("d", shortcut.url.startsWith("skeld://games") ? GAMEPAD_ICON : FILM_ICON);
 			svg.append(path);
 			return svg;
 		}

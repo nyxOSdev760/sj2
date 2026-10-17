@@ -1,6 +1,5 @@
 # One-click deploy on Render (render.com): New -> Blueprint -> pick this repo.
-# Runs the full Skeld server (proxy, AdGuard DNS, Wisp and AI). Render asks for
-# GEMINI_API_KEY when you create it; the key stays in Render, never in the repo.
+# Runs the full Skeld server (proxy, AdGuard DNS and Wisp).
 services:
   - type: web
     name: skyline
@@ -9,16 +8,3 @@ services:
     buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /
-    envVars:
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: TRUST_PROXY
-        value: "1"
-      - key: AI_COOKIE_SECRET
-        generateValue: true
-      # Optional: words that get chat messages rejected, comma-separated.
-      - key: CHAT_BLOCKED_WORDS
-        sync: false
-      # Lets the GitHub Pages copy of Skeld use this server's AI.
-      - key: AI_ALLOWED_ORIGINS
-        value: https://nyxosdev760.github.io

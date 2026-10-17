@@ -26,12 +26,9 @@ jobs:
       - run: npm ci
       # Repository variables (Settings -> Secrets and variables -> Actions -> Variables):
       #   WISP_URL     your own Wisp servers, comma-separated (optional)
-      #   AI_ENDPOINT  your Skeld server's AI address, e.g.
-      #                https://skyline.onrender.com/api/ai/ (turns AI on for Pages)
       - run: npm run build
         env:
           WISP_URL: ${{ vars.WISP_URL }}
-          AI_ENDPOINT: ${{ vars.AI_ENDPOINT }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

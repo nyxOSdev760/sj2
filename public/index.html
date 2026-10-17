@@ -11,7 +11,7 @@
 			} catch {}
 		</script>
 		<title>Skeld</title>
-		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+		<link rel="icon" href="data:," />
 		<link rel="preload" href="fonts/outfit-600.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="stylesheet" href="style.css" />
 		<script src="config.js"></script>
@@ -19,8 +19,6 @@
 		<script src="wisp.js"></script>
 		<script src="home.js"></script>
 		<script src="tour.js"></script>
-		<script src="ai.js"></script>
-		<script src="chat.js"></script>
 		<script src="app.js" defer></script>
 	</head>
 	<body data-view="desktop">
@@ -30,8 +28,7 @@
 
 		<section id="desktop" class="desktop" aria-label="Desktop">
 			<header class="topbar">
-				<img class="topbar-logo" src="favicon.svg" alt="" width="26" height="26" />
-				<span class="topbar-name">Skeld</span>
+				<h1 class="topbar-name">Skeld</h1>
 				<span class="topbar-spacer"></span>
 				<button id="fullscreen" class="topbar-button" type="button" title="Full screen" aria-label="Full screen">
 					<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -64,6 +61,12 @@
 						></span>
 						<span class="desktop-app-label">Games</span>
 					</button>
+					<button class="desktop-app" type="button" data-app="movies">
+						<span class="desktop-app-icon"
+							><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4" /></svg
+						></span>
+						<span class="desktop-app-label">Movies</span>
+					</button>
 					<button class="desktop-app" type="button" data-app="music">
 						<span class="desktop-app-icon"
 							><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -81,10 +84,6 @@
 				</div>
 			</div>
 			<footer class="home-footer">
-				<div class="home-brand">
-					<h1 class="home-brand-name">Skeld</h1>
-					<p class="home-tagline">Browse anything, anywhere.</p>
-				</div>
 				<button id="next-wallpaper" class="glass-button" type="button">
 					<svg viewBox="0 0 24 24" aria-hidden="true">
 						<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
@@ -145,14 +144,6 @@
 						<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
 					</button>
 					<div id="menu" class="menu" role="menu" aria-label="Menu" hidden>
-						<button type="button" role="menuitem" data-action="ai">
-							<svg viewBox="0 0 24 24">
-								<path
-									d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
-								/>
-							</svg>
-							Ask AI
-						</button>
 						<button type="button" role="menuitem" data-action="history">
 							<svg viewBox="0 0 24 24">
 								<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" />
@@ -217,90 +208,6 @@
 			<div id="frames"></div>
 		</section>
 
-		<aside id="ai-panel" class="ai-panel" aria-labelledby="ai-title" hidden>
-			<header class="ai-head">
-				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
-					/>
-				</svg>
-				<h2 id="ai-title">Skeld AI</h2>
-				<span id="ai-quota" class="ai-quota"></span>
-				<button id="ai-new" class="icon" type="button" title="New chat" aria-label="New chat">
-					<svg viewBox="0 0 24 24">
-						<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-					</svg>
-				</button>
-				<button id="ai-close" class="icon" type="button" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-				</button>
-			</header>
-			<div id="ai-log" class="ai-log" aria-live="polite"></div>
-			<form id="ai-form" class="ai-form">
-				<textarea
-					id="ai-input"
-					rows="1"
-					maxlength="4000"
-					placeholder="Ask anything…"
-					aria-label="Message Skeld AI"
-				></textarea>
-				<button class="search-go" type="submit" title="Send" aria-label="Send">
-					<svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
-				</button>
-			</form>
-			<p class="ai-note">AI can be wrong. Don't share private info.</p>
-		</aside>
-
-		<aside id="chat-panel" class="ai-panel chat-panel" aria-labelledby="chat-title" hidden>
-			<header class="ai-head">
-				<svg class="ai-mark" viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"
-					/>
-				</svg>
-				<h2 id="chat-title">Chat</h2>
-				<span id="chat-online" class="ai-quota"></span>
-				<button id="chat-rename" class="icon" type="button" title="Change your name" aria-label="Change your name">
-					<svg viewBox="0 0 24 24">
-						<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-					</svg>
-				</button>
-				<button id="chat-close" class="icon" type="button" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-				</button>
-			</header>
-			<div id="chat-log" class="ai-log chat-log" aria-live="polite"></div>
-			<form id="chat-name-form" class="chat-name-form" hidden>
-				<label for="chat-name">Pick a name for chat</label>
-				<div class="chat-name-row">
-					<input
-						id="chat-name"
-						type="text"
-						maxlength="20"
-						autocomplete="nickname"
-						spellcheck="false"
-						placeholder="Your name"
-					/>
-					<button class="text-button primary" type="submit">Join</button>
-				</div>
-				<p id="chat-name-error" class="status error" role="alert"></p>
-			</form>
-			<form id="chat-form" class="ai-form">
-				<textarea
-					id="chat-input"
-					rows="1"
-					maxlength="500"
-					placeholder="Message everyone…"
-					aria-label="Message everyone"
-				></textarea>
-				<button class="search-go" type="submit" title="Send" aria-label="Send">
-					<svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
-				</button>
-			</form>
-			<p id="chat-error" class="chat-error" role="alert"></p>
-			<p class="ai-note">Be nice. Messages are public.</p>
-		</aside>
-
 		<nav id="dock" class="dock" aria-label="Skeld">
 			<button type="button" data-dock="desktop" title="Desktop" aria-label="Desktop">
 				<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -321,24 +228,14 @@
 					/>
 				</svg>
 			</button>
+			<button type="button" data-dock="movies" title="Movies" aria-label="Movies">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4" />
+				</svg>
+			</button>
 			<button type="button" data-dock="music" title="Music" aria-label="Music">
 				<svg viewBox="0 0 24 24" aria-hidden="true">
 					<path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-				</svg>
-			</button>
-			<button type="button" data-dock="chat" title="Chat" aria-label="Chat">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zM18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"
-					/>
-				</svg>
-				<span class="dock-badge" hidden></span>
-			</button>
-			<button type="button" data-dock="ai" title="AI" aria-label="AI">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M15 13v2M9 13v2"
-					/>
 				</svg>
 			</button>
 			<button type="button" data-dock="settings" title="Settings" aria-label="Settings">
@@ -368,14 +265,7 @@
 				</label>
 				<label>
 					Wallpaper
-					<select id="wallpaper">
-						<option value="gtr-sunset">GT-R sunset</option>
-						<option value="r34-night">Night drive</option>
-						<option value="maybach-night">Maybach night</option>
-						<option value="maybach-driveway">Maybach driveway</option>
-						<option value="snow">Snow (animated)</option>
-						<option value="night">Night sky (animated)</option>
-					</select>
+					<button id="choose-wallpaper" class="text-button" type="button">Choose…</button>
 				</label>
 				<label>
 					Transport
@@ -443,6 +333,16 @@
 			</form>
 		</dialog>
 
+		<dialog id="wallpaper-panel" class="panel apps" aria-labelledby="wallpaper-title">
+			<header class="panel-head">
+				<h2 id="wallpaper-title">Wallpapers</h2>
+				<button id="wallpaper-close" class="icon" type="button" title="Close" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+			</header>
+			<div id="wallpaper-list" class="wallpaper-list" role="radiogroup" aria-label="Wallpapers"></div>
+		</dialog>
+
 		<dialog id="apps-panel" class="panel apps" aria-labelledby="apps-title">
 			<header class="panel-head">
 				<h2 id="apps-title">Apps</h2>
@@ -478,7 +378,7 @@
 					<span>Claude</span>
 				</p>
 				<p class="credits-built">
-					Built with Scramjet by Mercury Workshop, AdGuard DNS, Google Gemini, the Outfit font and Simple Icons.
+					Built with Scramjet by Mercury Workshop, AdGuard DNS, the Outfit font and Simple Icons.
 				</p>
 			</div>
 		</dialog>

@@ -45,7 +45,6 @@ const els = {
 	shortcutError: $("shortcut-error"),
 	menu: $("menu"),
 	menuButton: $("menu-button"),
-	wallpaper: $("wallpaper"),
 	theme: $("theme"),
 	historySearch: $("history-search"),
 	historyList: $("history-list"),
@@ -306,8 +305,24 @@ const BAR_ICONS = {
 		"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
 };
 
+// Movies is atlantic.st, but the address bar, tabs and history call it skeld://movies.
+const MOVIES_URL = "https://atlantic.st/";
+const MOVIES_HOST = "atlantic.st";
+function isMovies(url) {
+	try {
+		const host = new URL(url).hostname;
+		return host === MOVIES_HOST || host.endsWith("." + MOVIES_HOST);
+	} catch {
+		return false;
+	}
+}
+// What the address bar shows for `url`.
+function shownUrl(url) {
+	return isMovies(url) ? "skeld://movies" : url;
+}
+
 function setBarIcon(url) {
-	const name = !url ? "home" : url.startsWith("https:") ? "lock" : "globe";
+	const name = !url || isMovies(url) ? "home" : url.startsWith("https:") ? "lock" : "globe";
 	els.barIcon.firstElementChild.setAttribute("d", BAR_ICONS[name]);
 	els.barIcon.classList.toggle("secure", name === "lock");
 }
@@ -383,9 +398,9 @@ async function main() {
 	let activeTab = null;
 
 	function updateTabLabel(tab) {
-		const text = tab.url ? tab.title || hostOf(tab.url) : "New tab";
+		const text = !tab.url ? "New tab" : isMovies(tab.url) ? "Movies" : tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
-		tab.el.title = tab.url ? `${text}\n${tab.url}` : text;
+		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
 	}
 
 	function createTab({ activate = true } = {}) {
@@ -429,7 +444,7 @@ async function main() {
 			if (t.iframe) t.iframe.hidden = !active || !t.url;
 		}
 		els.home.hidden = !!tab.url;
-		els.bar.value = tab.url || HOME_URL;
+		els.bar.value = tab.url ? shownUrl(tab.url) : HOME_URL;
 		setBarIcon(tab.url);
 		updateDock();
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -475,9 +490,8 @@ async function main() {
 	async function navigate(input, tab = activeTab) {
 		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
 		if (page) {
+			if (page === "movies") return navigate(MOVIES_URL, tab);
 			if (page === "history") openHistory();
-			else if (page === "ai") openPanel("ai");
-			else if (page === "chat") openPanel("chat");
 			else if (page === "games") openGames();
 			else if (page === "settings") els.settingsPanel.showModal();
 			else goHome(tab);
@@ -508,7 +522,7 @@ async function main() {
 			tab.url = url;
 			if (url !== tab.recordedUrl) {
 				tab.recordedUrl = url;
-				browsingHistory.add(url, title);
+				browsingHistory.add(shownUrl(url), isMovies(url) ? "Movies" : title);
 			} else {
 				browsingHistory.setTitle(url, title);
 			}
@@ -516,8 +530,8 @@ async function main() {
 		tab.title = title;
 		if (changed) updateTabLabel(tab);
 		if (changed && tab === activeTab) updateDock();
-		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== tab.url) {
-			els.bar.value = tab.url;
+		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== shownUrl(tab.url)) {
+			els.bar.value = shownUrl(tab.url);
 			setBarIcon(tab.url);
 		}
 	}
@@ -615,22 +629,6 @@ async function main() {
 		updateDock();
 	}
 
-	// AI and Chat drawers, one at a time, opened from the bottom bar (and skeld://ai, /chat).
-	const panels = { ai: SkeldAI, chat: SkeldChat };
-	function openPanel(name) {
-		for (const [key, panel] of Object.entries(panels)) if (key !== name) panel.close();
-		panels[name].open();
-		updateDock();
-	}
-	SkeldAI.init();
-	SkeldChat.init({
-		unreadChanged(count) {
-			const badge = document.querySelector('[data-dock="chat"] .dock-badge');
-			badge.hidden = !count;
-			badge.textContent = count > 99 ? "99+" : String(count);
-		},
-	});
-
 	// Games: free game sites, opened through the proxy like any other site.
 	// Each card shows the site's own banner and logo (public/games/).
 	const GAME_SITES = [
@@ -659,8 +657,6 @@ async function main() {
 				card.append(banner, info);
 				card.addEventListener("click", (e) => {
 					$("games-panel").close();
-					SkeldAI.close();
-					SkeldChat.close();
 					const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
 					navigate(site.url, tab).catch(() => {});
 				});
@@ -676,10 +672,9 @@ async function main() {
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
 		let current = "browser";
-		if (SkeldChat.isOpen) current = "chat";
-		else if (SkeldAI.isOpen) current = "ai";
-		else if (document.body.dataset.view === "desktop") current = "desktop";
+		if (document.body.dataset.view === "desktop") current = "desktop";
 		else if (!activeTab?.url) current = "browser";
+		else if (isMovies(activeTab.url)) current = "movies";
 		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
@@ -692,20 +687,16 @@ async function main() {
 	}
 	// Dock buttons and desktop icons share these.
 	function launch(target) {
-		if (target === "ai" || target === "chat") {
-			if (panels[target].isOpen) panels[target].close();
-			else openPanel(target);
-		} else if (target === "games") {
+		if (target === "games") {
 			openGames();
 		} else if (target === "settings") {
 			els.settingsPanel.showModal();
 		} else if (target === "apps") {
 			$("apps-panel").showModal();
 		} else {
-			SkeldAI.close();
-			SkeldChat.close();
 			if (target === "desktop") setView("desktop");
 			else if (target === "browser") setView("browser");
+			else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
 			else navigate(MUSIC_URL).catch(() => {});
 		}
 		updateDock();
@@ -719,10 +710,6 @@ async function main() {
 		if (document.fullscreenElement) document.exitFullscreen?.();
 		else document.documentElement.requestFullscreen?.().catch(() => {});
 	});
-	// Panels also close themselves (Escape, their × button), so watch them.
-	const watchPanels = new MutationObserver(updateDock);
-	for (const id of ["ai-panel", "chat-panel"])
-		watchPanels.observe($(id), { attributes: true, attributeFilter: ["hidden"] });
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skeld://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
@@ -843,9 +830,6 @@ async function main() {
 		setMenu(false);
 		const url = activeTab.frame && currentRealUrl(activeTab);
 		switch (item.dataset.action) {
-			case "ai":
-				openPanel("ai");
-				break;
 			case "history":
 				openHistory();
 				break;
@@ -921,30 +905,59 @@ async function main() {
 	});
 	applyTheme(settings.get("theme", "lavender"));
 
-	// Home screen wallpaper: a photo, or an animation drawn on the canvas.
+	// Wallpaper: a photo, or an animation drawn on the canvas. "Change wallpaper" opens a
+	// picker with all of them.
+	const WALLPAPERS = [
+		{ id: "gtr-sunset", name: "GT-R sunset" },
+		{ id: "r34-night", name: "Night drive" },
+		{ id: "maybach-night", name: "Maybach night" },
+		{ id: "maybach-driveway", name: "Maybach driveway" },
+		{ id: "snow", name: "Snow", animated: true },
+		{ id: "night", name: "Night sky", animated: true },
+	];
 	const DEFAULT_WALLPAPER = "gtr-sunset";
 	const animations = { snow: Snowfall, night: Constellation };
 	let stopAnimation = null;
+	let currentWallpaper = null;
 	function applyWallpaper(name) {
-		if (![...els.wallpaper.options].some((o) => o.value === name)) name = DEFAULT_WALLPAPER;
-		els.wallpaper.value = name;
+		if (!WALLPAPERS.some((w) => w.id === name)) name = DEFAULT_WALLPAPER;
+		currentWallpaper = name;
 		$("wallpaper-layer").dataset.wallpaper = name;
 		$("wallpaper-layer").classList.toggle("photo", !animations[name]);
 		stopAnimation?.();
 		stopAnimation = animations[name]?.start($("stars")) ?? null;
 	}
-	els.wallpaper.addEventListener("change", () => {
-		settings.set("wallpaper", els.wallpaper.value);
-		applyWallpaper(els.wallpaper.value);
-	});
 	applyWallpaper(settings.get("wallpaper", DEFAULT_WALLPAPER));
-	// "Change wallpaper" on the home screen steps through the list.
-	$("next-wallpaper").addEventListener("click", () => {
-		const options = [...els.wallpaper.options];
-		const next = options[(options.findIndex((o) => o.value === els.wallpaper.value) + 1) % options.length];
-		settings.set("wallpaper", next.value);
-		applyWallpaper(next.value);
+
+	const wallpaperPanel = $("wallpaper-panel");
+	function openWallpapers() {
+		const cards = WALLPAPERS.map((wallpaper) => {
+			const card = el("button", "wallpaper-card");
+			card.type = "button";
+			card.setAttribute("role", "radio");
+			card.setAttribute("aria-checked", String(wallpaper.id === currentWallpaper));
+			const preview = el("span", "wallpaper-preview");
+			preview.dataset.wallpaper = wallpaper.id;
+			const label = el("span", "wallpaper-name", wallpaper.name);
+			if (wallpaper.animated) label.append(el("span", "wallpaper-tag", "Animated"));
+			card.append(preview, label);
+			card.addEventListener("click", () => {
+				settings.set("wallpaper", wallpaper.id);
+				applyWallpaper(wallpaper.id);
+				wallpaperPanel.close();
+			});
+			return card;
+		});
+		$("wallpaper-list").replaceChildren(...cards);
+		wallpaperPanel.showModal();
+		cards.find((c) => c.getAttribute("aria-checked") === "true")?.focus();
+	}
+	$("next-wallpaper").addEventListener("click", openWallpapers);
+	$("choose-wallpaper").addEventListener("click", () => {
+		els.settingsPanel.close();
+		openWallpapers();
 	});
+	$("wallpaper-close").addEventListener("click", () => wallpaperPanel.close());
 
 	// The desktop's date and clocks.
 	const dateEl = $("home-date");

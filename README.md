@@ -40,84 +40,26 @@ Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in 
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
 The default theme is **Lavender**, a soft cool light theme; *Settings → Theme* switches to
-**AMOLED dark**. The home screen wallpaper is set under *Settings → Wallpaper*: four car photos (**GT-R sunset**, the
+**AMOLED dark**. The home screen wallpaper is set under **Change wallpaper** (or *Settings → Wallpaper*): four car photos (**GT-R sunset**, the
 default, **Night drive**, **Maybach night** and **Maybach driveway**, in `public/wallpapers/`),
 **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
 animations pause while a page is open or the tab is hidden, and stay still for people who
 prefer reduced motion.
 
-The **☰ menu** has Ask AI, History, Bookmark this page and Take the tour. The
+The **☰ menu** has History, Bookmark this page and Take the tour. The
 address bar shows `skeld://home` on the home screen; `skeld://history` and `skeld://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
-## Chat
+The bottom bar holds Desktop, Browser, Games, Movies, Music (SoundCloud) and Settings.
+**Games** (also `skeld://games`) opens a picker of free game sites. **Movies**
+(`skeld://movies`) opens atlantic.st; the address bar, tab and history show it as
+`skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.
 
-The chat bubble in the bottom bar opens a live chat room shared by everyone on the same
-Skeld server (`src/chat.js`, `public/chat.js`). People pick a nickname, see who's online,
-and get an unread badge while the chat is closed. The last 100 messages are kept in memory,
-so a restart clears them.
+YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
+videos for traffic from datacenter IPs, which every Wisp server (Render included) uses.
 
-Messages are plain text (no HTML), up to 500 characters, at most one every 1.5 seconds and
-15 a minute per browser. Names are 2–20 letters, numbers, spaces, dots or dashes.
-
-| Variable | Default | What it does |
-| --- | --- | --- |
-| `CHAT_ENABLED` | on | Set to `0` to turn chat off |
-| `CHAT_BLOCKED_WORDS` | (none) | Comma-separated words that get a message or name rejected |
-
-The bottom bar holds Home, Games, Music (SoundCloud), Chat, AI and History. **Games** (also a
-home tile and `skeld://games`) opens a picker of free game sites, Poki, CrazyGames, Coolmath
-Games and Duck Math, which load through the proxy like any other site.
-
-## Skeld AI
-
-A chat drawer (the robot in the bottom bar, the **AI** tile, ☰ → Ask AI, or `skeld://ai`)
-powered by Google Gemini. The Node server relays chats so the API key never reaches the
-browser, and every visitor gets a daily limit.
-
-**Never put the key in the code or commit it.** Set it on the server instead, either as an
-environment variable or in a `.env` file next to `package.json` (`.env` is git-ignored; see
-`.env.example`):
-
-```sh
-GEMINI_API_KEY=your-key npm start
-```
-
-| Variable | Default | What it does |
-| --- | --- | --- |
-| `GEMINI_API_KEY` | (none, AI is off) | Your Gemini API key |
-| `GEMINI_MODEL` | `gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest` | Models tried in order; one that's overloaded or slow is skipped for 5 minutes |
-| `AI_DAILY_LIMIT` | `30` | Messages per browser per rolling 24 hours |
-| `AI_GLOBAL_DAILY_LIMIT` | `1000` | Messages for everyone together per 24 hours, a cap on your bill |
-| `TRUST_PROXY` | off | Set to `1` behind nginx/Caddy/Cloudflare (HTTPS there) so the ID cookie is marked Secure |
-| `AI_ALLOWED_ORIGINS` | (none) | Other sites allowed to use this server's AI, comma-separated |
-| `AI_COOKIE_SECRET` | random at start | Signs browser IDs; set it so IDs survive restarts |
-
-Each browser gets a signed, HttpOnly ID cookie and its own limit, so people sharing a
-Wi-Fi network don't share one allowance. (Websites can't see MAC addresses.) Clearing
-cookies or using a private window gets a fresh ID and a fresh limit; `AI_GLOBAL_DAILY_LIMIT`
-is what keeps the total in check. Counts are kept in memory, so a restart resets them. Messages
-are capped at 4,000 characters and the last 20 turns. Other websites can't use your server's
-AI unless listed in `AI_ALLOWED_ORIGINS`.
-
-### AI on GitHub Pages
-
-Pages only serves files, so it can't hold the key. Run the Skeld server on a host that
-can (it's free on Render) and point the Pages build at it:
-
-1. On [Render](https://render.com): **New → Blueprint**, pick this repo. `render.yaml` sets
-   everything up; paste your Gemini key when it asks for `GEMINI_API_KEY`. Note the URL it
-   gives you, e.g. `https://skyline-abcd.onrender.com`.
-2. On GitHub: *Settings → Secrets and variables → Actions → Variables → New repository
-   variable*, name `AI_ENDPOINT`, value `https://skyline-abcd.onrender.com/api/ai/`.
-3. Re-run the Pages deploy (*Actions → Deploy to GitHub Pages → Run workflow*), or push.
-
-`render.yaml` already allows `https://nyxosdev760.github.io` in `AI_ALLOWED_ORIGINS`; change
-it if your Pages address differs. The Render server is also a complete Skeld on its own,
-with AI, server-side AdGuard DNS and its own Wisp server, so you can simply use that URL.
-
-Browsers that block cookies between sites (Safari, Firefox) still keep their limit: the
-same signed browser ID is also stored by the page and sent with each request.
+`npm install` runs `scripts/patch-scramjet.js`, which fixes a Scramjet bug where
+`history.replaceState(state, "")` sent single-page sites to `/undefined`.
 
 ## Ad and tracker blocking (AdGuard DNS)
 
@@ -196,9 +138,6 @@ rate-limit you.
 | Shortcuts, animated wallpapers, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
-| Skeld AI drawer / Gemini relay with limits | `public/ai.js` / `src/ai.js` |
-| Live chat drawer / chat room server | `public/chat.js` / `src/chat.js` |
-| Browser IDs and API helpers shared by AI and chat | `src/visitors.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
 | Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |
@@ -218,7 +157,7 @@ can't be used to reach the host's own network.
 
 Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
 [Scramjet](https://github.com/MercuryWorkshop/scramjet) by Mercury Workshop, with
-[AdGuard DNS](https://adguard-dns.io), Google Gemini, the Outfit font and
+[AdGuard DNS](https://adguard-dns.io), the Outfit font and
 [Simple Icons](https://simpleicons.org). The game-site banners and logos in `public/games/`
 belong to Poki, CrazyGames, Coolmath Games and Duck Math, and are only used to link to them.
 
