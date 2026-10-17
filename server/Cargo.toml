@@ -1,0 +1,22 @@
+[package]
+name = "skeld-server"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Skeld's server: the static site plus a Wisp proxy endpoint"
+
+[dependencies]
+bytes = "1"
+fastwebsockets = { version = "0.8", features = ["upgrade", "unstable-split"] }
+hickory-resolver = "0.26"
+http-body-util = "0.1"
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+percent-encoding = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "fs", "io-util", "time", "signal"] }
+wisp-mux = { version = "5.1", features = ["fastwebsockets"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = true

@@ -61,6 +61,27 @@ videos for traffic from datacenter IPs, which every Wisp server (Render included
 `npm install` runs `scripts/patch-scramjet.js`, which fixes a Scramjet bug where
 `history.replaceState(state, "")` sent single-page sites to `/undefined`.
 
+## Server (Rust)
+
+`server/` is Skeld's server in Rust: it serves the site and runs the Wisp endpoint
+(`/wisp/`), resolves hostnames through AdGuard DNS and refuses private and loopback
+addresses. It uses less CPU and memory than the Node server, which matters on small hosts
+like Render's free plan. The `Dockerfile` builds it together with the site, and
+`render.yaml` deploys that.
+
+```sh
+npm install        # the proxy builds the server serves
+npm run server     # needs Rust (rustup.rs); http://localhost:8080
+```
+
+Environment: `PORT` (8080), `HOST` (0.0.0.0), `DNS_SERVERS` (default AdGuard; empty for
+the system resolver), `SKELD_ROOT` (the repo folder, default the current directory).
+
+The Node server (`npm start`, `src/index.js`) still works the same way, so a host set up
+for Node keeps running. To move an existing Render service to the Rust server: *Settings →
+Build → Source → Edit*, set **Runtime** to **Docker**, and deploy. The first build takes
+several minutes while Rust compiles.
+
 ## Ad and tracker blocking (AdGuard DNS)
 
 Hostnames are checked against [AdGuard DNS](https://adguard-dns.io/en/public-dns.html)

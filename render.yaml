@@ -1,10 +1,9 @@
 # One-click deploy on Render (render.com): New -> Blueprint -> pick this repo.
-# Runs the full Skeld server (proxy, AdGuard DNS and Wisp).
+# Builds the Dockerfile: the Rust server (server/) with the site, AdGuard DNS and Wisp.
 services:
   - type: web
     name: skyline
-    runtime: node
+    runtime: docker
     plan: free
-    buildCommand: npm ci
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /
