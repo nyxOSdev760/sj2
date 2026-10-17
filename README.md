@@ -42,7 +42,7 @@ Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in 
 The default theme is **Lavender**, a soft cool light theme; *Settings → Theme* switches to
 **AMOLED dark**. The home screen wallpaper is set under **Change wallpaper** (or *Settings → Wallpaper*): four car photos (**GT-R sunset**, the
 default, **Night drive**, **Maybach night** and **Maybach driveway**, in `public/wallpapers/`),
-**Snow** (animated snowfall) or **Night sky** (an animated constellation). The
+six more photos (**Flower field**, **Hokage**, **Overcast**, **Beach**, **Blue hour** and **Cabin**), **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
 animations pause while a page is open or the tab is hidden, and stay still for people who
 prefer reduced motion.
 

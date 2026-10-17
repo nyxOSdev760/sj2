@@ -913,6 +913,12 @@ async function main() {
 		{ id: "r34-night", name: "Night drive" },
 		{ id: "maybach-night", name: "Maybach night" },
 		{ id: "maybach-driveway", name: "Maybach driveway" },
+		{ id: "flower-field", name: "Flower field" },
+		{ id: "hokage", name: "Hokage" },
+		{ id: "overcast", name: "Overcast" },
+		{ id: "beach", name: "Beach" },
+		{ id: "blue-hour", name: "Blue hour" },
+		{ id: "cabin", name: "Cabin" },
 		{ id: "snow", name: "Snow", animated: true },
 		{ id: "night", name: "Night sky", animated: true },
 	];

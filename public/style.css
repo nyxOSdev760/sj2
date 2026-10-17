@@ -356,6 +356,30 @@ a {
 	background: #3d4a7a url("wallpapers/maybach-driveway.jpg") center 58% / cover no-repeat;
 }
 
+.wallpaper[data-wallpaper="flower-field"] {
+	background: #c98a8a url("wallpapers/flower-field.jpg") center 62% / cover no-repeat;
+}
+
+.wallpaper[data-wallpaper="hokage"] {
+	background: #3aa0e8 url("wallpapers/hokage.jpg") center 35% / cover no-repeat;
+}
+
+.wallpaper[data-wallpaper="overcast"] {
+	background: #8a94a8 url("wallpapers/overcast.jpg") center 30% / cover no-repeat;
+}
+
+.wallpaper[data-wallpaper="beach"] {
+	background: #a9b8c8 url("wallpapers/beach.jpg") center 58% / cover no-repeat;
+}
+
+.wallpaper[data-wallpaper="blue-hour"] {
+	background: #1b3a6b url("wallpapers/blue-hour.jpg") center 55% / cover no-repeat;
+}
+
+.wallpaper[data-wallpaper="cabin"] {
+	background: #1d2a1d url("wallpapers/cabin.jpg") center 62% / cover no-repeat;
+}
+
 .wallpaper[data-wallpaper="snow"] {
 	background: radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
 }
@@ -1694,6 +1718,36 @@ select:focus {
 .wallpaper-preview[data-wallpaper="maybach-driveway"] {
 	background-image: url("wallpapers/maybach-driveway.jpg");
 	background-position: center 58%;
+}
+
+.wallpaper-preview[data-wallpaper="flower-field"] {
+	background-image: url("wallpapers/flower-field.jpg");
+	background-position: center 62%;
+}
+
+.wallpaper-preview[data-wallpaper="hokage"] {
+	background-image: url("wallpapers/hokage.jpg");
+	background-position: center 35%;
+}
+
+.wallpaper-preview[data-wallpaper="overcast"] {
+	background-image: url("wallpapers/overcast.jpg");
+	background-position: center 30%;
+}
+
+.wallpaper-preview[data-wallpaper="beach"] {
+	background-image: url("wallpapers/beach.jpg");
+	background-position: center 58%;
+}
+
+.wallpaper-preview[data-wallpaper="blue-hour"] {
+	background-image: url("wallpapers/blue-hour.jpg");
+	background-position: center 55%;
+}
+
+.wallpaper-preview[data-wallpaper="cabin"] {
+	background-image: url("wallpapers/cabin.jpg");
+	background-position: center 62%;
 }
 
 .wallpaper-preview[data-wallpaper="snow"] {
