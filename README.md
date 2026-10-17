@@ -33,7 +33,7 @@ which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
 a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
 turned off under *Settings → Save history*.
 
-The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Music (SoundCloud) to start). Tap **Add**
+The home screen has shortcut tiles (YouTube, TikTok, Discord, Twitch and Music (Audiomack) to start). Tap **Add**
 to pin any site, the trash can to remove one, or use **☰ → Bookmark this page** while browsing.
 Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in your browser;
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
@@ -50,7 +50,7 @@ The **☰ menu** has History, Bookmark this page and Take the tour. The
 address bar shows `skeld://home` on the home screen; `skeld://history` and `skeld://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
-The bottom bar holds Desktop, Browser, Games, Movies, Music (SoundCloud) and Settings.
+The bottom bar holds Desktop, Browser, Games, Movies, Music (Audiomack) and Settings.
 **Games** (also `skeld://games`) opens a picker of free game sites. **Movies**
 (`skeld://movies`) opens atlantic.st; the address bar, tab and history show it as
 `skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.

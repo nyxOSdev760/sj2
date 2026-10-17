@@ -668,14 +668,14 @@ async function main() {
 	$("games-close").addEventListener("click", () => $("games-panel").close());
 
 	// The bottom bar. The highlighted button follows what's on screen.
-	const MUSIC_URL = "https://soundcloud.com/";
+	const MUSIC_URL = "https://audiomack.com/";
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
 		let current = "browser";
 		if (document.body.dataset.view === "desktop") current = "desktop";
 		else if (!activeTab?.url) current = "browser";
 		else if (isMovies(activeTab.url)) current = "movies";
-		else if (hostOf(activeTab.url).endsWith("soundcloud.com")) current = "music";
+		else if (hostOf(activeTab.url).endsWith("audiomack.com")) current = "music";
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
 		}
