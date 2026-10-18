@@ -1,8 +1,8 @@
 "use strict";
 /* filler: c__o__d__e */
-// Wisp server fallback. The site carries a list of Wisp servers (config.js); on start
-// every one is probed in parallel and the fastest real Wisp server is used. If that
-// server stops responding later, the next fastest takes over without a reload.
+// Wisp server fallback. The site carries a list of Wisp servers (config.js), in order of
+// preference; the first real Wisp server that answers is used. If that server stops
+// responding later, the next one takes over without a reload.
 self.WispPool = (() => {
 	const PROBE_TIMEOUT = 6000;
 	const HEALTH_TIMEOUT = 4000;

@@ -175,13 +175,21 @@ async function pickWisp(exclude = new Set()) {
 			console.warn(`Wisp server ${custom} isn't responding; trying the built-in list.`);
 		}
 	}
-	const all = WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"]);
-	let urls = all.filter((url) => !exclude.has(url));
-	if (!urls.length) {
+	// The built-in list is in order of preference: the first server that answers is used.
+	const entries = self.SJ2_CONFIG?.wispServers ?? ["self"];
+	if (WispPool.expandAll(entries).every((url) => exclude.has(url))) {
 		exclude.clear(); // every server has failed once; give them all another chance
-		urls = all;
 	}
-	return WispPool.fastest(urls);
+	for (const entry of entries) {
+		const urls = WispPool.expand(entry).filter((url) => !exclude.has(url));
+		if (!urls.length) continue;
+		try {
+			return await WispPool.fastest(urls); // an entry can be two URLs (/wisp/ and /)
+		} catch {
+			// not answering; try the next one
+		}
+	}
+	throw new Error("None of the Wisp servers responded");
 }
 
 // Backup routes for sites that fail on the main connection: epoxy (a different TLS

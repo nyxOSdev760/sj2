@@ -138,13 +138,15 @@ rate-limit you.
 ## Wisp server fallback
 
 `public/config.js` lists the Wisp servers (`wispServers`). Entries are a host (tried at both
-`/wisp/` and `/`), a full `ws://`/`wss://` URL, or `self` for the Node server's own `/wisp/`.
+`/wisp/` and `/`), a full `ws://`/`wss://` URL, or `self` for this site's own `/wisp/`. The
+list is in order of preference: `self` (your own server) first, then `wisp.mercurywork.shop`
+as the backup.
 
-- **On open**, every server is probed in parallel and the fastest one that answers like a real
+- **On open**, the servers are tried in order and the first one that answers like a real
   Wisp server is used (Settings shows which: *Automatic · using …*). A server typed into
-  Settings is tried first.
+  Settings is tried before the list.
 - **While browsing**, if a request fails, the current server is health-checked. If it's down,
-  the next fastest server takes over without a reload, and the failed page load is retried.
+  the next server in the list takes over without a reload, and the failed page load is retried.
   If the server is fine, the site gets a rescue instead: it's retried through epoxy (a
   different TLS engine) on the same server, then on the next healthiest servers, and the route
   that works is remembered for that site. This gets around servers that refuse a site and
