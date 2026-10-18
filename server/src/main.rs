@@ -132,7 +132,8 @@ async fn shutdown_signal() {
 }
 
 async fn handle(app: Arc<App>, mut req: Request<Incoming>) -> Result<Response<Body>, Infallible> {
-	if req.uri().path().starts_with("/wisp/") {
+	let path = req.uri().path();
+	if path == "/wisp" || path.starts_with("/wisp/") {
 		if !upgrade::is_upgrade_request(&req) {
 			return Ok(text(StatusCode::BAD_REQUEST, "Wisp needs a WebSocket"));
 		}
