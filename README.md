@@ -51,7 +51,7 @@ address bar shows `skeld://home` on the home screen; `skeld://history` and `skel
 open those panels. A five-step welcome tour shows on the first visit.
 
 The bottom bar holds Browser, Games, Movies, Apps and Settings.
-**Games** (also `skeld://games`) opens a picker of free game sites. **Movies**
+**Games** opens `skeld://games` (empty for now) and **Settings** opens `skeld://settings`, both as pages in a tab. **Movies**
 (`skeld://movies`) opens movy.sx; the address bar, tab and history show it as
 `skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.
 
@@ -181,8 +181,7 @@ can't be used to reach the host's own network.
 Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
 [Scramjet](https://github.com/MercuryWorkshop/scramjet) by Mercury Workshop, with
 [AdGuard DNS](https://adguard-dns.io), the Outfit font and
-[Simple Icons](https://simpleicons.org). The game-site banners and logos in `public/games/`
-belong to Poki, CrazyGames, Coolmath Games and Duck Math, and are only used to link to them.
+[Simple Icons](https://simpleicons.org).
 
 ## Notes
 

@@ -33,7 +33,6 @@ const els = {
 	wisp: $("wisp"),
 	engine: $("engine"),
 	saveHistory: $("save-history"),
-	settingsPanel: $("settings-panel"),
 	settingsStatus: $("settings-status"),
 	historyPanel: $("history-panel"),
 	barIcon: $("bar-icon"),
@@ -310,6 +309,8 @@ function currentTitle(tab) {
 
 // Internal pages shown in the address bar, e.g. the home screen.
 const HOME_URL = "skeld://home";
+const PAGES = ["settings", "games"];
+const PAGE_TITLES = { settings: "Settings", games: "Games" };
 const INTERNAL = /^(?:skeld|skyline):\/\/(\w+)\/?$/i; // skyline:// from before the rename
 
 const BAR_ICONS = {
@@ -431,13 +432,20 @@ async function main() {
 
 	function updateTabLabel(tab) {
 		styleFrame(tab);
-		const text = !tab.url ? "New tab" : isMovies(tab.url) ? "Movies" : tab.title || hostOf(tab.url);
+		const text = tab.page
+			? PAGE_TITLES[tab.page]
+			: !tab.url
+				? "New tab"
+				: isMovies(tab.url)
+					? "Movies"
+					: tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
 		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
 	}
 
 	function createTab({ activate = true } = {}) {
-		const tab = { url: "", title: "", recordedUrl: null, iframe: null, frame: null };
+		// `page` is a built-in page (skeld://settings, skeld://games) shown instead of a site.
+		const tab = { url: "", page: null, title: "", recordedUrl: null, iframe: null, frame: null };
 		tab.el = el("div", "tab");
 		tab.el.setAttribute("role", "tab");
 		tab.el.tabIndex = 0;
@@ -476,12 +484,13 @@ async function main() {
 			t.el.setAttribute("aria-selected", String(active));
 			if (t.iframe) t.iframe.hidden = !active || !t.url;
 		}
-		els.home.hidden = !!tab.url;
-		els.bar.value = tab.url ? shownUrl(tab.url) : HOME_URL;
+		els.home.hidden = !!tab.url || !!tab.page;
+		for (const name of PAGES) $("page-" + name).hidden = tab.page !== name;
+		els.bar.value = tab.page ? "skeld://" + tab.page : tab.url ? shownUrl(tab.url) : HOME_URL;
 		setBarIcon(tab.url);
 		updateDock();
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
-		if (!tab.url) {
+		if (!tab.url && !tab.page) {
 			els.search.value = "";
 			els.search.focus();
 		}
@@ -503,6 +512,7 @@ async function main() {
 
 	function goHome(tab) {
 		tab.url = "";
+		tab.page = null;
 		tab.title = "";
 		tab.recordedUrl = null;
 		if (tab.iframe) tab.iframe.src = "about:blank";
@@ -526,8 +536,7 @@ async function main() {
 			const os = document.body.dataset.mode === "os";
 			if (page === "movies") return os ? launch("movies") : navigate(MOVIES_URL, tab);
 			if (page === "history") openHistory();
-			else if (page === "games") os ? openGamesWindow() : openGames();
-			else if (page === "settings") els.settingsPanel.showModal();
+			else if (PAGES.includes(page)) openPage(page, tab);
 			else goHome(tab);
 			return;
 		}
@@ -538,6 +547,7 @@ async function main() {
 		await ready;
 		if (!tabs.includes(tab)) return; // closed while the proxy was starting
 		ensureFrame(tab);
+		tab.page = null;
 		tab.url = url;
 		tab.title = "";
 		tab.frame.go(url);
@@ -653,7 +663,23 @@ async function main() {
 	$("forward").addEventListener("click", () => activeTab.url && activeTab.frame?.forward());
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
-	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
+	$("show-settings").addEventListener("click", () => openPage("settings"));
+
+	// Built-in pages (skeld://settings, skeld://games): shown in a tab like any site. One
+	// opens in the tab it's asked for if that's a new tab, in the tab already showing it,
+	// or in a new tab.
+	function openPage(name, tab = activeTab) {
+		const target = tab && !tab.url && !tab.page ? tab : tabs.find((t) => t.page === name) || createTab();
+		if (target.iframe) target.iframe.src = "about:blank";
+		target.url = "";
+		target.title = "";
+		target.recordedUrl = null;
+		target.page = name;
+		if (name === "games") renderGamesPage();
+		updateTabLabel(target);
+		selectTab(target);
+		setView("browser");
+	}
 	// Two views: the desktop and the browser. In OS mode the desktop stays up and the
 	// browser is a window on it; in browser mode the browser is the whole page.
 	const osWindow = $("os-window");
@@ -836,26 +862,6 @@ async function main() {
 			loading.append(retry);
 		}, 20000);
 	}
-	// The Games window: the game sites as cards; each game opens in its own window.
-	function openGamesWindow() {
-		const open = appWindows.get("games");
-		if (open) return showAppWindow(open);
-		const { win, bar, body } = windowShell("games", "Games");
-		bar.querySelectorAll('[data-win="back"], [data-win="reload"], [data-win="full"]').forEach((b) => b.remove());
-		appWindows.set("games", { win, iframe: null, frame: null });
-		const grid = el("div", "games-list games-window-list");
-		grid.append(...gameCards((site) => openAppWindow("game:" + site.art, site.name, site.url)));
-		body.append(grid);
-		bar.addEventListener("click", (e) => {
-			const action = e.target.closest("[data-win]")?.dataset.win;
-			if (action === "close") closeAppWindow("games");
-			else if (action === "min") {
-				win.hidden = true;
-				updateDock();
-			} else if (action === "max") win.classList.toggle("maximized");
-		});
-		focusWindow(win);
-	}
 	// A taskbar button for a window: open it, bring it to the front, or minimize it.
 	function toggleWindow(win, open) {
 		if (!win || win.hidden) return open();
@@ -867,21 +873,11 @@ async function main() {
 
 	// Games: free game sites, opened through the proxy like any other site.
 	// Each card shows the site's own banner and logo (public/games/).
-	const GAME_SITES = [
-		{ name: "Poki", url: "https://poki.com/", art: "poki", about: "Thousands of free games" },
-		{ name: "CrazyGames", url: "https://www.crazygames.com/", art: "crazy", about: "New games every day" },
-		{ name: "Coolmath Games", url: "https://www.coolmathgames.com/", art: "cool", about: "Puzzle and logic classics" },
-		{ name: "Duck Math", url: "https://duckmath.org/", art: "duck", about: "Popular browser games" },
-	];
-	function openGames() {
-		$("games-list").replaceChildren(
-			...gameCards((site, e) => {
-				$("games-panel").close();
-				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
-				navigate(site.url, tab).catch(() => {});
-			})
-		);
-		$("games-panel").showModal();
+	// Game sites shown on skeld://games (none for now).
+	const GAME_SITES = [];
+	function renderGamesPage() {
+		$("games-list").replaceChildren(...gameCards((site) => navigate(site.url).catch(() => {})));
+		$("games-empty").hidden = GAME_SITES.length > 0;
 	}
 	function gameCards(onPick) {
 		return GAME_SITES.map((site) => {
@@ -903,7 +899,6 @@ async function main() {
 				return card;
 		});
 	}
-	$("games-close").addEventListener("click", () => $("games-panel").close());
 
 	// The bottom bar. The highlighted button follows what's on screen.
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
@@ -915,22 +910,22 @@ async function main() {
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
 		}
-		$("os-window-title").textContent = activeTab?.url ? activeTab.label.textContent : "New tab";
+		if (activeTab?.page && document.body.dataset.view !== "desktop") current = activeTab.page;
+		$("os-window-title").textContent = activeTab ? activeTab.label.textContent : "New tab";
 		// In OS mode the taskbar marks every open window, and the focused one more strongly.
 		const os = document.body.dataset.mode === "os";
 		const openApps = os ? [...document.querySelectorAll(".app-window")] : [];
 		const windowFor = {
 			browser: osWindow.hidden ? [] : [osWindow],
 			movies: openApps.filter((w) => w.dataset.app === "movies"),
-			games: openApps.filter((w) => w.dataset.app === "games" || w.dataset.app.startsWith("game:")),
 		};
 		for (const button of dockButtons) {
 			const wins = windowFor[button.dataset.dock] ?? [];
 			const on = os ? wins.length > 0 : button.dataset.dock === current;
 			button.classList.toggle("active", on);
 			const dialogOpen =
-				(button.dataset.dock === "settings" && els.settingsPanel.open) ||
-				(button.dataset.dock === "apps" && $("apps-panel").open);
+				(button.dataset.dock === "apps" && $("apps-panel").open) ||
+				(PAGES.includes(button.dataset.dock) && current === button.dataset.dock && !osWindow.hidden);
 			button.classList.toggle(
 				"focused",
 				os && (dialogOpen || wins.some((w) => !w.hidden && w.classList.contains("focused")))
@@ -942,9 +937,8 @@ async function main() {
 	// Dock buttons and desktop icons share these.
 	function launch(target) {
 		const os = document.body.dataset.mode === "os";
-		if (target === "games") {
-			if (os) toggleWindow(appWindows.get("games")?.win, openGamesWindow);
-			else openGames();
+		if (PAGES.includes(target)) {
+			openPage(target);
 		} else if (target === "movies" && os) {
 			toggleWindow(appWindows.get("movies")?.win, () => openAppWindow("movies", "Movies", MOVIES_URL));
 		} else if (target === "browser" && os) {
@@ -952,8 +946,6 @@ async function main() {
 				setView("browser");
 				focusWindow(osWindow);
 			});
-		} else if (target === "settings") {
-			els.settingsPanel.showModal();
 		} else if (target === "apps") {
 			$("apps-panel").showModal();
 		} else if (target === "browser-mode") setMode("browser");
@@ -968,7 +960,6 @@ async function main() {
 		button.addEventListener("click", () => launch(button.dataset.app));
 	}
 	$("apps-close").addEventListener("click", () => $("apps-panel").close());
-	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skeld://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
 
@@ -1027,7 +1018,7 @@ async function main() {
 		}
 		return items;
 	}
-	for (const id of ["settings-panel", "apps-panel"]) $(id).addEventListener("close", () => updateDock());
+	$("apps-panel").addEventListener("close", () => updateDock());
 	$("apps-edit").addEventListener("click", () => {
 		const editing = $("apps-panel").classList.toggle("editing");
 		$("apps-edit").textContent = editing ? "Done" : "Edit";
@@ -1124,7 +1115,7 @@ async function main() {
 	});
 	// Clicking the backdrop (outside a panel) closes it.
 	$("credits-close").addEventListener("click", () => $("credits-panel").close());
-	for (const panel of [els.settingsPanel, els.historyPanel, els.shortcutPanel, $("credits-panel"), $("games-panel")]) {
+	for (const panel of [els.historyPanel, els.shortcutPanel, $("credits-panel")]) {
 		panel.addEventListener("click", (e) => {
 			if (e.target === panel) panel.close();
 		});
@@ -1239,10 +1230,7 @@ async function main() {
 		wallpaperPanel.showModal();
 		cards.find((c) => c.getAttribute("aria-checked") === "true")?.focus();
 	}
-	$("choose-wallpaper").addEventListener("click", () => {
-		els.settingsPanel.close();
-		openWallpapers();
-	});
+	$("choose-wallpaper").addEventListener("click", openWallpapers);
 	$("wallpaper-close").addEventListener("click", () => wallpaperPanel.close());
 
 	// The lock screen's date and clock, and the top bar's clock.
@@ -1337,7 +1325,6 @@ async function main() {
 	$("lock-hint").addEventListener("click", unlock);
 	$("to-browser-mode").addEventListener("click", () => setMode("browser"));
 	$("switch-mode").addEventListener("click", () => {
-		els.settingsPanel.close();
 		setMode(document.body.dataset.mode === "os" ? "browser" : "os");
 	});
 	const modePanel = $("mode-panel");

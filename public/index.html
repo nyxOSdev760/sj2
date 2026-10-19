@@ -164,6 +164,70 @@
 				</div>
 			</main>
 
+			<section id="page-settings" class="internal-page" aria-labelledby="page-settings-title" hidden>
+				<h1 id="page-settings-title" class="internal-title">Settings</h1>
+				<div class="settings">
+					<label>
+						Mode
+						<button id="switch-mode" class="text-button" type="button">Switch to OS mode</button>
+					</label>
+					<label>
+						Theme
+						<select id="theme">
+							<option value="lavender">Lavender</option>
+							<option value="dark">AMOLED dark</option>
+							<option value="midnight">Midnight</option>
+							<option value="forest">Forest</option>
+							<option value="sunset">Sunset</option>
+							<option value="ocean">Ocean</option>
+							<option value="rose">Rose</option>
+							<option value="mono">Mono</option>
+						</select>
+					</label>
+					<label>
+						Wallpaper
+						<button id="choose-wallpaper" class="text-button" type="button">Choose…</button>
+					</label>
+					<label>
+						Transport
+						<select id="transport">
+							<option value="libcurl">libcurl</option>
+							<option value="epoxy">epoxy</option>
+						</select>
+					</label>
+					<label>
+						<span class="setting-name">Wisp server<span id="wisp-using" class="setting-hint"></span></span>
+						<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
+					</label>
+					<label>
+						Save history
+						<input id="save-history" type="checkbox" />
+					</label>
+					<label>
+						Search engine
+						<select id="engine">
+							<option value="https://html.duckduckgo.com/html/?q=%s&kae=d">DuckDuckGo</option>
+							<option value="https://duckduckgo.com/?q=%s&kae=d">DuckDuckGo (full site)</option>
+							<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
+							<option value="https://www.google.com/search?q=%s">Google</option>
+							<option value="https://www.bing.com/search?q=%s">Bing</option>
+							<option value="https://search.brave.com/search?q=%s">Brave</option>
+						</select>
+					</label>
+					<label>
+						Home shortcuts
+						<button id="reset-shortcuts" class="text-button" type="button">Reset to defaults</button>
+					</label>
+					<p id="settings-status" class="status" role="status"></p>
+				</div>
+			</section>
+
+			<section id="page-games" class="internal-page" aria-labelledby="page-games-title" hidden>
+				<h1 id="page-games-title" class="internal-title">Games</h1>
+				<div id="games-list" class="games-list"></div>
+				<p id="games-empty" class="internal-empty">No games yet.</p>
+			</section>
+
 			<div id="frames"></div>
 		</section>
 			<div id="os-window-resize" class="os-window-resize" aria-hidden="true"></div>
@@ -222,69 +286,6 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3zM8 20h8M12 16v4" /></svg>
 			</button>
 		</nav>
-
-		<dialog id="settings-panel" class="panel" aria-labelledby="settings-title">
-			<header class="panel-head">
-				<h2 id="settings-title">Settings</h2>
-				<button id="settings-close" class="icon" type="button" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-				</button>
-			</header>
-			<div class="settings">
-				<label>
-					Mode
-					<button id="switch-mode" class="text-button" type="button">Switch to OS mode</button>
-				</label>
-				<label>
-					Theme
-					<select id="theme">
-						<option value="lavender">Lavender</option>
-						<option value="dark">AMOLED dark</option>
-						<option value="midnight">Midnight</option>
-						<option value="forest">Forest</option>
-						<option value="sunset">Sunset</option>
-						<option value="ocean">Ocean</option>
-						<option value="rose">Rose</option>
-						<option value="mono">Mono</option>
-					</select>
-				</label>
-				<label>
-					Wallpaper
-					<button id="choose-wallpaper" class="text-button" type="button">Choose…</button>
-				</label>
-				<label>
-					Transport
-					<select id="transport">
-						<option value="libcurl">libcurl</option>
-						<option value="epoxy">epoxy</option>
-					</select>
-				</label>
-				<label>
-					<span class="setting-name">Wisp server<span id="wisp-using" class="setting-hint"></span></span>
-					<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
-				</label>
-				<label>
-					Save history
-					<input id="save-history" type="checkbox" />
-				</label>
-				<label>
-					Search engine
-					<select id="engine">
-						<option value="https://html.duckduckgo.com/html/?q=%s&kae=d">DuckDuckGo</option>
-						<option value="https://duckduckgo.com/?q=%s&kae=d">DuckDuckGo (full site)</option>
-						<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
-						<option value="https://www.google.com/search?q=%s">Google</option>
-						<option value="https://www.bing.com/search?q=%s">Bing</option>
-						<option value="https://search.brave.com/search?q=%s">Brave</option>
-					</select>
-				</label>
-				<label>
-					Home shortcuts
-					<button id="reset-shortcuts" class="text-button" type="button">Reset to defaults</button>
-				</label>
-				<p id="settings-status" class="status" role="status"></p>
-			</div>
-		</dialog>
 
 		<dialog id="shortcut-panel" class="panel" aria-labelledby="shortcut-title">
 			<form id="shortcut-form" method="dialog">
@@ -357,16 +358,6 @@
 				</button>
 			</header>
 			<nav id="shortcuts" class="shortcuts apps-grid" aria-label="Apps"></nav>
-		</dialog>
-
-		<dialog id="games-panel" class="panel games" aria-labelledby="games-title">
-			<header class="panel-head">
-				<h2 id="games-title">Games</h2>
-				<button id="games-close" class="icon" type="button" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-				</button>
-			</header>
-			<div id="games-list" class="games-list"></div>
 		</dialog>
 
 		<dialog id="credits-panel" class="panel credits" aria-labelledby="credits-title">
