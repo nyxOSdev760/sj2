@@ -17,7 +17,9 @@ self.Tour = (() => {
 		right: "M5 12h14M13 6l6 6-6 6",
 	};
 
-	const STEPS = [
+	// OS mode and browser mode get different directions for the same steps.
+	const os = () => document.body.dataset.mode === "os";
+	const STEPS_FOR = () => [
 		{
 			label: "Welcome",
 			icon: "sparkles",
@@ -28,13 +30,17 @@ self.Tour = (() => {
 			label: "Tabs",
 			icon: "tabs",
 			title: "Open as many tabs as you want",
-			body: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, under ☰ in the toolbar.",
+			body: os()
+				? "The globe in the taskbar opens the browser in a window: drag it around, resize it from the corner, or maximize it. Hit + for a new tab; History is under ☰."
+				: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, under ☰ in the toolbar.",
 		},
 		{
 			label: "Shortcuts",
 			icon: "grid",
 			title: "Pin your sites",
-			body: "Your shortcuts live in Apps on the desktop. Tap Add to pin a site, the trash can to drop one, or use ☰ → Bookmark this page while you browse.",
+			body: os()
+				? "Your sites live in Apps in the taskbar and on every new tab. Movies opens in its own window. In Apps, tap Edit to remove a site or Add to pin one."
+				: "Your sites live on every new tab and in Apps. Tap Add in Apps to pin one, Edit to remove one, or use ☰ → Bookmark this page while you browse.",
 		},
 		{
 			label: "Blocking",
@@ -46,9 +52,10 @@ self.Tour = (() => {
 			label: "Settings",
 			icon: "gear",
 			title: "Make it yours",
-			body: "The gear in the dock has your search engine, transport, Wisp server and history settings. History never leaves this browser.",
+			body: `The gear (skeld://settings) has your theme, wallpaper, search engine and server settings. History never leaves this browser.`,
 		},
 	];
+	let STEPS = []; // worked out when the tour opens (the page body isn't there yet now)
 
 	function svg(name) {
 		const node = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -150,6 +157,7 @@ self.Tour = (() => {
 	}
 
 	function open() {
+		STEPS = STEPS_FOR();
 		if (!dialog) {
 			dialog = el("dialog", "tour");
 			dialog.setAttribute("aria-labelledby", "tour-title");

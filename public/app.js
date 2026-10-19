@@ -542,6 +542,8 @@ async function main() {
 		}
 		const url = toUrl(input);
 		if (!url) return;
+		// Remember searches, to re-run them elsewhere if the engine turns the proxy away.
+		tab.searchQuery = url === els.engine.value.replace("%s", encodeURIComponent(input.trim())) ? input.trim() : null;
 		setView("browser");
 		if (!proxy) setStatus("Still starting, one moment…");
 		await ready;
@@ -557,6 +559,18 @@ async function main() {
 
 	// Reads a tab's real URL and title, including SPA navigations that never fire
 	// "load", and records new URLs in history.
+	// DuckDuckGo sometimes answers proxy traffic with an error page or a bot check.
+	const FALLBACK_SEARCH = "https://www.bing.com/search?q=%s";
+	function searchBlocked(tab, url) {
+		if (!/(^|\.)duckduckgo\.com$/.test(hostOf(url))) return false;
+		if (/\/static-pages\/home-error\//.test(url)) return true;
+		try {
+			return /bots use DuckDuckGo|If this persists, please email us/i.test(tab.iframe.contentDocument.body.innerText);
+		} catch {
+			return false;
+		}
+	}
+
 	function syncTab(tab) {
 		if (!tab.frame || !tab.url) return;
 		const url = currentRealUrl(tab);
@@ -572,6 +586,13 @@ async function main() {
 			}
 		}
 		tab.title = title;
+		if (tab.searchQuery && url && searchBlocked(tab, url)) {
+			const query = tab.searchQuery;
+			tab.searchQuery = null;
+			setStatus("DuckDuckGo turned the proxy away, so this search ran on Bing.");
+			navigate(FALLBACK_SEARCH.replace("%s", encodeURIComponent(query)), tab).catch(() => {});
+			return;
+		}
 		if (changed) updateTabLabel(tab);
 		if (changed && tab === activeTab) updateDock();
 		if (tab === activeTab && document.activeElement !== els.bar && els.bar.value !== shownUrl(tab.url)) {
@@ -659,8 +680,17 @@ async function main() {
 	});
 
 	$("add-tab").addEventListener("click", () => createTab());
-	$("back").addEventListener("click", () => activeTab.url && activeTab.frame?.back());
-	$("forward").addEventListener("click", () => activeTab.url && activeTab.frame?.forward());
+	// Back/forward only within the page's own history: with nothing to go back to, the
+	// browser would go back in Skeld itself and lose every tab.
+	function canStep(iframe, dir) {
+		try {
+			const nav = iframe?.contentWindow?.navigation;
+			if (nav) return dir < 0 ? nav.canGoBack : nav.canGoForward;
+		} catch {}
+		return false;
+	}
+	$("back").addEventListener("click", () => activeTab.url && canStep(activeTab.iframe, -1) && activeTab.frame?.back());
+	$("forward").addEventListener("click", () => activeTab.url && canStep(activeTab.iframe, 1) && activeTab.frame?.forward());
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => openPage("settings"));
@@ -830,7 +860,7 @@ async function main() {
 				updateDock();
 			} else if (action === "max") win.classList.toggle("maximized");
 			else if (action === "full") (entry.iframe ?? win).requestFullscreen?.().catch(() => {});
-			else if (action === "back") page?.history.back();
+			else if (action === "back") canStep(entry.iframe, -1) && page?.history.back();
 			else if (action === "reload") page?.location.reload();
 		});
 		await ready;
@@ -1241,10 +1271,11 @@ async function main() {
 			const label = el("span", "wallpaper-name", wallpaper.name);
 			if (wallpaper.animated) label.append(el("span", "wallpaper-tag", "Animated"));
 			card.append(preview, label);
+			// Applies right away and stays open, so several can be tried in a row.
 			card.addEventListener("click", () => {
 				settings.set("wallpaper", wallpaper.id);
 				applyWallpaper(wallpaper.id);
-				wallpaperPanel.close();
+				for (const other of cards) other.setAttribute("aria-checked", String(other === card));
 			});
 			return card;
 		});
@@ -1285,7 +1316,8 @@ async function main() {
 		document.body.dataset.mode = mode;
 		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
 		if (mode !== "os") for (const id of [...appWindows.keys()]) closeAppWindow(id);
-		setView(mode === "os" ? "desktop" : "browser");
+		const browsing = tabs.some((t) => t.url || t.page);
+		setView(mode === "os" && !(browsing && !lockScreen) ? "desktop" : "browser");
 		if (mode === "os" && lockScreen) showLock();
 		else hideLock();
 	}
@@ -1303,8 +1335,11 @@ async function main() {
 		lock.hidden = true;
 		document.body.classList.remove("locked");
 	}
+	let tourAfterUnlock = false;
 	function unlock() {
 		if (lock.hidden || lock.classList.contains("unlocking")) return;
+		if (tourAfterUnlock) setTimeout(() => Tour.openIfNew(), 500);
+		tourAfterUnlock = false;
 		lock.classList.add("unlocking");
 		lock.style.transform = "translateY(-100%)";
 		document.body.classList.remove("locked");
@@ -1314,7 +1349,6 @@ async function main() {
 		}, 450);
 	}
 	lock.addEventListener("pointerdown", (e) => {
-		if (e.target.closest("button")) return;
 		const y0 = e.clientY;
 		const t0 = performance.now();
 		let dy = 0;
@@ -1362,7 +1396,8 @@ async function main() {
 	const savedMode = settings.get("mode", "");
 	if (savedMode) {
 		setMode(savedMode === "browser" ? "browser" : "os", true); // OS mode opens on the lock screen
-		Tour.openIfNew();
+		if (lock.hidden) Tour.openIfNew();
+		else tourAfterUnlock = true;
 	} else {
 		document.body.dataset.mode = "os";
 		setView("desktop");

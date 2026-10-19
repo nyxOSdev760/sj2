@@ -2525,8 +2525,12 @@ body[data-mode="os"] .tour {
 	color-scheme: dark;
 }
 
-body[data-mode="os"] .settings label:has(#theme) {
+.os-only {
 	display: none;
+}
+
+body[data-mode="os"] .os-only {
+	display: block;
 }
 
 .tour-pill.current {
@@ -2759,7 +2763,7 @@ body[data-mode="os"] .settings label:has(#theme) {
 	--error: #c92a2a;
 	--shadow: rgb(150 50 90 / 0.18);
 	--backdrop: rgb(80 20 40 / 0.3);
-	--chrome: rgb(70 22 40 / 0.72);
+	--chrome: rgb(255 244 247 / 0.8);
 	color-scheme: light;
 }
 
@@ -2782,7 +2786,7 @@ body[data-mode="os"] .settings label:has(#theme) {
 	--error: #c92a2a;
 	--shadow: rgb(0 0 0 / 0.14);
 	--backdrop: rgb(0 0 0 / 0.3);
-	--chrome: rgb(22 22 22 / 0.75);
+	--chrome: rgb(250 250 250 / 0.82);
 	color-scheme: light;
 }
 
@@ -2917,4 +2921,92 @@ body[data-mode="os"] .os-window .internal-page {
 	background: var(--brand);
 	color: #fff;
 	font-size: 20px;
+}
+
+/* ---- Round 2 fixes ---- */
+/* Light themes (Lavender, Rose, Mono): light frosted bars, menus and search in browser
+   mode, matching their light panels. */
+:root:not([data-theme]) {
+	--chrome: rgb(250 249 255 / 0.8);
+}
+
+:root:is(:not([data-theme]), [data-theme="rose"], [data-theme="mono"])
+	body:not([data-mode="os"])
+	:is(#tabbar, #toolbar, #home-screen .search) {
+	--panel: transparent;
+	--surface: rgb(255 255 255 / 0.72);
+	--raised: #fff;
+	--chip: rgb(0 0 0 / 0.06);
+	--hover: rgb(0 0 0 / 0.08);
+	--border: rgb(0 0 0 / 0.1);
+	--text: #1d1a2b;
+	--body-text: #3d3a4f;
+	--muted: #6b6880;
+	--secure: #15803d;
+	color-scheme: light;
+	color: var(--text);
+}
+
+:root:is(:not([data-theme]), [data-theme="rose"], [data-theme="mono"]) body:not([data-mode="os"]) #home-screen .search {
+	box-shadow: 0 10px 40px rgb(0 0 0 / 0.18);
+}
+
+/* Shortcut tiles: a darker frosted base so they stay readable on bright wallpapers. */
+.home-shortcuts .shortcut-icon,
+.apps-grid .shortcut-icon {
+	border: 1px solid rgb(255 255 255 / 0.14);
+	background: rgb(16 16 22 / 0.62);
+	backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* The chosen wallpaper's check shows on any background. */
+.wallpaper-card[aria-checked="true"] .wallpaper-name::after {
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: var(--accent);
+	color: #fff;
+	font-size: 12px;
+}
+
+/* OS panels: a real title and a divider. */
+body[data-mode="os"] .panel .panel-head {
+	padding: 8px 6px 8px 14px;
+	border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+body[data-mode="os"] .panel .panel-head h2 {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+/* The tour's progress capsule wraps its pills. */
+.tour-pills {
+	flex: 0 1 auto;
+}
+
+.tour-skip {
+	margin-left: auto;
+}
+
+/* Settings inputs never push past the card. */
+.settings label > :is(input, select) {
+	min-width: 0;
+	max-width: 62%;
+}
+
+/* Touch screens: bigger taskbar buttons; windows are full screen there already. */
+@media (pointer: coarse) {
+	body[data-mode="os"] .dock button {
+		flex-basis: 46px;
+		height: 44px;
+	}
+}
+
+@media (max-width: 699px) {
+	body[data-mode="os"] .os-window-bar [data-win="full"] {
+		display: none;
+	}
 }
