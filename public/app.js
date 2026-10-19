@@ -198,9 +198,14 @@ async function pickWisp(exclude = new Set()) {
 let healthyServers = [];
 const epoxyClients = new Map();
 async function alternativeRoutes(failover) {
-	const urls = [failover.url, ...healthyServers.filter((u) => u !== failover.url && !failover.dead.has(u))];
+	// Servers that answered at start first, then the rest of the list (a free server that
+	// was asleep then may be up by now).
+	const configured = WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? []);
+	const urls = [...new Set([failover.url, ...healthyServers, ...configured])].filter(
+		(u) => u === failover.url || !failover.dead.has(u)
+	);
 	const routes = [];
-	for (const url of urls.slice(0, 3)) {
+	for (const url of urls.slice(0, 4)) {
 		if (url === failover.url && els.transport.value === "epoxy") continue; // that's the main route
 		if (!epoxyClients.has(url)) epoxyClients.set(url, AdGuardDNS.wrap(await createTransport("epoxy", url)));
 		routes.push(epoxyClients.get(url));
@@ -498,9 +503,10 @@ async function main() {
 	async function navigate(input, tab = activeTab) {
 		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
 		if (page) {
-			if (page === "movies") return navigate(MOVIES_URL, tab);
+			const os = document.body.dataset.mode === "os";
+			if (page === "movies") return os ? launch("movies") : navigate(MOVIES_URL, tab);
 			if (page === "history") openHistory();
-			else if (page === "games") openGames();
+			else if (page === "games") os ? openGamesWindow() : openGames();
 			else if (page === "settings") els.settingsPanel.showModal();
 			else goHome(tab);
 			return;
@@ -637,65 +643,180 @@ async function main() {
 		els.desktop.hidden = !os && view !== "desktop";
 		els.browser.hidden = !os && view !== "browser";
 		osWindow.hidden = os && view !== "browser";
+		if (os && view === "browser") focusWindow(osWindow);
 		if (view === "browser" && !activeTab?.url) els.search.focus();
 		updateDock();
 	}
 
-	// The browser window (OS mode): drag by the title bar, resize from the corner,
-	// double-click or the middle button to maximize. Phones always get it full screen.
-	const WINDOW_KEY = "window";
-	function placeWindow(rect) {
-		const w = Math.min(Math.max(rect.w, 360), innerWidth);
-		const h = Math.min(Math.max(rect.h, 240), innerHeight - 72);
-		const x = Math.min(Math.max(rect.x, 0), innerWidth - w);
-		const y = Math.min(Math.max(rect.y, 28), innerHeight - 44 - 40);
-		Object.assign(osWindow.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
-		return { x, y, w, h };
+	// OS mode windows: the browser, plus a window per app (Movies, Games, each game).
+	// Drag by the title bar, resize from the corner, double-click or the middle button to
+	// maximize, click to bring to the front. Phones get every window full screen.
+	let zTop = 30;
+	function focusWindow(win) {
+		win.style.zIndex = ++zTop;
+		for (const w of document.querySelectorAll(".os-window")) w.classList.toggle("focused", w === win);
+		updateDock();
 	}
-	let windowRect = (() => {
+	function makeWindow(win, key, fallback) {
+		const place = (rect) => {
+			const w = Math.min(Math.max(rect.w, 340), innerWidth);
+			const h = Math.min(Math.max(rect.h, 220), innerHeight - 72);
+			const x = Math.min(Math.max(rect.x, 0), innerWidth - w);
+			const y = Math.min(Math.max(rect.y, 26), innerHeight - 44 - 40);
+			Object.assign(win.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
+			return { x, y, w, h };
+		};
+		let rect;
 		try {
-			return JSON.parse(settings.get(WINDOW_KEY, "null"));
+			rect = JSON.parse(settings.get(key, "null"));
 		} catch {
-			return null;
+			rect = null;
 		}
-	})() ?? { x: innerWidth * 0.12, y: 56, w: innerWidth * 0.76, h: innerHeight - 140 };
-	windowRect = placeWindow(windowRect);
-	function saveWindow() {
-		settings.set(WINDOW_KEY, JSON.stringify(windowRect));
-	}
-	function dragWindow(e, resize) {
-		if (e.button !== 0 || osWindow.classList.contains("maximized") || innerWidth < 700) return;
-		e.preventDefault();
-		const start = { px: e.clientX, py: e.clientY, ...windowRect };
-		osWindow.classList.add("moving"); // the page iframe can't swallow the pointer meanwhile
-		const move = (ev) => {
-			const dx = ev.clientX - start.px;
-			const dy = ev.clientY - start.py;
-			windowRect = placeWindow(
-				resize ? { ...start, w: start.w + dx, h: start.h + dy } : { ...start, x: start.x + dx, y: start.y + dy }
-			);
+		rect = place(rect ?? fallback());
+		const drag = (e, resize) => {
+			if (e.button !== 0 || win.classList.contains("maximized") || innerWidth < 700) return;
+			e.preventDefault();
+			const start = { px: e.clientX, py: e.clientY, ...rect };
+			document.body.classList.add("moving-window"); // pages can't swallow the pointer meanwhile
+			const move = (ev) => {
+				const dx = ev.clientX - start.px;
+				const dy = ev.clientY - start.py;
+				rect = place(resize ? { ...start, w: start.w + dx, h: start.h + dy } : { ...start, x: start.x + dx, y: start.y + dy });
+			};
+			const up = () => {
+				document.body.classList.remove("moving-window");
+				removeEventListener("pointermove", move);
+				removeEventListener("pointerup", up);
+				settings.set(key, JSON.stringify(rect));
+			};
+			addEventListener("pointermove", move);
+			addEventListener("pointerup", up);
 		};
-		const up = () => {
-			osWindow.classList.remove("moving");
-			removeEventListener("pointermove", move);
-			removeEventListener("pointerup", up);
-			saveWindow();
-		};
-		addEventListener("pointermove", move);
-		addEventListener("pointerup", up);
+		const bar = win.querySelector(".os-window-bar");
+		win.addEventListener("pointerdown", () => focusWindow(win), true);
+		bar.addEventListener("pointerdown", (e) => !e.target.closest("button") && drag(e, false));
+		win.querySelector(".os-window-resize").addEventListener("pointerdown", (e) => drag(e, true));
+		bar.addEventListener("dblclick", (e) => !e.target.closest("button") && win.classList.toggle("maximized"));
+		addEventListener("resize", () => (rect = place(rect)));
 	}
-	$("os-window-bar").addEventListener("pointerdown", (e) => {
-		if (!e.target.closest("button")) dragWindow(e, false);
+	const cascade = (n) => () => ({
+		x: innerWidth * 0.1 + n * 28,
+		y: 52 + n * 28,
+		w: Math.min(1100, innerWidth * 0.78),
+		h: innerHeight - 150,
 	});
-	$("os-window-resize").addEventListener("pointerdown", (e) => dragWindow(e, true));
-	const toggleMaximize = () => osWindow.classList.toggle("maximized");
-	$("os-window-bar").addEventListener("dblclick", (e) => !e.target.closest("button") && toggleMaximize());
+	makeWindow(osWindow, "window", cascade(0));
 	$("os-window-bar").addEventListener("click", (e) => {
 		const action = e.target.closest("[data-win]")?.dataset.win;
-		if (action === "max") toggleMaximize();
+		if (action === "max") osWindow.classList.toggle("maximized");
 		else if (action === "min" || action === "close") setView("desktop");
 	});
-	addEventListener("resize", () => (windowRect = placeWindow(windowRect)));
+
+	// App windows show one site through the proxy, without the browser's tabs and bar.
+	const appWindows = new Map(); // id -> { win, iframe, frame }
+	const WIN_BUTTONS = [
+		["back", "Back", "M15 6l-6 6 6 6"],
+		["reload", "Reload", "M20 11a8 8 0 1 0-2.3 5.6M20 4v7h-7"],
+		["full", "Full screen", "M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"],
+		["min", "Minimize", "M6 12h12"],
+		["max", "Maximize", "M6 6h12v12H6z"],
+		["close", "Close", "M7 7l10 10M17 7L7 17"],
+	];
+	function windowShell(id, title) {
+		const win = el("div", "os-window app-window");
+		win.dataset.app = id;
+		const bar = el("div", "os-window-bar");
+		bar.append(el("span", "os-window-title", title));
+		for (const [action, label, d] of WIN_BUTTONS) {
+			const button = el("button");
+			button.type = "button";
+			button.dataset.win = action;
+			button.title = label;
+			button.setAttribute("aria-label", label);
+			button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" /></svg>`;
+			bar.append(button);
+		}
+		const body = el("div", "app-window-body");
+		win.append(bar, body, el("div", "os-window-resize"));
+		document.body.append(win);
+		makeWindow(win, "win:" + id.split(":")[0], cascade(1 + (appWindows.size % 5)));
+		return { win, bar, body };
+	}
+	function closeAppWindow(id) {
+		const entry = appWindows.get(id);
+		if (!entry) return;
+		const frames = proxy?.controller.frames;
+		if (frames?.includes(entry.frame)) frames.splice(frames.indexOf(entry.frame), 1);
+		entry.win.remove();
+		appWindows.delete(id);
+		updateDock();
+	}
+	function showAppWindow(entry) {
+		entry.win.hidden = false;
+		focusWindow(entry.win);
+	}
+	// Opens (or brings back) a window showing `url`.
+	async function openAppWindow(id, title, url) {
+		const open = appWindows.get(id);
+		if (open) return showAppWindow(open);
+		const { win, bar, body } = windowShell(id, title);
+		const entry = { win, iframe: null, frame: null };
+		appWindows.set(id, entry);
+		focusWindow(win);
+		const loading = el("p", "app-window-loading", "Loading…");
+		body.append(loading);
+		bar.addEventListener("click", (e) => {
+			const action = e.target.closest("[data-win]")?.dataset.win;
+			if (!action) return;
+			const page = entry.iframe?.contentWindow;
+			if (action === "close") closeAppWindow(id);
+			else if (action === "min") {
+				win.hidden = true;
+				updateDock();
+			} else if (action === "max") win.classList.toggle("maximized");
+			else if (action === "full") (entry.iframe ?? win).requestFullscreen?.().catch(() => {});
+			else if (action === "back") page?.history.back();
+			else if (action === "reload") page?.location.reload();
+		});
+		await ready;
+		if (!appWindows.has(id) || !proxy) return;
+		entry.iframe = el("iframe");
+		entry.iframe.title = title;
+		entry.iframe.allow = "fullscreen; autoplay; encrypted-media; picture-in-picture";
+		entry.iframe.allowFullscreen = true;
+		entry.iframe.addEventListener("load", () => loading.remove(), { once: true });
+		body.append(entry.iframe);
+		entry.frame = proxy.controller.createFrame(entry.iframe);
+		entry.frame.go(url);
+	}
+	// The Games window: the game sites as cards; each game opens in its own window.
+	function openGamesWindow() {
+		const open = appWindows.get("games");
+		if (open) return showAppWindow(open);
+		const { win, bar, body } = windowShell("games", "Games");
+		bar.querySelectorAll('[data-win="back"], [data-win="reload"], [data-win="full"]').forEach((b) => b.remove());
+		appWindows.set("games", { win, iframe: null, frame: null });
+		const grid = el("div", "games-list games-window-list");
+		grid.append(...gameCards((site) => openAppWindow("game:" + site.art, site.name, site.url)));
+		body.append(grid);
+		bar.addEventListener("click", (e) => {
+			const action = e.target.closest("[data-win]")?.dataset.win;
+			if (action === "close") closeAppWindow("games");
+			else if (action === "min") {
+				win.hidden = true;
+				updateDock();
+			} else if (action === "max") win.classList.toggle("maximized");
+		});
+		focusWindow(win);
+	}
+	// A taskbar button for a window: open it, bring it to the front, or minimize it.
+	function toggleWindow(win, open) {
+		if (!win || win.hidden) return open();
+		if (win.classList.contains("focused")) {
+			win.hidden = true;
+			updateDock();
+		} else focusWindow(win);
+	}
 
 	// Games: free game sites, opened through the proxy like any other site.
 	// Each card shows the site's own banner and logo (public/games/).
@@ -706,9 +827,17 @@ async function main() {
 		{ name: "Duck Math", url: "https://duckmath.org/", art: "duck", about: "Popular browser games" },
 	];
 	function openGames() {
-		const list = $("games-list");
-		list.replaceChildren(
-			...GAME_SITES.map((site) => {
+		$("games-list").replaceChildren(
+			...gameCards((site, e) => {
+				$("games-panel").close();
+				const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
+				navigate(site.url, tab).catch(() => {});
+			})
+		);
+		$("games-panel").showModal();
+	}
+	function gameCards(onPick) {
+		return GAME_SITES.map((site) => {
 				const card = el("button", "game-site");
 				card.type = "button";
 				const banner = el("img", "game-banner");
@@ -723,54 +852,64 @@ async function main() {
 				text.append(el("span", "game-name", site.name), el("span", "game-about", site.about));
 				info.append(icon, text);
 				card.append(banner, info);
-				card.addEventListener("click", (e) => {
-					$("games-panel").close();
-					const tab = e.ctrlKey || e.metaKey ? createTab({ activate: false }) : activeTab;
-					navigate(site.url, tab).catch(() => {});
-				});
+				card.addEventListener("click", (e) => onPick(site, e));
 				return card;
-			})
-		);
-		$("games-panel").showModal();
+		});
 	}
 	$("games-close").addEventListener("click", () => $("games-panel").close());
 
 	// The bottom bar. The highlighted button follows what's on screen.
-	const MUSIC_URL = "https://audiomack.com/";
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
 		let current = "browser";
 		if (document.body.dataset.view === "desktop") current = "desktop";
 		else if (!activeTab?.url) current = "browser";
 		else if (isMovies(activeTab.url)) current = "movies";
-		else if (hostOf(activeTab.url).endsWith("audiomack.com")) current = "music";
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
 		}
 		$("os-window-title").textContent = activeTab?.url ? activeTab.label.textContent : "New tab";
+		// In OS mode the taskbar marks every open window, and the focused one more strongly.
+		const os = document.body.dataset.mode === "os";
+		const openApps = os ? [...document.querySelectorAll(".app-window")] : [];
+		const windowFor = {
+			browser: osWindow.hidden ? [] : [osWindow],
+			movies: openApps.filter((w) => w.dataset.app === "movies"),
+			games: openApps.filter((w) => w.dataset.app === "games" || w.dataset.app.startsWith("game:")),
+		};
 		for (const button of dockButtons) {
-			button.classList.toggle("active", button.dataset.dock === current);
-			if (button.dataset.dock === current) button.setAttribute("aria-current", "page");
+			const wins = windowFor[button.dataset.dock] ?? [];
+			const on = os ? wins.length > 0 : button.dataset.dock === current;
+			button.classList.toggle("active", on);
+			button.classList.toggle("focused", os && wins.some((w) => !w.hidden && w.classList.contains("focused")));
+			if (on) button.setAttribute("aria-current", "page");
 			else button.removeAttribute("aria-current");
 		}
 	}
 	// Dock buttons and desktop icons share these.
 	function launch(target) {
+		const os = document.body.dataset.mode === "os";
 		if (target === "games") {
-			openGames();
+			if (os) toggleWindow(appWindows.get("games")?.win, openGamesWindow);
+			else openGames();
+		} else if (target === "movies" && os) {
+			toggleWindow(appWindows.get("movies")?.win, () => openAppWindow("movies", "Movies", MOVIES_URL));
+		} else if (target === "browser" && os) {
+			toggleWindow(osWindow.hidden ? null : osWindow, () => {
+				setView("browser");
+				focusWindow(osWindow);
+			});
 		} else if (target === "settings") {
 			els.settingsPanel.showModal();
 		} else if (target === "apps") {
 			$("apps-panel").showModal();
-		} else {
-			if (target === "browser-mode") setMode("browser");
-			else if (target === "desktop") setView("desktop");
-			else if (target === "browser") setView("browser");
-			else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
-			else navigate(MUSIC_URL).catch(() => {});
-		}
+		} else if (target === "browser-mode") setMode("browser");
+		else if (target === "desktop") setView("desktop");
+		else if (target === "browser") setView("browser");
+		else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
 		updateDock();
 	}
+
 	for (const button of dockButtons) button.addEventListener("click", () => launch(button.dataset.dock));
 	for (const button of document.querySelectorAll("[data-app]")) {
 		button.addEventListener("click", () => launch(button.dataset.app));
@@ -1059,6 +1198,7 @@ async function main() {
 		settings.set("mode", mode);
 		document.body.dataset.mode = mode;
 		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
+		if (mode !== "os") for (const id of [...appWindows.keys()]) closeAppWindow(id);
 		setView(mode === "os" ? "desktop" : "browser");
 		if (mode === "os") showLock();
 		else hideLock();

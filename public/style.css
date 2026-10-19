@@ -2108,8 +2108,8 @@ body[data-mode="os"][data-view] .os-window.maximized {
 	border: 0;
 }
 
-/* While moving or resizing, the page can't catch the pointer. */
-.os-window.moving #frames {
+/* While moving or resizing, pages can't catch the pointer. */
+body.moving-window iframe {
 	pointer-events: none;
 }
 
@@ -2127,7 +2127,7 @@ body[data-mode="os"][data-view] .os-window.maximized {
 	touch-action: none;
 }
 
-.os-window.moving .os-window-bar {
+body.moving-window .os-window-bar {
 	cursor: grabbing;
 }
 
@@ -2431,4 +2431,65 @@ body[data-mode="os"] .panel .panel-head .icon {
 	stroke-width: 1.8;
 	stroke-linecap: round;
 	stroke-linejoin: round;
+}
+
+/* App windows (Movies, Games, each game). Only exist in OS mode. */
+.app-window-body {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	background: #000;
+}
+
+.app-window-body iframe {
+	flex: 1;
+	width: 100%;
+	border: 0;
+	background: #000;
+}
+
+.app-window-loading {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	margin: 0;
+	color: rgb(255 255 255 / 0.6);
+	font-size: 14px;
+}
+
+.games-window-list {
+	flex: 1;
+	overflow-y: auto;
+	align-content: start;
+}
+
+body[data-mode="os"] .os-window:not(.focused) .os-window-bar {
+	color: rgb(255 255 255 / 0.55);
+}
+
+body[data-mode="os"] .dock button.focused {
+	background: rgb(255 255 255 / 0.14);
+}
+
+body[data-mode="os"] .app-window {
+	--panel: #000;
+	--surface: #0c0c0e;
+	--raised: #111114;
+	--border: rgb(255 255 255 / 0.12);
+	--text: #f2f2f4;
+	--muted: #9a9aa6;
+	color-scheme: dark;
+	color: var(--text);
+}
+
+/* The bars and the lock screen stay above every window, however many get focused. */
+body[data-mode="os"] .topbar,
+body[data-mode="os"] .dock {
+	z-index: 100000;
+}
+
+.lock {
+	z-index: 100001;
 }

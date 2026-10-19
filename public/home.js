@@ -51,13 +51,11 @@ self.Shortcuts = (() => {
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
 		{ name: "Twitch", url: "https://www.twitch.tv/" },
-		{ name: "Music", url: "https://audiomack.com/" },
 	];
 /* filler: c__o__d__e */
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
 	const ADDED_LATER = [
-		{ version: 2, name: "Music", url: "https://audiomack.com/" },
 		{ version: 3, name: "AI", url: "skeld://ai" },
 		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
 		{ version: 5, name: "Games", url: "skeld://games" },
@@ -72,18 +70,13 @@ self.Shortcuts = (() => {
 				const list = saved.filter((s) => s && s.name && s.url);
 				// Built-in tiles saved before the rename to Skeld.
 				for (const s of list) s.url = s.url.replace(/^skyline:/, "skeld:");
+				// Music was removed (as were AI and chat).
+				for (let i = list.length - 1; i >= 0; i--) {
+					if (list[i].name === "Music" && /(audiomack|soundcloud|tidal)\.com/.test(list[i].url)) list.splice(i, 1);
+				}
 				// AI and chat were removed.
 				for (let i = list.length - 1; i >= 0; i--) {
 					if (/^skeld:\/\/(ai|chat)\/?$/i.test(list[i].url)) list.splice(i, 1);
-				}
-				// The Tidal tile became Music on SoundCloud (Tidal blocks the proxy as a bot), and
-				// Music is now Audiomack. A SoundCloud tile people named themselves stays.
-				for (const s of list) {
-					const host = s.url.replace(/^https?:\/\//, "");
-					if (/(^|\.)tidal\.com\//.test(host) || (s.name === "Music" && /(^|\.)soundcloud\.com\//.test(host))) {
-						s.name = s.name === "Tidal" ? "Music" : s.name;
-						s.url = "https://audiomack.com/";
-					}
 				}
 				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
 				for (const extra of ADDED_LATER) {
