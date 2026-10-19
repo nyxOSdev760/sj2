@@ -52,7 +52,7 @@ open those panels. A five-step welcome tour shows on the first visit.
 
 The bottom bar holds Desktop, Browser, Games, Movies, Music (Audiomack) and Settings.
 **Games** (also `skeld://games`) opens a picker of free game sites. **Movies**
-(`skeld://movies`) opens atlantic.st; the address bar, tab and history show it as
+(`skeld://movies`) opens movy.sx; the address bar, tab and history show it as
 `skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.
 
 YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
