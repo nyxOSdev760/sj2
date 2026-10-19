@@ -214,7 +214,8 @@ async function alternativeRoutes(failover) {
 }
 
 function showWisp(url) {
-	els.wisp.placeholder = `Automatic · using ${WispPool.label(url)}`;
+	els.wisp.placeholder = "Automatic";
+	$("wisp-using").textContent = "· " + WispPool.label(url).replace(/\/wisp$/, "");
 }
 
 async function boot() {
@@ -385,7 +386,10 @@ async function main() {
 	els.transport.value = settings.get("transport", "libcurl");
 	els.wisp.placeholder = "Automatic";
 	els.wisp.value = settings.get("wisp", "");
-	els.engine.value = settings.get("engine", els.engine.options[0].value);
+	// Startpage blocks proxy traffic now, so a saved Startpage moves to the default.
+	const savedEngine = settings.get("engine", "");
+	els.engine.value = savedEngine && !savedEngine.includes("startpage.com") ? savedEngine : els.engine.options[0].value;
+	if (!els.engine.value) els.engine.value = els.engine.options[0].value;
 	if (!els.engine.value) els.engine.selectedIndex = 0;
 	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
 	browsingHistory.load();
@@ -659,10 +663,13 @@ async function main() {
 	}
 	function makeWindow(win, key, fallback) {
 		const place = (rect) => {
+			// Between the top bar (26px) and the taskbar (44px), so the corner stays reachable.
+			const top = 26;
+			const bottom = innerHeight - 44;
 			const w = Math.min(Math.max(rect.w, 340), innerWidth);
-			const h = Math.min(Math.max(rect.h, 220), innerHeight - 72);
+			const h = Math.min(Math.max(rect.h, 220), bottom - top);
 			const x = Math.min(Math.max(rect.x, 0), innerWidth - w);
-			const y = Math.min(Math.max(rect.y, 26), innerHeight - 44 - 40);
+			const y = Math.min(Math.max(rect.y, top), bottom - h);
 			Object.assign(win.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
 			return { x, y, w, h };
 		};
@@ -703,13 +710,17 @@ async function main() {
 		x: innerWidth * 0.1 + n * 28,
 		y: 52 + n * 28,
 		w: Math.min(1100, innerWidth * 0.78),
-		h: innerHeight - 150,
+		h: innerHeight - 150 - n * 28,
 	});
 	makeWindow(osWindow, "window", cascade(0));
 	$("os-window-bar").addEventListener("click", (e) => {
 		const action = e.target.closest("[data-win]")?.dataset.win;
 		if (action === "max") osWindow.classList.toggle("maximized");
-		else if (action === "min" || action === "close") setView("desktop");
+		else if (action === "min") setView("desktop");
+		else if (action === "close") {
+			for (const tab of [...tabs]) closeTab(tab); // leaves one new tab
+			setView("desktop");
+		}
 	});
 
 	// App windows show one site through the proxy, without the browser's tabs and bar.
@@ -739,7 +750,7 @@ async function main() {
 		const body = el("div", "app-window-body");
 		win.append(bar, body, el("div", "os-window-resize"));
 		document.body.append(win);
-		makeWindow(win, "win:" + id.split(":")[0], cascade(1 + (appWindows.size % 5)));
+		makeWindow(win, "win:" + id, cascade(1 + (appWindows.size % 5)));
 		return { win, bar, body };
 	}
 	function closeAppWindow(id) {
@@ -763,7 +774,9 @@ async function main() {
 		const entry = { win, iframe: null, frame: null };
 		appWindows.set(id, entry);
 		focusWindow(win);
-		const loading = el("p", "app-window-loading", "Loading…");
+		const loading = el("div", "app-window-loading");
+		const loadingText = el("p", null, `Loading ${title}…`);
+		loading.append(el("span", "spinner"), loadingText);
 		body.append(loading);
 		bar.addEventListener("click", (e) => {
 			const action = e.target.closest("[data-win]")?.dataset.win;
@@ -783,11 +796,29 @@ async function main() {
 		entry.iframe = el("iframe");
 		entry.iframe.title = title;
 		entry.iframe.allow = "fullscreen; autoplay; encrypted-media; picture-in-picture";
-		entry.iframe.allowFullscreen = true;
-		entry.iframe.addEventListener("load", () => loading.remove(), { once: true });
+		// The overlay stays until the proxied page itself loads (not the first about:blank).
+		entry.iframe.addEventListener("load", () => {
+			try {
+				if (entry.iframe.contentWindow.location.href.includes("/~/sj/")) loading.remove();
+			} catch {
+				loading.remove();
+			}
+		});
 		body.append(entry.iframe);
 		entry.frame = proxy.controller.createFrame(entry.iframe);
 		entry.frame.go(url);
+		setTimeout(() => {
+			if (!loading.isConnected) return;
+			loadingText.textContent = `${title} is taking a while…`;
+			const retry = el("button", "text-button", "Retry");
+			retry.type = "button";
+			retry.addEventListener("click", () => {
+				loadingText.textContent = `Loading ${title}…`;
+				retry.remove();
+				entry.frame.go(url);
+			});
+			loading.append(retry);
+		}, 20000);
 	}
 	// The Games window: the game sites as cards; each game opens in its own window.
 	function openGamesWindow() {
@@ -881,7 +912,13 @@ async function main() {
 			const wins = windowFor[button.dataset.dock] ?? [];
 			const on = os ? wins.length > 0 : button.dataset.dock === current;
 			button.classList.toggle("active", on);
-			button.classList.toggle("focused", os && wins.some((w) => !w.hidden && w.classList.contains("focused")));
+			const dialogOpen =
+				(button.dataset.dock === "settings" && els.settingsPanel.open) ||
+				(button.dataset.dock === "apps" && $("apps-panel").open);
+			button.classList.toggle(
+				"focused",
+				os && (dialogOpen || wins.some((w) => !w.hidden && w.classList.contains("focused")))
+			);
 			if (on) button.setAttribute("aria-current", "page");
 			else button.removeAttribute("aria-current");
 		}
@@ -921,6 +958,11 @@ async function main() {
 
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
 	function renderShortcuts() {
+		els.shortcuts.replaceChildren(...shortcutItems(true));
+		$("home-shortcuts").replaceChildren(...shortcutItems(false));
+	}
+	// The Apps panel can edit (Add, and remove in Edit mode); the new-tab page just opens.
+	function shortcutItems(editable) {
 		const items = Shortcuts.list.map((shortcut, index) => {
 			const item = el("div", "shortcut-item");
 			const open = el("button", "shortcut");
@@ -949,10 +991,11 @@ async function main() {
 				Shortcuts.remove(index);
 				renderShortcuts();
 			});
-			item.append(open, remove);
+			item.append(open);
+			if (editable && !internal) item.append(remove); // built-in apps can't be removed
 			return item;
 		});
-		if (!Shortcuts.full) {
+		if (editable && !Shortcuts.full) {
 			const add = el("button", "shortcut shortcut-add");
 			add.type = "button";
 			const tile = el("span", "shortcut-icon");
@@ -966,8 +1009,14 @@ async function main() {
 			item.append(add);
 			items.push(item);
 		}
-		els.shortcuts.replaceChildren(...items);
+		return items;
 	}
+	for (const id of ["settings-panel", "apps-panel"]) $(id).addEventListener("close", () => updateDock());
+	$("apps-edit").addEventListener("click", () => {
+		const editing = $("apps-panel").classList.toggle("editing");
+		$("apps-edit").textContent = editing ? "Done" : "Edit";
+		$("apps-edit").setAttribute("aria-pressed", String(editing));
+	});
 
 	function openShortcutForm(name = "", url = "") {
 		if (Shortcuts.full) {
@@ -1194,13 +1243,13 @@ async function main() {
 
 	createTab();
 	// OS mode (desktop, dock) or browser mode (just the browser). Asked on the first visit.
-	function setMode(mode) {
+	function setMode(mode, lockScreen = false) {
 		settings.set("mode", mode);
 		document.body.dataset.mode = mode;
 		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
 		if (mode !== "os") for (const id of [...appWindows.keys()]) closeAppWindow(id);
 		setView(mode === "os" ? "desktop" : "browser");
-		if (mode === "os") showLock();
+		if (mode === "os" && lockScreen) showLock();
 		else hideLock();
 	}
 
@@ -1276,7 +1325,7 @@ async function main() {
 	modePanel.addEventListener("close", () => Tour.openIfNew());
 	const savedMode = settings.get("mode", "");
 	if (savedMode) {
-		setMode(savedMode === "browser" ? "browser" : "os");
+		setMode(savedMode === "browser" ? "browser" : "os", true); // OS mode opens on the lock screen
 		Tour.openIfNew();
 	} else {
 		document.body.dataset.mode = "os";

@@ -2101,7 +2101,7 @@ body[data-mode="os"] .os-window #home-screen {
 
 body[data-mode="os"] .os-window.maximized,
 body[data-mode="os"][data-view] .os-window.maximized {
-	inset: calc(28px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
+	inset: calc(26px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
 	width: auto !important;
 	height: auto !important;
 	border-radius: 0;
@@ -2183,7 +2183,7 @@ body.moving-window .os-window-bar {
 /* Phones: the window always fills the screen between the bars. */
 @media (max-width: 699px) {
 	body[data-mode="os"] .os-window {
-		inset: calc(28px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
+		inset: calc(26px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
 		width: auto !important;
 		height: auto !important;
 		border: 0;
@@ -2492,4 +2492,151 @@ body[data-mode="os"] .dock {
 
 .lock {
 	z-index: 100001;
+}
+
+/* ---- Round 1 fixes ---- */
+/* Taskbar: a dot for open apps, a highlight only for the focused one. */
+body[data-mode="os"] .dock button.active {
+	background: none;
+}
+
+body[data-mode="os"] .dock button.focused {
+	background: rgb(255 255 255 / 0.14);
+}
+
+/* OS panels get a dimmed, blurred backdrop so they stand out from busy windows. */
+body[data-mode="os"] .panel::backdrop {
+	background: rgb(0 0 0 / 0.45);
+	backdrop-filter: blur(6px);
+}
+
+/* The tour matches the black panels in OS mode; Theme only applies to browser mode. */
+body[data-mode="os"] .tour {
+	--raised: #000;
+	--text: #f2f2f4;
+	--body-text: #d4d4da;
+	--muted: #9a9aa6;
+	--border: rgb(255 255 255 / 0.12);
+	--chip: #16161a;
+	--accent-soft: rgb(255 255 255 / 0.18);
+	--on-accent-soft: #fff;
+	border-radius: 10px;
+	color-scheme: dark;
+}
+
+body[data-mode="os"] .settings label:has(#theme) {
+	display: none;
+}
+
+.tour-pill.current {
+	flex: none;
+	white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+	.tour-pill-label {
+		display: none;
+	}
+}
+
+.setting-hint {
+	margin-left: 4px;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 400;
+}
+
+/* Game cards never clip their text. */
+.game-banner,
+.game-info {
+	flex: none;
+}
+
+.games-list {
+	grid-auto-rows: max-content;
+}
+
+/* App window loading state. */
+.app-window-loading {
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	background: #000;
+}
+
+.app-window-loading p {
+	margin: 0;
+}
+
+.spinner {
+	width: 28px;
+	height: 28px;
+	border: 3px solid rgb(255 255 255 / 0.18);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Phones: big enough title-bar buttons, close set apart. */
+@media (max-width: 699px) {
+	body[data-mode="os"] .os-window-bar {
+		height: 44px;
+		gap: 4px;
+	}
+
+	body[data-mode="os"] .os-window-bar button {
+		width: 40px;
+		height: 40px;
+	}
+
+	body[data-mode="os"] .os-window-bar [data-win="close"] {
+		margin-left: 6px;
+	}
+}
+
+/* Trash buttons only in the Apps panel's Edit mode (or on hover with a mouse). */
+.home-shortcuts .shortcut-remove {
+	display: none;
+}
+
+@media (hover: none) {
+	.shortcut-remove {
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+.apps.editing .shortcut-remove {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* The new-tab page: a wordmark above the search, shortcuts below it. */
+.home-wordmark {
+	margin: 0 0 4px;
+	color: #fff;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: clamp(30px, 6vw, 44px);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	text-shadow: 0 2px 16px rgb(0 0 0 / 0.4);
+}
+
+.home-shortcuts {
+	margin-top: 18px;
+}
+
+.home-shortcuts .shortcut-label {
+	color: #fff;
+	font-weight: 500;
+	text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
 }

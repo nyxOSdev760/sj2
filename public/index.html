@@ -140,6 +140,7 @@
 
 			<main id="home-screen">
 				<div class="home-main">
+					<h2 class="home-wordmark">Skeld</h2>
 					<form id="search-form" class="search">
 						<svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
 							<circle cx="11" cy="11" r="7" />
@@ -159,6 +160,7 @@
 						</button>
 					</form>
 					<p id="status" class="status" role="status">Starting proxy…</p>
+					<nav id="home-shortcuts" class="shortcuts home-shortcuts" aria-label="Shortcuts"></nav>
 				</div>
 			</main>
 
@@ -252,7 +254,7 @@
 					</select>
 				</label>
 				<label>
-					Wisp server
+					Wisp server <span id="wisp-using" class="setting-hint"></span>
 					<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
 				</label>
 				<label>
@@ -262,8 +264,8 @@
 				<label>
 					Search engine
 					<select id="engine">
-						<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
 						<option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
+						<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
 						<option value="https://www.google.com/search?q=%s">Google</option>
 						<option value="https://www.bing.com/search?q=%s">Bing</option>
 						<option value="https://search.brave.com/search?q=%s">Brave</option>
@@ -342,6 +344,7 @@
 		<dialog id="apps-panel" class="panel apps" aria-labelledby="apps-title">
 			<header class="panel-head">
 				<h2 id="apps-title">Apps</h2>
+				<button id="apps-edit" class="text-button" type="button" aria-pressed="false">Edit</button>
 				<button id="apps-close" class="icon" type="button" title="Close" aria-label="Close">
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
 				</button>
