@@ -240,6 +240,12 @@
 					<select id="theme">
 						<option value="lavender">Lavender</option>
 						<option value="dark">AMOLED dark</option>
+						<option value="midnight">Midnight</option>
+						<option value="forest">Forest</option>
+						<option value="sunset">Sunset</option>
+						<option value="ocean">Ocean</option>
+						<option value="rose">Rose</option>
+						<option value="mono">Mono</option>
 					</select>
 				</label>
 				<label>
@@ -254,7 +260,7 @@
 					</select>
 				</label>
 				<label>
-					Wisp server <span id="wisp-using" class="setting-hint"></span>
+					<span class="setting-name">Wisp server<span id="wisp-using" class="setting-hint"></span></span>
 					<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
 				</label>
 				<label>
@@ -264,7 +270,8 @@
 				<label>
 					Search engine
 					<select id="engine">
-						<option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
+						<option value="https://html.duckduckgo.com/html/?q=%s&kae=d">DuckDuckGo</option>
+						<option value="https://duckduckgo.com/?q=%s&kae=d">DuckDuckGo (full site)</option>
 						<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
 						<option value="https://www.google.com/search?q=%s">Google</option>
 						<option value="https://www.bing.com/search?q=%s">Bing</option>

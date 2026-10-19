@@ -215,7 +215,7 @@ async function alternativeRoutes(failover) {
 
 function showWisp(url) {
 	els.wisp.placeholder = "Automatic";
-	$("wisp-using").textContent = "· " + WispPool.label(url).replace(/\/wisp$/, "");
+	$("wisp-using").textContent = "Using " + WispPool.label(url).replace(/\/wisp$/, "");
 }
 
 async function boot() {
@@ -386,9 +386,11 @@ async function main() {
 	els.transport.value = settings.get("transport", "libcurl");
 	els.wisp.placeholder = "Automatic";
 	els.wisp.value = settings.get("wisp", "");
-	// Startpage blocks proxy traffic now, so a saved Startpage moves to the default.
+	// Startpage blocks proxy traffic and the default is now DuckDuckGo's HTML version, so
+	// a saved Startpage or the old DuckDuckGo default moves to it.
 	const savedEngine = settings.get("engine", "");
-	els.engine.value = savedEngine && !savedEngine.includes("startpage.com") ? savedEngine : els.engine.options[0].value;
+	const oldDefault = /startpage\.com|^https:\/\/duckduckgo\.com\/\?q=%s$/.test(savedEngine);
+	els.engine.value = savedEngine && !oldDefault ? savedEngine : els.engine.options[0].value;
 	if (!els.engine.value) els.engine.value = els.engine.options[0].value;
 	if (!els.engine.value) els.engine.selectedIndex = 0;
 	els.saveHistory.checked = settings.get("saveHistory", "1") === "1";
@@ -414,7 +416,21 @@ async function main() {
 	const tabs = [];
 	let activeTab = null;
 
+	// DuckDuckGo's HTML version has no reliable dark theme, so its page is shown inverted.
+	function styleFrame(tab) {
+		let host = "";
+		try {
+			host = new URL(tab.url).hostname;
+		} catch {}
+		let challenge = false; // its "select the ducks" check needs real colors
+		try {
+			challenge = /bots use DuckDuckGo/i.test(tab.iframe.contentDocument.body.innerText);
+		} catch {}
+		tab.iframe?.classList.toggle("force-dark", /^(html|lite)\.duckduckgo\.com$/.test(host) && !challenge);
+	}
+
 	function updateTabLabel(tab) {
+		styleFrame(tab);
 		const text = !tab.url ? "New tab" : isMovies(tab.url) ? "Movies" : tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
 		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
@@ -1146,12 +1162,23 @@ async function main() {
 		reconnect();
 	});
 
+	// Browser themes: the colors live in style.css (:root[data-theme=...]).
+	const THEME_COLORS = {
+		lavender: "#e9e7f6",
+		dark: "#000000",
+		midnight: "#0a1024",
+		forest: "#0b1510",
+		sunset: "#1a0f12",
+		ocean: "#06171c",
+		rose: "#f8eef1",
+		mono: "#efefef",
+	};
 	function applyTheme(name) {
-		const dark = name === "dark";
-		els.theme.value = dark ? "dark" : "lavender";
-		if (dark) document.documentElement.dataset.theme = "dark";
-		else delete document.documentElement.dataset.theme;
-		document.querySelector('meta[name="theme-color"]').content = dark ? "#000000" : "#e9e7f6";
+		if (!THEME_COLORS[name]) name = "lavender";
+		els.theme.value = name;
+		if (name === "lavender") delete document.documentElement.dataset.theme;
+		else document.documentElement.dataset.theme = name;
+		document.querySelector('meta[name="theme-color"]').content = THEME_COLORS[name];
 	}
 	els.theme.addEventListener("change", () => {
 		settings.set("theme", els.theme.value);
