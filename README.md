@@ -51,7 +51,7 @@ address bar shows `skeld://home` on the home screen; `skeld://history` and `skel
 open those panels. A five-step welcome tour shows on the first visit.
 
 The bottom bar holds Browser, Games, Movies, Apps and Settings.
-**Games** opens `skeld://games` (empty for now) and **Settings** opens `skeld://settings`, both as pages in a tab. **Movies**
+**Games** opens `skeld://games` (itch.io free web games and Armor Games) and **Settings** opens `skeld://settings`, both as pages in a tab. **Movies**
 (`skeld://movies`) opens movy.sx; the address bar, tab and history show it as
 `skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.
 

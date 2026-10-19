@@ -2869,3 +2869,52 @@ body[data-mode="os"] .os-window .internal-page {
 	padding-bottom: 28px;
 	background: #000;
 }
+
+/* Drawn game cards: the site's color, its logo or letter, and its name. */
+.game-banner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	background:
+		radial-gradient(120% 90% at 20% 10%, rgb(255 255 255 / 0.22), transparent 60%),
+		linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand), #000 45%));
+	color: #fff;
+}
+
+.game-banner-mark,
+.game-icon {
+	display: grid;
+	place-items: center;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-weight: 600;
+}
+
+.game-banner-mark {
+	width: 64px;
+	height: 64px;
+	border-radius: 18px;
+	background: rgb(255 255 255 / 0.16);
+	font-size: 36px;
+}
+
+.game-banner-mark svg,
+.game-icon svg {
+	width: 60%;
+	height: 60%;
+	fill: currentColor;
+}
+
+.game-banner-name {
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: clamp(22px, 3.4vw, 30px);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	text-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+}
+
+.game-icon {
+	background: var(--brand);
+	color: #fff;
+	font-size: 20px;
+}
