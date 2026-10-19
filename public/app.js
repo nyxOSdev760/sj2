@@ -628,14 +628,74 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => els.settingsPanel.showModal());
-	// Two views: the desktop (clock and app icons) and the browser (tabs and pages).
+	// Two views: the desktop and the browser. In OS mode the desktop stays up and the
+	// browser is a window on it; in browser mode the browser is the whole page.
+	const osWindow = $("os-window");
 	function setView(view) {
 		document.body.dataset.view = view;
-		els.desktop.hidden = view !== "desktop";
-		els.browser.hidden = view !== "browser";
+		const os = document.body.dataset.mode === "os";
+		els.desktop.hidden = !os && view !== "desktop";
+		els.browser.hidden = !os && view !== "browser";
+		osWindow.hidden = os && view !== "browser";
 		if (view === "browser" && !activeTab?.url) els.search.focus();
 		updateDock();
 	}
+
+	// The browser window (OS mode): drag by the title bar, resize from the corner,
+	// double-click or the middle button to maximize. Phones always get it full screen.
+	const WINDOW_KEY = "window";
+	function placeWindow(rect) {
+		const w = Math.min(Math.max(rect.w, 360), innerWidth);
+		const h = Math.min(Math.max(rect.h, 240), innerHeight - 72);
+		const x = Math.min(Math.max(rect.x, 0), innerWidth - w);
+		const y = Math.min(Math.max(rect.y, 28), innerHeight - 44 - 40);
+		Object.assign(osWindow.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
+		return { x, y, w, h };
+	}
+	let windowRect = (() => {
+		try {
+			return JSON.parse(settings.get(WINDOW_KEY, "null"));
+		} catch {
+			return null;
+		}
+	})() ?? { x: innerWidth * 0.12, y: 56, w: innerWidth * 0.76, h: innerHeight - 140 };
+	windowRect = placeWindow(windowRect);
+	function saveWindow() {
+		settings.set(WINDOW_KEY, JSON.stringify(windowRect));
+	}
+	function dragWindow(e, resize) {
+		if (e.button !== 0 || osWindow.classList.contains("maximized") || innerWidth < 700) return;
+		e.preventDefault();
+		const start = { px: e.clientX, py: e.clientY, ...windowRect };
+		osWindow.classList.add("moving"); // the page iframe can't swallow the pointer meanwhile
+		const move = (ev) => {
+			const dx = ev.clientX - start.px;
+			const dy = ev.clientY - start.py;
+			windowRect = placeWindow(
+				resize ? { ...start, w: start.w + dx, h: start.h + dy } : { ...start, x: start.x + dx, y: start.y + dy }
+			);
+		};
+		const up = () => {
+			osWindow.classList.remove("moving");
+			removeEventListener("pointermove", move);
+			removeEventListener("pointerup", up);
+			saveWindow();
+		};
+		addEventListener("pointermove", move);
+		addEventListener("pointerup", up);
+	}
+	$("os-window-bar").addEventListener("pointerdown", (e) => {
+		if (!e.target.closest("button")) dragWindow(e, false);
+	});
+	$("os-window-resize").addEventListener("pointerdown", (e) => dragWindow(e, true));
+	const toggleMaximize = () => osWindow.classList.toggle("maximized");
+	$("os-window-bar").addEventListener("dblclick", (e) => !e.target.closest("button") && toggleMaximize());
+	$("os-window-bar").addEventListener("click", (e) => {
+		const action = e.target.closest("[data-win]")?.dataset.win;
+		if (action === "max") toggleMaximize();
+		else if (action === "min" || action === "close") setView("desktop");
+	});
+	addEventListener("resize", () => (windowRect = placeWindow(windowRect)));
 
 	// Games: free game sites, opened through the proxy like any other site.
 	// Each card shows the site's own banner and logo (public/games/).
@@ -687,6 +747,7 @@ async function main() {
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
 		}
+		$("os-window-title").textContent = activeTab?.url ? activeTab.label.textContent : "New tab";
 		for (const button of dockButtons) {
 			button.classList.toggle("active", button.dataset.dock === current);
 			if (button.dataset.dock === current) button.setAttribute("aria-current", "page");
@@ -974,21 +1035,25 @@ async function main() {
 	});
 	$("wallpaper-close").addEventListener("click", () => wallpaperPanel.close());
 
-	// The desktop's date and clocks.
-	const dateEl = $("home-date");
-	const timeEl = $("home-time");
+	// The lock screen's date and clock, and the top bar's clock.
+	const dateEl = $("lock-date");
+	const timeEl = $("lock-time");
 	const smallTimeEl = $("topbar-time");
 	function tick() {
 		const now = new Date();
 		dateEl.textContent = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 		// The big clock leaves out AM/PM.
-		timeEl.textContent = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" })
+		timeEl.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" })
 			.formatToParts(now)
 			.filter((part) => part.type !== "dayPeriod")
 			.map((part) => part.value)
 			.join("")
 			.trim();
-		smallTimeEl.textContent = now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+		smallTimeEl.textContent = now.toLocaleTimeString(undefined, {
+			hour: "numeric",
+			minute: "2-digit",
+			second: "2-digit",
+		});
 		setTimeout(tick, 1000 - now.getMilliseconds() + 5);
 	}
 	tick();
@@ -1000,7 +1065,65 @@ async function main() {
 		document.body.dataset.mode = mode;
 		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
 		setView(mode === "os" ? "desktop" : "browser");
+		if (mode === "os") showLock();
+		else hideLock();
 	}
+
+	// OS mode starts on a lock screen: drag or swipe it up (or scroll, press Enter / an
+	// arrow key, or tap the hint) to get to the desktop.
+	const lock = $("lock");
+	function showLock() {
+		lock.style.transform = "";
+		lock.hidden = false;
+		document.body.classList.add("locked");
+		lock.focus({ preventScroll: true });
+	}
+	function hideLock() {
+		lock.hidden = true;
+		document.body.classList.remove("locked");
+	}
+	function unlock() {
+		if (lock.hidden || lock.classList.contains("unlocking")) return;
+		lock.classList.add("unlocking");
+		lock.style.transform = "translateY(-100%)";
+		document.body.classList.remove("locked");
+		setTimeout(() => {
+			lock.classList.remove("unlocking");
+			hideLock();
+		}, 450);
+	}
+	lock.addEventListener("pointerdown", (e) => {
+		if (e.target.closest("button")) return;
+		const y0 = e.clientY;
+		const t0 = performance.now();
+		let dy = 0;
+		lock.setPointerCapture(e.pointerId);
+		lock.classList.add("dragging");
+		const move = (ev) => {
+			dy = Math.min(0, ev.clientY - y0);
+			lock.style.transform = `translateY(${dy}px)`;
+		};
+		const up = () => {
+			lock.classList.remove("dragging");
+			lock.removeEventListener("pointermove", move);
+			lock.removeEventListener("pointerup", up);
+			lock.removeEventListener("pointercancel", up);
+			const fast = -dy / (performance.now() - t0) > 0.6; // a flick
+			if (-dy > innerHeight * 0.18 || (fast && -dy > 30)) unlock();
+			else lock.style.transform = "";
+		};
+		lock.addEventListener("pointermove", move);
+		lock.addEventListener("pointerup", up);
+		lock.addEventListener("pointercancel", up);
+	});
+	lock.addEventListener("wheel", (e) => Math.abs(e.deltaY) > 20 && unlock(), { passive: true });
+	lock.addEventListener("keydown", (e) => {
+		if (["Enter", " ", "ArrowUp", "PageUp"].includes(e.key)) {
+			e.preventDefault();
+			unlock();
+		}
+	});
+	$("lock-hint").addEventListener("click", unlock);
 	$("to-browser-mode").addEventListener("click", () => setMode("browser"));
 	$("switch-mode").addEventListener("click", () => {
 		els.settingsPanel.close();

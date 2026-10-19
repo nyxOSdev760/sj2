@@ -1974,3 +1974,328 @@ body[data-mode="browser"] .desktop {
 		height: 18px;
 	}
 }
+
+/* ---- OS mode, after GalaxyV7's desktop: thin black bars, a clean wallpaper and the
+   browser in a window. ---- */
+body[data-mode="os"] {
+	--dock-space: calc(44px + env(safe-area-inset-bottom));
+	--bar: rgb(8 8 10 / 0.92);
+}
+
+body[data-mode="os"] .desktop {
+	padding: 0;
+}
+
+body[data-mode="os"] .topbar {
+	position: fixed;
+	inset: 0 0 auto;
+	z-index: 40;
+	min-height: 0;
+	height: calc(28px + env(safe-area-inset-top));
+	margin: 0;
+	padding: env(safe-area-inset-top) 10px 0;
+	gap: 4px;
+	border: 0;
+	background: var(--bar);
+	backdrop-filter: none;
+	font-size: 13px;
+}
+
+body[data-mode="os"] .topbar-name {
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+body[data-mode="os"] .topbar-button,
+body[data-mode="os"] .topbar-link {
+	width: auto;
+	height: 24px;
+	padding: 0 6px;
+	border-radius: 6px;
+	color: rgb(255 255 255 / 0.85);
+	font-size: 12px;
+}
+
+body[data-mode="os"] .topbar-button svg,
+body[data-mode="os"] .topbar-link svg {
+	width: 15px;
+	height: 15px;
+}
+
+body[data-mode="os"] .topbar-time {
+	margin-left: 6px;
+	font-size: 13px;
+}
+
+/* The taskbar. */
+body[data-mode="os"] .dock {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: var(--dock-space);
+	padding: 0 8px env(safe-area-inset-bottom);
+	gap: 2px;
+	justify-content: center;
+	transform: none;
+	border: 0;
+	border-top: 1px solid rgb(255 255 255 / 0.06);
+	border-radius: 0;
+	background: var(--bar);
+	box-shadow: none;
+}
+
+body[data-mode="os"] .dock button {
+	flex: 0 0 42px;
+	height: 36px;
+	border-radius: 8px;
+}
+
+body[data-mode="os"] .dock svg {
+	width: 20px;
+	height: 20px;
+}
+
+body[data-mode="os"] .dock .dock-sep,
+body[data-mode="os"] .dock [data-dock="browser-mode"] {
+	display: none;
+}
+
+/* The browser window. In browser mode it's just a wrapper with no box of its own. */
+body:not([data-mode="os"]) .os-window {
+	display: contents;
+}
+
+body:not([data-mode="os"]) .os-window-bar,
+body:not([data-mode="os"]) .os-window-resize {
+	display: none;
+}
+
+body[data-mode="os"] .os-window {
+	position: fixed;
+	z-index: 30;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid rgb(255 255 255 / 0.1);
+	border-radius: 10px;
+	background: rgb(10 10 14 / 0.55);
+	backdrop-filter: blur(24px);
+	box-shadow: 0 24px 70px rgb(0 0 0 / 0.55);
+}
+
+body[data-mode="os"] .os-window .browser {
+	flex: 1;
+	min-height: 0;
+}
+
+body[data-mode="os"] .os-window #frames {
+	margin-bottom: 0;
+}
+
+body[data-mode="os"] .os-window #home-screen {
+	padding-bottom: 24px;
+}
+
+body[data-mode="os"] .os-window.maximized,
+body[data-mode="os"][data-view] .os-window.maximized {
+	inset: calc(28px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
+	width: auto !important;
+	height: auto !important;
+	border-radius: 0;
+	border: 0;
+}
+
+/* While moving or resizing, the page can't catch the pointer. */
+.os-window.moving #frames {
+	pointer-events: none;
+}
+
+.os-window-bar {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	height: 32px;
+	padding: 0 4px 0 12px;
+	background: rgb(14 14 18 / 0.96);
+	color: rgb(255 255 255 / 0.85);
+	font-size: 13px;
+	cursor: grab;
+	user-select: none;
+	touch-action: none;
+}
+
+.os-window.moving .os-window-bar {
+	cursor: grabbing;
+}
+
+.os-window-title {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.os-window-bar button {
+	display: grid;
+	place-items: center;
+	width: 30px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 6px;
+	background: none;
+	color: inherit;
+	cursor: pointer;
+}
+
+.os-window-bar button:hover {
+	background: rgb(255 255 255 / 0.12);
+}
+
+.os-window-bar button[data-win="close"]:hover {
+	background: #e5484d;
+	color: #fff;
+}
+
+.os-window-bar svg {
+	width: 14px;
+	height: 14px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+.os-window-resize {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 18px;
+	height: 18px;
+	cursor: nwse-resize;
+	touch-action: none;
+}
+
+/* Phones: the window always fills the screen between the bars. */
+@media (max-width: 699px) {
+	body[data-mode="os"] .os-window {
+		inset: calc(28px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
+		width: auto !important;
+		height: auto !important;
+		border: 0;
+		border-radius: 0;
+	}
+
+	body[data-mode="os"] .os-window-bar [data-win="max"],
+	body[data-mode="os"] .os-window-resize {
+		display: none;
+	}
+
+	body[data-mode="os"] .topbar-link {
+		font-size: 0;
+	}
+}
+
+/* ---- Lock screen (OS mode): swipe up to unlock. ---- */
+.lock {
+	position: fixed;
+	inset: 0;
+	z-index: 60;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	padding: calc(14vh + env(safe-area-inset-top)) 20px calc(36px + env(safe-area-inset-bottom));
+	background: linear-gradient(rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.42));
+	color: #fff;
+	text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
+	touch-action: none;
+	user-select: none;
+	cursor: grab;
+	outline: none;
+	transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lock.dragging {
+	cursor: grabbing;
+	transition: none;
+}
+
+body.locked .desktop,
+body.locked .dock,
+body.locked .os-window {
+	visibility: hidden;
+}
+
+.lock-clock {
+	text-align: center;
+}
+
+.lock-time {
+	margin: 0;
+	font-size: clamp(72px, 20vw, 140px);
+	font-weight: 300;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.03em;
+	line-height: 1;
+}
+
+.lock-date {
+	margin: 8px 0 0;
+	font-size: clamp(16px, 3.8vw, 21px);
+	font-weight: 500;
+}
+
+.lock-hint {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 8px 18px;
+	border: 0;
+	background: none;
+	color: rgb(255 255 255 / 0.9);
+	font: inherit;
+	font-size: 14px;
+	cursor: pointer;
+	animation: lock-nudge 2.2s ease-in-out infinite;
+}
+
+.lock-hint svg {
+	width: 26px;
+	height: 26px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+@keyframes lock-nudge {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lock {
+		transition: opacity 0.2s;
+	}
+
+	.lock.unlocking {
+		opacity: 0;
+		transform: none !important;
+	}
+
+	.lock-hint {
+		animation: none;
+	}
+}
