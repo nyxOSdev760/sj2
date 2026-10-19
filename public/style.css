@@ -2299,3 +2299,136 @@ body.locked .os-window {
 		animation: none;
 	}
 }
+
+/* ---- Closer to GalaxyV7: pure black bars and windows, solid white taskbar icons with
+   a dot under the open app, and app panels (Apps, Settings, Games...) as black windows. */
+body[data-mode="os"] {
+	--bar: rgb(0 0 0 / 0.88);
+}
+
+body[data-mode="os"] .topbar {
+	height: calc(26px + env(safe-area-inset-top));
+	padding-inline: 8px;
+}
+
+body[data-mode="os"] .topbar-name {
+	font-size: 14px;
+	font-weight: 400;
+}
+
+body[data-mode="os"] .topbar-time {
+	font-size: 14px;
+}
+
+body[data-mode="os"] .dock button {
+	flex-basis: 40px;
+	color: #fff;
+	background: none;
+}
+
+body[data-mode="os"] .dock button:hover {
+	background: rgb(255 255 255 / 0.1);
+}
+
+body[data-mode="os"] .dock button.active {
+	background: rgb(255 255 255 / 0.08);
+}
+
+body[data-mode="os"] .dock button.active::after {
+	content: "";
+	position: absolute;
+	bottom: 1px;
+	left: 50%;
+	width: 4px;
+	height: 4px;
+	margin-left: -2px;
+	border-radius: 50%;
+	background: #fff;
+}
+
+body[data-mode="os"] .dock svg {
+	stroke-width: 2.3;
+}
+
+body[data-mode="os"] .dock [data-dock="desktop"] {
+	display: none;
+}
+
+/* Windows: black, square-ish, plain title bar. */
+body[data-mode="os"] .os-window {
+	border-color: rgb(255 255 255 / 0.08);
+	border-radius: 6px;
+	background: #000;
+	backdrop-filter: none;
+	box-shadow: 0 18px 50px rgb(0 0 0 / 0.6);
+}
+
+body[data-mode="os"] .os-window-bar {
+	height: 28px;
+	background: #000;
+	color: #fff;
+	font-size: 14px;
+}
+
+body[data-mode="os"] .os-window #tabbar,
+body[data-mode="os"] .os-window #toolbar {
+	background: #000;
+	backdrop-filter: none;
+}
+
+body[data-mode="os"] .os-window #home-screen {
+	background: #000;
+}
+
+/* App panels become black windows over the desktop (no dimmed backdrop). */
+body[data-mode="os"] .panel {
+	--bg: #000;
+	--panel: #000;
+	--surface: #0c0c0e;
+	--raised: #111114;
+	--chip: #16161a;
+	--hover: #1c1c21;
+	--border: rgb(255 255 255 / 0.12);
+	--text: #f2f2f4;
+	--body-text: #d4d4da;
+	--muted: #9a9aa6;
+	--accent-soft: rgb(255 255 255 / 0.18);
+	--on-accent-soft: #fff;
+	color-scheme: dark;
+	border: 1px solid rgb(255 255 255 / 0.08);
+	border-radius: 6px;
+	background: #000;
+	color: var(--text);
+	box-shadow: 0 18px 50px rgb(0 0 0 / 0.6);
+	backdrop-filter: none;
+}
+
+body[data-mode="os"] .panel::backdrop {
+	background: transparent;
+}
+
+body[data-mode="os"] .panel .panel-head {
+	padding: 4px 4px 4px 12px;
+	border-bottom: 0;
+}
+
+body[data-mode="os"] .panel .panel-head h2 {
+	font-size: 14px;
+	font-weight: 400;
+}
+
+body[data-mode="os"] .panel .panel-head .icon {
+	width: 30px;
+	height: 26px;
+	border-radius: 6px;
+	color: #fff;
+}
+
+/* Built-in tiles (Games, Movies) draw a line icon. */
+.internal-icon {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}

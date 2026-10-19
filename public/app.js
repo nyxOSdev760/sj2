@@ -776,10 +776,6 @@ async function main() {
 		button.addEventListener("click", () => launch(button.dataset.app));
 	}
 	$("apps-close").addEventListener("click", () => $("apps-panel").close());
-	$("fullscreen").addEventListener("click", () => {
-		if (document.fullscreenElement) document.exitFullscreen?.();
-		else document.documentElement.requestFullscreen?.().catch(() => {});
-	});
 	$("settings-close").addEventListener("click", () => els.settingsPanel.close());
 	// Selecting the whole address on focus, so typing replaces skeld://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
@@ -1028,7 +1024,6 @@ async function main() {
 		wallpaperPanel.showModal();
 		cards.find((c) => c.getAttribute("aria-checked") === "true")?.focus();
 	}
-	$("next-wallpaper").addEventListener("click", openWallpapers);
 	$("choose-wallpaper").addEventListener("click", () => {
 		els.settingsPanel.close();
 		openWallpapers();

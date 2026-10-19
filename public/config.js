@@ -6,7 +6,6 @@
 // in server/). `npm run build` drops "self" for static hosting.
 self.SJ2_CONFIG = {
 	wispServers: [
-		"self",
 		"wisp.mercurywork.shop",
 	],
 };
