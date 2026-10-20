@@ -146,11 +146,23 @@ async function registerServiceWorker(path) {
 }
 
 const transportScripts = new Set();
+// Epoxy loads its WebAssembly on the first init(). Two inits at once load it twice, and the
+// first client is left pointing at the replaced copy (requests then fail with garbage
+// errors), so epoxy clients start one at a time.
+let epoxyInits = Promise.resolve();
 async function createTransport(name, wisp) {
 	if (name === "epoxy") {
 		if (!transportScripts.has(name)) await loadScript(PATHS.epoxy);
 		transportScripts.add(name);
-		return new EpoxyTransport.default({ wisp });
+		const transport = new EpoxyTransport.default({ wisp });
+		const init = transport.init.bind(transport);
+		let starting = null; // calls made while it starts share that start
+		transport.init = () => {
+			starting ??= epoxyInits = epoxyInits.then(init, init);
+			starting.catch(() => (starting = null));
+			return starting;
+		};
+		return transport;
 	}
 	if (!transportScripts.has("libcurl")) await loadScript(PATHS.libcurl);
 	transportScripts.add("libcurl");
@@ -204,12 +216,29 @@ async function alternativeRoutes(failover) {
 		(u) => u === failover.url || !failover.dead.has(u)
 	);
 	const routes = [];
-	for (const url of urls.slice(0, 4)) {
+	const servers = new Set(); // one route per server, even when it answers on two paths
+	for (const url of urls) {
+		const server = new URL(url).host;
+		if (servers.has(server)) continue;
+		servers.add(server);
 		if (url === failover.url && els.transport.value === "epoxy") continue; // that's the main route
 		if (!epoxyClients.has(url)) epoxyClients.set(url, AdGuardDNS.wrap(await createTransport("epoxy", url)));
 		routes.push(epoxyClients.get(url));
+		if (routes.length === 3) break;
 	}
 	return routes;
+}
+
+// Free hosts (like Render) sleep when idle and take a while to wake. A plain request
+// wakes them while the rest of the site starts, so they're ready as backup routes.
+function wakeServers() {
+	const origins = WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? []).map(
+		(url) => new URL(url.replace(/^ws/, "http")).origin
+	);
+	for (const origin of new Set(origins)) {
+		if (origin === location.origin) continue;
+		fetch(origin + "/", { mode: "no-cors", cache: "no-store" }).catch(() => {});
+	}
 }
 
 function showWisp(url) {
@@ -224,6 +253,7 @@ async function boot() {
 		);
 	}
 	/* filler: c__o__d__e */
+	wakeServers();
 	const sw = await registerServiceWorker(PATHS.sw);
 	await loadScript(PATHS.scramjet);
 	await loadScript(PATHS.controllerApi);
@@ -249,10 +279,15 @@ async function boot() {
 		},
 		alternatives: () => alternativeRoutes(failover),
 	});
-	// In the background, find every server that answers, for the backup routes.
-	WispPool.healthy(WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"])).then((list) => {
-		healthyServers = list;
-	});
+	// In the background, find every server that answers and start the backup routes, so
+	// they're ready to race from the first site.
+	WispPool.healthy(WispPool.expandAll(self.SJ2_CONFIG?.wispServers ?? ["self"]))
+		.then((list) => {
+			healthyServers = list;
+			return alternativeRoutes(failover);
+		})
+		.then((routes) => Promise.all(routes.map((route) => route.ready || route.init())))
+		.catch((err) => console.warn("Backup routes didn't start:", err));
 
 	const { Controller, config } = $scramjetController;
 	config.prefix = PATHS.prefix;

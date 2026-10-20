@@ -92,15 +92,86 @@ self.WispPool = (() => {
 	}
 
 	const RESCUE_COOLDOWN = 60 * 1000;
+	// Once one route answers with a blocked page, how long the others get to beat it.
+	const RACE_GRACE = 2500;
+	// Route marker: the site works on the main connection.
+	const MAIN = "main";
+
+	// Answers one server can get and another not: its IP is blocked or rate limited, or
+	// the request failed on the way (the service worker turns that into a 500).
+	const blocked = (status) => status === 403 || status === 429 || status >= 500;
+
+	// Only requests without a body (page loads, images, scripts, API reads) are safe to
+	// send more than once.
+	const repeatable = (method, body) => body == null && (method === "GET" || method === "HEAD");
+
+	function discard(response) {
+		try {
+			response?.body?.cancel?.()?.catch?.(() => {});
+		} catch {
+			// not a stream
+		}
+	}
+
+	// Sends `run(transport, signal)` through every route at once. Resolves with the first
+	// answer that isn't blocked (or, when every route is blocked, the first answer) and the
+	// route it came through; the others are cancelled. Rejects if no route answers.
+	function raceRoutes(routes, run, signal) {
+		return new Promise((resolve, reject) => {
+			const controllers = routes.map(() => new AbortController());
+			const stop = () => controllers.forEach((c) => c.abort(signal?.reason));
+			if (signal?.aborted) stop();
+			else signal?.addEventListener("abort", stop, { once: true });
+			let done = false;
+			let settled = 0;
+			let fallback = null;
+			let firstError = null;
+			let grace = null;
+			const finish = (winner) => {
+				done = true;
+				clearTimeout(grace);
+				controllers.forEach((c, i) => i !== winner.index && c.abort());
+				resolve(winner);
+			};
+			routes.forEach((transport, index) => {
+				(async () => {
+					if (!transport.ready) await transport.init();
+					return run(transport, controllers[index].signal);
+				})()
+					.then(
+						(response) => {
+							if (done) return discard(response);
+							const entry = { transport, response, index };
+							if (!blocked(response.status)) {
+								discard(fallback?.response);
+								return finish(entry);
+							}
+							if (fallback) return discard(response);
+							fallback = entry;
+							grace = setTimeout(() => finish(fallback), RACE_GRACE);
+						},
+						(err) => {
+							firstError ??= err;
+						}
+					)
+					.finally(() => {
+						if (++settled < routes.length || done) return;
+						if (fallback) return finish(fallback);
+						done = true;
+						reject(firstError);
+					});
+			});
+		});
+	}
 
 	// Sits in front of the real transport and swaps it out when its Wisp server dies.
 	// `connectTo(url)` builds a fresh transport for a server URL; `pick(exclude)` returns
 	// the URL to switch to.
 	//
-	// It also rescues single sites: when a site fails but the server is fine (the server
-	// refuses that site, or the TLS handshake fails with it), the request is retried
-	// through `alternatives()` (other TLS engines / servers), and the route that worked is
-	// remembered for that site.
+	// It also picks a route per site. The first request to a site goes out through the
+	// main connection and all of `alternatives()` (other TLS engines / servers) at once,
+	// and whichever answers first is used for the rest of that site. If a site later fails
+	// or answers with a blocked page, the other routes are tried again.
 	class FailoverTransport {
 		constructor({ url, transport, connectTo, pick, onSwitch, alternatives }) {
 			this.url = url;
@@ -111,8 +182,70 @@ self.WispPool = (() => {
 			this.alternatives = alternatives || (() => []);
 			this.dead = new Set();
 			this.checking = null;
-			this.routes = new Map(); // hostname -> transport that works for it
+			this.routes = new Map(); // hostname -> MAIN or the transport that works for it
+			this.deciding = new Map(); // hostname -> race still picking its route
 			this.hopeless = new Map(); // hostname -> time rescue may be tried again
+			this.retried = new Map(); // hostname -> time a blocked answer may be retried again
+		}
+
+		// The transport a site's requests go through.
+		routeFor(host) {
+			const route = this.routes.get(host);
+			return route && route !== MAIN ? route : this.inner;
+		}
+
+		remember(host, transport) {
+			this.routes.set(host, transport === this.inner ? MAIN : transport);
+		}
+
+		async otherRoutes(...skip) {
+			let alternatives = [];
+			try {
+				alternatives = await this.alternatives();
+			} catch (err) {
+				console.warn("No backup routes:", err);
+			}
+			return [...new Set([this.inner, ...alternatives])].filter((t) => !skip.includes(t));
+		}
+
+		// First request to a site: every route at once, the first to answer wins.
+		async decide(host, send, signal) {
+			const race = this.otherRoutes().then((routes) => raceRoutes(routes, send, signal));
+			this.deciding.set(host, race);
+			try {
+				const { transport, response } = await race;
+				this.remember(host, transport);
+				return response;
+			} catch (err) {
+				if (signal?.aborted) throw err;
+				// Nothing got through: if the main server died, the next one may.
+				if (await this.checkServer()) return send(this.inner);
+				this.hopeless.set(host, Date.now() + RESCUE_COOLDOWN);
+				throw err;
+			} finally {
+				this.deciding.delete(host);
+			}
+		}
+
+		// The site answered with a blocked page: ask the other routes once (per cooldown) and
+		// switch the site over if one gets a real answer.
+		async retryBlocked(host, used, response, send, signal) {
+			if (this.retried.get(host) > Date.now()) return response;
+			this.retried.set(host, Date.now() + RESCUE_COOLDOWN);
+			const others = await this.otherRoutes(used);
+			if (!others.length) return response;
+			try {
+				const winner = await raceRoutes(others, send, signal);
+				if (blocked(winner.response.status)) {
+					discard(winner.response);
+					return response;
+				}
+				discard(response);
+				this.remember(host, winner.transport);
+				return winner.response;
+			} catch {
+				return response;
+			}
 		}
 
 		// Tries `run(transport)` on each alternative; remembers the first that works.
@@ -123,7 +256,7 @@ self.WispPool = (() => {
 				try {
 					if (!alt.ready) await alt.init();
 					const result = await run(alt);
-					this.routes.set(host, alt);
+					this.remember(host, alt);
 					return { result };
 				} catch {
 					// try the next one
@@ -175,31 +308,37 @@ self.WispPool = (() => {
 
 		async request(remote, method, body, headers, signal) {
 			const host = remote.hostname;
-			const route = this.routes.get(host);
-			const send = (transport) => transport.request(remote, method, body, headers, signal);
-			const first = route || this.inner;
+			const send = (transport, sig = signal) => transport.request(remote, method, body, headers, sig);
+			const raceable = repeatable(method, body);
+			if (raceable && !this.routes.has(host) && !(this.hopeless.get(host) > Date.now())) {
+				const pending = this.deciding.get(host);
+				// Requests made while the site's first race runs wait for its winner.
+				if (pending) await pending.catch(() => {});
+				else return this.decide(host, send, signal);
+			}
+			const first = this.routeFor(host);
+			let response;
 			try {
-				return await send(first);
+				response = await send(first);
 			} catch (err) {
 				if (signal?.aborted) throw err;
 				// Only bodiless requests (page loads, images, scripts) are safe to send again.
 				if (body != null) throw err;
-				if (route) {
+				if (first !== this.inner) {
 					this.routes.delete(host);
-				} else {
-					const switched = first === this.inner ? await this.checkServer() : true;
-					if (switched) {
-						try {
-							return await send(this.inner);
-						} catch {
-							// fall through to the site rescue
-						}
+				} else if (await this.checkServer()) {
+					try {
+						return await send(this.inner);
+					} catch {
+						// fall through to the site rescue
 					}
 				}
 				const rescued = await this.rescue(host, send);
 				if (rescued) return rescued.result;
 				throw err;
 			}
+			if (raceable && blocked(response.status)) return this.retryBlocked(host, first, response, send, signal);
+			return response;
 		}
 /* filler: c__o__d__e */
 		// WebSockets: use the site's known route; if it fails before opening, try the
@@ -250,7 +389,7 @@ self.WispPool = (() => {
 				step(0)(error);
 			};
 
-			attempt(this.routes.get(host) || this.inner, tryAlternatives);
+			attempt(this.routeFor(host), tryAlternatives);
 			return [
 				(data) => current?.[0](data),
 				(code, reason) => {
