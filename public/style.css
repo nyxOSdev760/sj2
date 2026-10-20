@@ -3012,3 +3012,57 @@ body[data-mode="os"] .panel .panel-head h2 {
 		display: none;
 	}
 }
+
+/* Laptops and other wide screens get wallpapers made for them: each tall photo cropped
+   to 1920x1080 around its subject and sharpened (public/wallpapers/*-wide.jpg). */
+@media (orientation: landscape) and (min-width: 700px) {
+	.wallpaper[data-wallpaper="gtr-sunset"],
+	.wallpaper-preview[data-wallpaper="gtr-sunset"] {
+		background-image: url("wallpapers/gtr-sunset-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="r34-night"],
+	.wallpaper-preview[data-wallpaper="r34-night"] {
+		background-image: url("wallpapers/r34-night-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="maybach-night"],
+	.wallpaper-preview[data-wallpaper="maybach-night"] {
+		background-image: url("wallpapers/maybach-night-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="maybach-driveway"],
+	.wallpaper-preview[data-wallpaper="maybach-driveway"] {
+		background-image: url("wallpapers/maybach-driveway-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="flower-field"],
+	.wallpaper-preview[data-wallpaper="flower-field"] {
+		background-image: url("wallpapers/flower-field-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="hokage"],
+	.wallpaper-preview[data-wallpaper="hokage"] {
+		background-image: url("wallpapers/hokage-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="beach"],
+	.wallpaper-preview[data-wallpaper="beach"] {
+		background-image: url("wallpapers/beach-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="blue-hour"],
+	.wallpaper-preview[data-wallpaper="blue-hour"] {
+		background-image: url("wallpapers/blue-hour-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper="cabin"],
+	.wallpaper-preview[data-wallpaper="cabin"] {
+		background-image: url("wallpapers/cabin-wide.jpg");
+	}
+
+	.wallpaper[data-wallpaper],
+	.wallpaper-preview[data-wallpaper] {
+		background-position: center;
+	}
+}
