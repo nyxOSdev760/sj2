@@ -17,8 +17,6 @@ self.Tour = (() => {
 		right: "M5 12h14M13 6l6 6-6 6",
 	};
 
-	// OS mode and browser mode get different directions for the same steps.
-	const os = () => document.body.dataset.mode === "os";
 	const STEPS_FOR = () => [
 		{
 			label: "Welcome",
@@ -30,29 +28,25 @@ self.Tour = (() => {
 			label: "Tabs",
 			icon: "tabs",
 			title: "Open as many tabs as you want",
-			body: os()
-				? "The globe in the taskbar opens the browser in a window: drag it around, resize it from the corner, or maximize it. Hit + for a new tab; History is under ☰."
-				: "Hit + up top for a new tab, and middle-click a tab to close it. Everything you visit lands in History, under ☰ in the toolbar.",
+			body: "Hit + next to your tabs for a new one, and middle-click a tab to close it. Everything you visit lands in History, top right.",
 		},
 		{
 			label: "Shortcuts",
 			icon: "grid",
 			title: "Pin your sites",
-			body: os()
-				? "Your sites live in Apps in the taskbar and on every new tab. Movies opens in its own window. In Apps, tap Edit to remove a site or Add to pin one."
-				: "Your sites live on every new tab and in Apps. Tap Add in Apps to pin one, Edit to remove one, or use ☰ → Bookmark this page while you browse.",
+			body: "Your sites sit under the search bar. The pencil adds or removes them, and ☰ → Bookmark this page pins the site you're on. Games, Movies and Music are one click away in the bar at the bottom.",
 		},
 		{
 			label: "Blocking",
 			icon: "shield",
 			title: "Ads? Blocked.",
-			body: `Ad and tracker domains are blocked automatically through AdGuard DNS. If a server goes down, ${APP} switches to another one on its own.`,
+			body: `Ad and tracker domains are blocked automatically through AdGuard DNS. Every site goes through whichever server reaches it fastest, and if one goes down ${APP} switches on its own.`,
 		},
 		{
 			label: "Settings",
 			icon: "gear",
 			title: "Make it yours",
-			body: `The gear (arc4dia://settings) has your theme, wallpaper, search engine and server settings. History never leaves this browser.`,
+			body: `The gear at the bottom right (arc4dia://settings) has themes, your search engine and server settings. History never leaves this browser.`,
 		},
 	];
 	let STEPS = []; // worked out when the tour opens (the page body isn't there yet now)

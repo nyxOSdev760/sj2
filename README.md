@@ -27,33 +27,32 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## Tabs and history
 
-Open as many tabs as you like with **+** in the tab strip (middle-click a tab to close it).
-Each tab is its own proxied frame. Visited pages are saved to **History** (in the ☰ menu),
-which you can search, open in the current tab (Ctrl/Cmd- or middle-click opens
-a new tab), prune or clear. History is stored only in your browser's `localStorage` and can be
-turned off under *Settings → Save history*.
+Open as many tabs as you like with **+** next to the tabs (middle-click a tab to close it).
+Each tab is its own proxied frame with its own Back and Forward. Visited pages are saved to
+**History** (the pill at the top right), which you can search, open in the current tab
+(Ctrl/Cmd- or middle-click opens a new tab), prune or clear. History is stored only in your
+browser's `localStorage` and can be turned off under *Settings → Save history*.
 
-The home screen has shortcut tiles (YouTube, TikTok, Discord, and Twitch to start). Tap **Add**
-to pin any site, the trash can to remove one, or use **☰ → Bookmark this page** while browsing.
-Ctrl/Cmd- or middle-click opens a shortcut in a new tab. Shortcuts are saved in your browser;
+The home screen is the Arc4dia wordmark over an animated constellation, a search bar, and a
+launcher: round buttons for your sites (YouTube, TikTok, Discord and Twitch to start), then
+Games, Movies, Music, History and a pencil that edits your shortcuts (Add, or the trash can in
+Edit). **☰ → Bookmark this page** pins the site you're on. Shortcuts are saved in your browser;
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
-The default theme is **Lavender**, a soft cool light theme; *Settings → Theme* switches to
-**AMOLED dark**. The home screen wallpaper is set under **Change wallpaper** (or *Settings → Wallpaper*): four car photos (**GT-R sunset**, the
-default, **Night drive**, **Maybach night** and **Maybach driveway**, in `public/wallpapers/`),
-six more photos (**Flower field**, **Hokage**, **Overcast**, **Beach**, **Blue hour** and **Cabin**), **Snow** (animated snowfall) or **Night sky** (an animated constellation). The
-animations pause while a page is open or the tab is hidden, and stay still for people who
-prefer reduced motion.
+Every theme is dark: **Forest** (the default), Midnight, Ocean, Lavender, Sunset, Rose, Mono
+and AMOLED black, under *Settings → Theme*. The constellation pauses while a page is open or
+the tab is hidden, and stays still for people who prefer reduced motion.
 
-The **☰ menu** has History, Bookmark this page and Take the tour. The
-address bar shows `arc4dia://home` on the home screen; `arc4dia://history` and `arc4dia://settings`
-open those panels. A five-step welcome tour shows on the first visit.
+The **☰ menu** has Bookmark this page, Edit shortcuts, Credits and Take the tour. The address
+bar shows `arc4dia://home` on the home screen; `arc4dia://history` and `arc4dia://settings`
+open those. A five-step welcome tour shows on the first visit.
 
-The bottom bar holds Browser, Games, Movies, Music, Apps and Settings.
-**Games** opens `arc4dia://games` (itch.io free web games and Armor Games) and **Settings** opens `arc4dia://settings`, both as pages in a tab. **Movies**
-(`arc4dia://movies`) opens movy.sx; the address bar, tab and history show it as
-`arc4dia://movies`. **Change wallpaper** opens a picker with every wallpaper.
+The bottom bar holds Movies, Music, Games, Shortcuts, History and Settings. **Games** opens
+`arc4dia://games` (itch.io free web games and Armor Games) and **Settings** opens
+`arc4dia://settings`, both as pages in a tab. **Movies** (`arc4dia://movies`) opens movy.sx
+and **Music** (`arc4dia://music`) opens Ripple; the address bar, tab and history show them by
+those names.
 
 YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
 videos for traffic from datacenter IPs, which every Wisp server (Render included) uses.
@@ -157,8 +156,8 @@ as the backup.
 
 | Piece | Where |
 | --- | --- |
-| Static site (UI, tabs, history, `sw.js`, `config.js`) | `public/` |
-| Shortcuts, animated wallpapers, welcome tour | `public/home.js`, `public/tour.js` |
+| Static site (UI, tabs, history, `servy.js`, `config.js`) | `public/` |
+| Shortcuts, the constellation background, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
 | Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
@@ -166,7 +165,7 @@ as the backup.
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |
 | Wisp server (TCP over WebSocket) | `/wisp/` → `@mercuryworkshop/wisp-js` (Node server only) |
 
-1. `public/app.js` registers `sw.js`, loads Scramjet and the controller, and creates a
+1. `public/app.js` registers the service worker `servy.js`, loads Scramjet and the controller, and creates a
    transport (libcurl by default, epoxy selectable under *Settings*).
 2. A `Controller` is created and attached to the page's `<iframe>`; `frame.go(url)` navigates it.
 3. Requests from the iframe hit the service worker, which hands them to the controller to be

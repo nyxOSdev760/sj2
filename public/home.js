@@ -195,11 +195,15 @@ self.Shortcuts = (() => {
 			save();
 		},
 		iconFor,
+		// The site's logo as an <svg>, or null when it isn't a known brand.
+		brandIcon(url) {
+			return brandFor(url) ? iconFor({ name: "", url }) : null;
+		},
 	};
 })();
 
-// Animated wallpapers drawn on the home screen's canvas. Each start() returns a stop().
-// They only animate while the home screen is on screen and the page is visible.
+// The home screen's animated background, drawn on a canvas. start() returns a stop().
+// It only animates while the home screen is on screen and the page is visible.
 function animateCanvas(canvas, { setup, frame, still }) {
 	const ctx = canvas.getContext("2d");
 	const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -208,7 +212,7 @@ function animateCanvas(canvas, { setup, frame, still }) {
 	let stopped = false;
 	let timer = 0;
 	let raf = 0;
-/* filler: c__o__d__e */
+
 	function resize() {
 		const dpr = Math.min(devicePixelRatio || 1, 2);
 		width = canvas.clientWidth;
@@ -245,22 +249,30 @@ function animateCanvas(canvas, { setup, frame, still }) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 	};
 }
-/* filler: c__o__d__e */
-// Drifting points joined by faint lines.
+
+// A night sky: faint twinkling dust, and brighter stars drifting slowly, joined by thin
+// lines when they come near each other. `color` is "r g b".
 self.Constellation = {
-	start(canvas, color = "167 139 250") {
-		let points = [];
+	start(canvas, color = "150 230 190") {
+		let dust = [];
+		let stars = [];
+		let reach = 160;
+		let t = 0;
 		function draw(ctx, width, height) {
 			ctx.clearRect(0, 0, width, height);
-			const reach = Math.min(140, Math.max(90, width / 8));
-			for (let i = 0; i < points.length; i++) {
-				const a = points[i];
-				for (let j = i + 1; j < points.length; j++) {
-					const b = points[j];
+			for (const d of dust) {
+				const alpha = d.alpha * (0.6 + 0.4 * Math.sin(t * d.speed + d.phase));
+				ctx.fillStyle = `rgb(${color} / ${alpha})`;
+				ctx.fillRect(d.x, d.y, d.r, d.r);
+			}
+			ctx.lineWidth = 1;
+			for (let i = 0; i < stars.length; i++) {
+				const a = stars[i];
+				for (let j = i + 1; j < stars.length; j++) {
+					const b = stars[j];
 					const d = Math.hypot(a.x - b.x, a.y - b.y);
 					if (d < reach) {
-						ctx.strokeStyle = `rgb(${color} / ${0.22 * (1 - d / reach)})`;
-						ctx.lineWidth = 1;
+						ctx.strokeStyle = `rgb(${color} / ${0.28 * (1 - d / reach)})`;
 						ctx.beginPath();
 						ctx.moveTo(a.x, a.y);
 						ctx.lineTo(b.x, b.y);
@@ -268,79 +280,48 @@ self.Constellation = {
 					}
 				}
 			}
-			ctx.fillStyle = `rgb(${color} / 0.7)`;
-			for (const p of points) {
+			for (const s of stars) {
+				const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+				glow.addColorStop(0, `rgb(${color} / 0.55)`);
+				glow.addColorStop(1, `rgb(${color} / 0)`);
+				ctx.fillStyle = glow;
 				ctx.beginPath();
-				ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+				ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.fillStyle = `rgb(${color} / 0.95)`;
+				ctx.beginPath();
+				ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
 				ctx.fill();
 			}
 		}
 		return animateCanvas(canvas, {
 			setup(width, height) {
-				const count = Math.min(90, Math.round((width * height) / 14000));
-				points = Array.from({ length: count }, () => ({
+				reach = Math.min(240, Math.max(130, width / 6));
+				dust = Array.from({ length: Math.min(260, Math.round((width * height) / 5000)) }, () => ({
 					x: Math.random() * width,
 					y: Math.random() * height,
-					vx: (Math.random() - 0.5) * 0.25,
-					vy: (Math.random() - 0.5) * 0.25,
-					r: Math.random() * 1.2 + 0.6,
+					r: Math.random() < 0.85 ? 1 : 2,
+					alpha: 0.12 + Math.random() * 0.45,
+					speed: 0.01 + Math.random() * 0.03,
+					phase: Math.random() * Math.PI * 2,
+				}));
+				stars = Array.from({ length: Math.min(46, Math.round((width * height) / 26000)) }, () => ({
+					x: Math.random() * width,
+					y: Math.random() * height,
+					vx: (Math.random() - 0.5) * 0.18,
+					vy: (Math.random() - 0.5) * 0.18,
+					r: 1.4 + Math.random() * 1.4,
 				}));
 			},
 			frame(ctx, width, height) {
-				for (const p of points) {
-					p.x += p.vx;
-					p.y += p.vy;
-					if (p.x < -10) p.x = width + 10;
-					else if (p.x > width + 10) p.x = -10;
-					if (p.y < -10) p.y = height + 10;
-					else if (p.y > height + 10) p.y = -10;
-				}
-				draw(ctx, width, height);
-			},
-			still: draw,
-		});
-	},
-};
-
-// Falling snow: near flakes are bigger, brighter and faster, and every flake sways.
-self.Snowfall = {
-	start(canvas) {
-		let flakes = [];
-		let t = 0;
-		function draw(ctx, width, height) {
-			ctx.clearRect(0, 0, width, height);
-			for (const f of flakes) {
-				ctx.fillStyle = `rgb(255 255 255 / ${f.alpha})`;
-				ctx.beginPath();
-				ctx.arc(f.x + Math.sin(t * f.sway + f.phase) * f.drift, f.y, f.r, 0, Math.PI * 2);
-				ctx.fill();
-			}
-		}
-		return animateCanvas(canvas, {
-			setup(width, height) {
-				const count = Math.min(260, Math.round((width * height) / 5000));
-				flakes = Array.from({ length: count }, () => {
-					const depth = Math.random();
-					return {
-						x: Math.random() * width,
-						y: Math.random() * height,
-						r: 0.8 + depth * 2.6,
-						speed: 0.35 + depth * 1.2,
-						alpha: 0.35 + depth * 0.6,
-						drift: 6 + depth * 18,
-						sway: 0.01 + Math.random() * 0.02,
-						phase: Math.random() * Math.PI * 2,
-					};
-				});
-			},
-			frame(ctx, width, height) {
 				t++;
-				for (const f of flakes) {
-					f.y += f.speed;
-					if (f.y > height + 6) {
-						f.y = -6;
-						f.x = Math.random() * width;
-					}
+				for (const s of stars) {
+					s.x += s.vx;
+					s.y += s.vy;
+					if (s.x < -20) s.x = width + 20;
+					else if (s.x > width + 20) s.x = -20;
+					if (s.y < -20) s.y = height + 20;
+					else if (s.y > height + 20) s.y = -20;
 				}
 				draw(ctx, width, height);
 			},

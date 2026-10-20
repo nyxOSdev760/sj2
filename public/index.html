@@ -1,18 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="forest">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#e9e7f6" />
+		<meta name="theme-color" content="#070c0a" />
 		<script>
-			// Apply the saved theme before first paint so there's no flash.
+			// Apply the saved theme before first paint so there's no flash. Themes saved before
+			// the redesign (sj2:themeV < 2) start over on Forest.
 			try {
-				if (localStorage.getItem("sj2:theme") === "dark") document.documentElement.dataset.theme = "dark";
+				const saved = localStorage.getItem("sj2:themeV") === "2" && localStorage.getItem("sj2:theme");
+				if (/^(dark|midnight|ocean|lavender|sunset|rose|mono)$/.test(saved)) document.documentElement.dataset.theme = saved;
 			} catch {}
 		</script>
 		<title>Arc4dia</title>
 		<link rel="icon" href="data:," />
-		<link rel="preload" href="fonts/outfit-600.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="fonts/playball-400.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="stylesheet" href="style.css" />
 		<script src="config.js"></script>
 		<script src="adblock.js"></script>
@@ -21,64 +23,24 @@
 		<script src="tour.js"></script>
 		<script src="app.js" defer></script>
 	</head>
-	<body data-view="desktop">
-		<div id="wallpaper-layer" class="wallpaper" aria-hidden="true">
-			<canvas id="stars" class="stars"></canvas>
-		</div>
-
-		<section id="desktop" class="desktop" aria-label="Desktop">
-			<header class="topbar">
-				<h1 class="topbar-name">Arc4dia</h1>
-				<span class="topbar-spacer"></span>
-				<button id="to-browser-mode" class="topbar-button" type="button" title="Switch to browser mode" aria-label="Switch to browser mode">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4" /></svg>
-				</button>
-				<span id="topbar-time" class="topbar-time"></span>
-			</header>
-		</section>
-
-		<div id="os-window" class="os-window">
-			<div id="os-window-bar" class="os-window-bar">
-				<span id="os-window-title" class="os-window-title">Browser</span>
-				<button type="button" data-win="min" title="Minimize" aria-label="Minimize">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
-				</button>
-				<button type="button" data-win="max" title="Maximize" aria-label="Maximize">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z" /></svg>
-				</button>
-				<button type="button" data-win="close" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
-				</button>
-			</div>
-		<section id="browser" class="browser" aria-label="Browser" hidden>
-			<nav id="tabbar">
-				<div id="tabs" role="tablist" aria-label="Tabs"></div>
-				<button id="add-tab" class="icon" title="New tab" aria-label="New tab">
-					<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-				</button>
-			</nav>
-
+	<body>
+		<section id="browser" class="browser" aria-label="Browser">
 			<header id="toolbar">
 				<button id="back" class="icon" title="Back" aria-label="Back">
-					<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+					<svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
 				</button>
 				<button id="forward" class="icon" title="Forward" aria-label="Forward">
-					<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+					<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 				</button>
 				<button id="reload" class="icon" title="Reload" aria-label="Reload">
-					<svg viewBox="0 0 24 24">
-						<path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
-					</svg>
-				</button>
-				<button id="home" class="icon" title="Home" aria-label="Home">
-					<svg viewBox="0 0 24 24">
-						<path d="M3 11l9-7 9 7M5 10v10h14V10" />
-					</svg>
+					<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
 				</button>
 				<form id="bar-form" class="bar">
-					<svg id="bar-icon" class="bar-icon" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M3 11l9-7 9 7M5 10v10h14V10" />
-					</svg>
+					<button id="home" class="bar-home" type="button" title="Home" aria-label="Home">
+						<svg id="bar-icon" class="bar-icon" viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M3 11l9-7 9 7M5 10v10h14V10" />
+						</svg>
+					</button>
 					<input
 						id="bar"
 						type="text"
@@ -101,17 +63,15 @@
 						<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
 					</button>
 					<div id="menu" class="menu" role="menu" aria-label="Menu" hidden>
-						<button type="button" role="menuitem" data-action="history">
-							<svg viewBox="0 0 24 24">
-								<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" />
-							</svg>
-							History
-						</button>
 						<button type="button" role="menuitem" data-action="bookmark">
 							<svg viewBox="0 0 24 24">
 								<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z" />
 							</svg>
 							Bookmark this page
+						</button>
+						<button type="button" role="menuitem" data-action="apps">
+							<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v6M14 17h6" /></svg>
+							Edit shortcuts
 						</button>
 						<hr />
 						<button type="button" role="menuitem" data-action="credits">
@@ -128,169 +88,161 @@
 						</button>
 					</div>
 				</div>
-				<button id="show-settings" class="icon" title="Settings" aria-label="Settings">
-					<svg viewBox="0 0 24 24">
+				<button id="history-button" class="pill-button" type="button">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
+					History
+				</button>
+			</header>
+
+			<nav id="tabbar" aria-label="Tabs">
+				<button id="add-tab" class="icon" title="New tab" aria-label="New tab">
+					<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+				</button>
+				<div id="tabs" role="tablist" aria-label="Tabs"></div>
+			</nav>
+
+			<div id="stage">
+				<main id="home-screen">
+					<canvas id="stars" class="stars" aria-hidden="true"></canvas>
+					<div class="home-main">
+						<h1 class="home-wordmark">Arc4dia</h1>
+						<form id="search-form" class="search">
+							<svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+								<circle cx="11" cy="11" r="7" />
+								<path d="M20 20l-3.5-3.5" />
+							</svg>
+							<input
+								id="search"
+								type="text"
+								autocomplete="off"
+								spellcheck="false"
+								placeholder="Search"
+								aria-label="Search or enter a URL"
+								autofocus
+							/>
+							<button class="search-go" type="submit" title="Go" aria-label="Go">
+								<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+							</button>
+						</form>
+						<p id="status" class="status" role="status">Starting proxy…</p>
+						<div class="launcher">
+							<nav id="home-shortcuts" class="launcher-row" aria-label="Shortcuts"></nav>
+							<nav class="launcher-row" aria-label="Apps">
+								<button class="launcher-button" type="button" data-app="games" title="Games" aria-label="Games">
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" />
+									</svg>
+								</button>
+								<button class="launcher-button" type="button" data-app="movies" title="Movies" aria-label="Movies">
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4" />
+									</svg>
+								</button>
+								<button class="launcher-button" type="button" data-app="music" title="Music" aria-label="Music">
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+									</svg>
+								</button>
+								<button class="launcher-button" type="button" data-app="history" title="History" aria-label="History">
+									<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
+								</button>
+								<button class="launcher-button" type="button" data-app="edit" title="Edit shortcuts" aria-label="Edit shortcuts">
+									<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20H4v-4zM14 6l4 4" /></svg>
+								</button>
+							</nav>
+						</div>
+					</div>
+				</main>
+
+				<section id="page-settings" class="internal-page" aria-labelledby="page-settings-title" hidden>
+					<h1 id="page-settings-title" class="internal-title">Settings</h1>
+					<div class="settings">
+						<label>
+							Theme
+							<select id="theme">
+								<option value="forest">Forest</option>
+								<option value="midnight">Midnight</option>
+								<option value="ocean">Ocean</option>
+								<option value="lavender">Lavender</option>
+								<option value="sunset">Sunset</option>
+								<option value="rose">Rose</option>
+								<option value="mono">Mono</option>
+								<option value="dark">AMOLED black</option>
+							</select>
+						</label>
+						<label>
+							Transport
+							<select id="transport">
+								<option value="libcurl">libcurl</option>
+								<option value="epoxy">epoxy</option>
+							</select>
+						</label>
+						<label>
+							<span class="setting-name">Wisp server<span id="wisp-using" class="setting-hint"></span></span>
+							<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
+						</label>
+						<label>
+							Save history
+							<input id="save-history" type="checkbox" />
+						</label>
+						<label>
+							Search engine
+							<select id="engine">
+								<option value="https://html.duckduckgo.com/html/?q=%s&kae=d">DuckDuckGo</option>
+								<option value="https://duckduckgo.com/?q=%s&kae=d">DuckDuckGo (full site)</option>
+								<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
+								<option value="https://www.google.com/search?q=%s">Google</option>
+								<option value="https://www.bing.com/search?q=%s">Bing</option>
+								<option value="https://search.brave.com/search?q=%s">Brave</option>
+							</select>
+						</label>
+						<label>
+							Home shortcuts
+							<button id="reset-shortcuts" class="text-button" type="button">Reset to defaults</button>
+						</label>
+						<p id="settings-status" class="status" role="status"></p>
+					</div>
+				</section>
+
+				<section id="page-games" class="internal-page" aria-labelledby="page-games-title" hidden>
+					<h1 id="page-games-title" class="internal-title">Games</h1>
+					<div id="games-list" class="games-list"></div>
+					<p id="games-empty" class="internal-empty">No games yet.</p>
+				</section>
+
+				<div id="frames"></div>
+			</div>
+
+			<nav id="dock" class="dock" aria-label="Apps">
+				<button type="button" data-dock="movies" title="Movies" aria-label="Movies">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4" />
+					</svg>
+				</button>
+				<button type="button" data-dock="music" title="Music" aria-label="Music">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg>
+				</button>
+				<button type="button" data-dock="games" title="Games" aria-label="Games">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" />
+					</svg>
+				</button>
+				<button type="button" data-dock="apps" title="Shortcuts" aria-label="Shortcuts">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg>
+				</button>
+				<button type="button" data-dock="history" title="History" aria-label="History">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
+				</button>
+				<button type="button" data-dock="settings" title="Settings" aria-label="Settings">
+					<svg viewBox="0 0 24 24" aria-hidden="true">
 						<circle cx="12" cy="12" r="3" />
 						<path
 							d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
 						/>
 					</svg>
 				</button>
-			</header>
-
-			<main id="home-screen">
-				<div class="home-main">
-					<h2 class="home-wordmark">Arc4dia</h2>
-					<form id="search-form" class="search">
-						<svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-							<circle cx="11" cy="11" r="7" />
-							<path d="M20 20l-3.5-3.5" />
-						</svg>
-						<input
-							id="search"
-							type="text"
-							autocomplete="off"
-							spellcheck="false"
-							placeholder="Search or enter a URL"
-							aria-label="Search or enter a URL"
-							autofocus
-						/>
-						<button class="search-go" type="submit" title="Go" aria-label="Go">
-							<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-						</button>
-					</form>
-					<p id="status" class="status" role="status">Starting proxy…</p>
-					<nav id="home-shortcuts" class="shortcuts home-shortcuts" aria-label="Shortcuts"></nav>
-				</div>
-			</main>
-
-			<section id="page-settings" class="internal-page" aria-labelledby="page-settings-title" hidden>
-				<h1 id="page-settings-title" class="internal-title">Settings</h1>
-				<div class="settings">
-					<label>
-						Mode
-						<button id="switch-mode" class="text-button" type="button">Switch to OS mode</button>
-					</label>
-					<label>
-						<span class="setting-name">Theme<span class="setting-hint os-only">Used in browser mode; OS mode stays black</span></span>
-						<select id="theme">
-							<option value="lavender">Lavender</option>
-							<option value="dark">AMOLED dark</option>
-							<option value="midnight">Midnight</option>
-							<option value="forest">Forest</option>
-							<option value="sunset">Sunset</option>
-							<option value="ocean">Ocean</option>
-							<option value="rose">Rose</option>
-							<option value="mono">Mono</option>
-						</select>
-					</label>
-					<label>
-						Wallpaper
-						<button id="choose-wallpaper" class="text-button" type="button">Choose…</button>
-					</label>
-					<label>
-						Transport
-						<select id="transport">
-							<option value="libcurl">libcurl</option>
-							<option value="epoxy">epoxy</option>
-						</select>
-					</label>
-					<label>
-						<span class="setting-name">Wisp server<span id="wisp-using" class="setting-hint"></span></span>
-						<input id="wisp" type="text" autocomplete="off" spellcheck="false" />
-					</label>
-					<label>
-						Save history
-						<input id="save-history" type="checkbox" />
-					</label>
-					<label>
-						Search engine
-						<select id="engine">
-							<option value="https://html.duckduckgo.com/html/?q=%s&kae=d">DuckDuckGo</option>
-							<option value="https://duckduckgo.com/?q=%s&kae=d">DuckDuckGo (full site)</option>
-							<option value="https://www.startpage.com/sp/search?query=%s">Startpage</option>
-							<option value="https://www.google.com/search?q=%s">Google</option>
-							<option value="https://www.bing.com/search?q=%s">Bing</option>
-							<option value="https://search.brave.com/search?q=%s">Brave</option>
-						</select>
-					</label>
-					<label>
-						Home shortcuts
-						<button id="reset-shortcuts" class="text-button" type="button">Reset to defaults</button>
-					</label>
-					<p id="settings-status" class="status" role="status"></p>
-				</div>
-			</section>
-
-			<section id="page-games" class="internal-page" aria-labelledby="page-games-title" hidden>
-				<h1 id="page-games-title" class="internal-title">Games</h1>
-				<div id="games-list" class="games-list"></div>
-				<p id="games-empty" class="internal-empty">No games yet.</p>
-			</section>
-
-			<div id="frames"></div>
+			</nav>
 		</section>
-			<div id="os-window-resize" class="os-window-resize" aria-hidden="true"></div>
-		</div>
-
-		<div id="lock" class="lock" tabindex="-1" role="dialog" aria-label="Lock screen" hidden>
-			<div class="lock-clock">
-				<p id="lock-time" class="lock-time"></p>
-				<p id="lock-date" class="lock-date"></p>
-			</div>
-			<button id="lock-hint" class="lock-hint" type="button">
-				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
-				Swipe up to unlock
-			</button>
-		</div>
-
-		<nav id="dock" class="dock" aria-label="Arc4dia">
-			<button type="button" data-dock="desktop" title="Desktop" aria-label="Desktop">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
-				</svg>
-			</button>
-			<span class="dock-sep" aria-hidden="true"></span>
-			<button type="button" data-dock="browser" title="Browser" aria-label="Browser">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"
-					/>
-				</svg>
-			</button>
-			<button type="button" data-dock="games" title="Games" aria-label="Games">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z"
-					/>
-				</svg>
-			</button>
-			<button type="button" data-dock="movies" title="Movies" aria-label="Movies">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path d="M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4" />
-				</svg>
-			</button>
-			<button type="button" data-dock="music" title="Music" aria-label="Music">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-				</svg>
-			</button>
-			<button type="button" data-dock="apps" title="Apps" aria-label="Apps">
-				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM4 14h6v6H4zM14 14h6v6h-6zM17 3l4 4-4 4-4-4z" /></svg>
-			</button>
-			<button type="button" data-dock="settings" title="Settings" aria-label="Settings">
-				<svg viewBox="0 0 24 24">
-					<circle cx="12" cy="12" r="3" />
-					<path
-						d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
-					/>
-				</svg>
-			</button>
-			<span class="dock-sep" aria-hidden="true"></span>
-			<button type="button" data-dock="browser-mode" title="Switch to browser mode" aria-label="Switch to browser mode">
-				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3zM8 20h8M12 16v4" /></svg>
-			</button>
-		</nav>
 
 		<dialog id="shortcut-panel" class="panel" aria-labelledby="shortcut-title">
 			<form id="shortcut-form" method="dialog">
@@ -325,44 +277,15 @@
 			</form>
 		</dialog>
 
-		<dialog id="mode-panel" class="panel apps mode-panel" aria-labelledby="mode-title">
-			<div class="mode-body">
-				<h2 id="mode-title" class="mode-title">How do you want to use Arc4dia?</h2>
-				<p class="mode-sub">You can switch any time in Settings.</p>
-				<div class="mode-options">
-					<button class="mode-option" type="button" data-mode="os">
-						<span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg></span>
-						<span class="mode-name">OS mode</span>
-						<span class="mode-about">A desktop with a clock, apps, a dock and wallpapers.</span>
-					</button>
-					<button class="mode-option" type="button" data-mode="browser">
-						<span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z" /></svg></span>
-						<span class="mode-name">Browser mode</span>
-						<span class="mode-about">Just tabs and a search bar, like a normal browser.</span>
-					</button>
-				</div>
-			</div>
-		</dialog>
-
-		<dialog id="wallpaper-panel" class="panel apps" aria-labelledby="wallpaper-title">
-			<header class="panel-head">
-				<h2 id="wallpaper-title">Wallpapers</h2>
-				<button id="wallpaper-close" class="icon" type="button" title="Close" aria-label="Close">
-					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-				</button>
-			</header>
-			<div id="wallpaper-list" class="wallpaper-list" role="radiogroup" aria-label="Wallpapers"></div>
-		</dialog>
-
 		<dialog id="apps-panel" class="panel apps" aria-labelledby="apps-title">
 			<header class="panel-head">
-				<h2 id="apps-title">Apps</h2>
+				<h2 id="apps-title">Shortcuts</h2>
 				<button id="apps-edit" class="text-button" type="button" aria-pressed="false">Edit</button>
 				<button id="apps-close" class="icon" type="button" title="Close" aria-label="Close">
 					<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
 				</button>
 			</header>
-			<nav id="shortcuts" class="shortcuts apps-grid" aria-label="Apps"></nav>
+			<nav id="shortcuts" class="shortcuts apps-grid" aria-label="Shortcuts"></nav>
 		</dialog>
 
 		<dialog id="credits-panel" class="panel credits" aria-labelledby="credits-title">
@@ -380,7 +303,7 @@
 					<span>Claude</span>
 				</p>
 				<p class="credits-built">
-					Built with Scramjet by Mercury Workshop, AdGuard DNS, the Outfit font and Simple Icons.
+					Built with Scramjet by Mercury Workshop, AdGuard DNS, the Playball font and Simple Icons.
 				</p>
 			</div>
 		</dialog>

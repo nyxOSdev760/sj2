@@ -6,7 +6,7 @@ const BASE = new URL("./", location.href);
 const path = (p) => new URL(p, BASE).pathname;
 
 const PATHS = {
-	sw: path("sw.js"),
+	sw: path("servy.js"),
 	prefix: path("~/sj/"),
 	scramjet: path("scramjet/scramjet.js"),
 	wasm: path("scramjet/scramjet.wasm"),
@@ -21,7 +21,6 @@ const els = {
 	tabs: $("tabs"),
 	toolbar: $("toolbar"),
 	home: $("home-screen"),
-	desktop: $("desktop"),
 	browser: $("browser"),
 	frames: $("frames"),
 	bar: $("bar"),
@@ -353,7 +352,29 @@ const BAR_ICONS = {
 	lock: "M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4",
 	globe:
 		"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
+	settings:
+		"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z",
+	games:
+		"M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z",
+	movies: "M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4",
+	music: "M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
 };
+
+// A tab's icon: the site's logo when it's a known brand, otherwise a line icon for the
+// page (home, settings, games, movies, music) or a globe.
+function tabIcon(tab) {
+	const brand = tab.url && !isMovies(tab.url) && !isMusic(tab.url) && Shortcuts.brandIcon(tab.url);
+	if (brand) return brand;
+	const name = tab.page || (!tab.url ? "home" : isMovies(tab.url) ? "movies" : isMusic(tab.url) ? "music" : "globe");
+	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	svg.setAttribute("viewBox", "0 0 24 24");
+	svg.setAttribute("aria-hidden", "true");
+	svg.classList.add("line-icon");
+	const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+	path.setAttribute("d", BAR_ICONS[name] ?? BAR_ICONS.globe);
+	svg.append(path);
+	return svg;
+}
 
 // Movies is movy.sx, but the address bar, tabs and history call it arc4dia://movies.
 const MOVIES_URL = "https://www.movy.sx/";
@@ -610,7 +631,7 @@ async function main() {
 		const text = tab.page
 			? PAGE_TITLES[tab.page]
 			: !tab.url
-				? "New tab"
+				? "Home"
 				: isMovies(tab.url)
 					? "Movies"
 					: isMusic(tab.url)
@@ -618,22 +639,29 @@ async function main() {
 					: tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
 		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
+		const key = tab.page || (tab.url ? hostOf(tab.url) : "home");
+		if (tab.iconKey !== key) {
+			tab.iconKey = key;
+			tab.icon.replaceChildren(tabIcon(tab));
+		}
 	}
 
 	function createTab({ activate = true } = {}) {
 		// `page` is a built-in page (arc4dia://settings, arc4dia://games) shown instead of a site.
-		const tab = { url: "", page: null, title: "", recordedUrl: null, iframe: null, frame: null };
+		const tab = { url: "", page: null, title: "", recordedUrl: null, iframe: null, frame: null, back: [], forward: [] };
 		tab.el = el("div", "tab");
 		tab.el.setAttribute("role", "tab");
 		tab.el.tabIndex = 0;
+		tab.icon = el("span", "tab-icon");
 		tab.label = el("span", "tab-title");
-		const close = el("button", "tab-close", "×");
+		const close = el("button", "tab-close");
 		close.title = "Close tab";
 		close.setAttribute("aria-label", "Close tab");
-		tab.el.append(tab.label, close);
+		close.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>';
+		tab.el.append(tab.icon, tab.label, close);
 
 		tab.el.addEventListener("click", (e) => {
-			if (e.target === close) closeTab(tab);
+			if (close.contains(e.target)) closeTab(tab);
 			else selectTab(tab);
 		});
 		tab.el.addEventListener("auxclick", (e) => {
@@ -667,6 +695,7 @@ async function main() {
 		els.bar.value = tab.page ? "arc4dia://" + tab.page : tab.url ? shownUrl(tab.url) : HOME_URL;
 		setBarIcon(tab.url);
 		updateDock();
+		updateNavButtons();
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
 		if (!tab.url && !tab.page) {
 			els.search.value = "";
@@ -689,7 +718,47 @@ async function main() {
 		else if (tab === activeTab) selectTab(tabs[Math.min(index, tabs.length - 1)]);
 	}
 
-	function goHome(tab) {
+	// Back and forward: each tab keeps its own list of pages, and a step loads that page
+	// again. (Every tab's frame shares the browser's history, so history.back() in one tab
+	// could undo another tab's page, or leave Arc4dia altogether.)
+	const entryOf = (tab) => (tab.page ? "arc4dia://" + tab.page : tab.url || HOME_URL);
+	function record(tab, next) {
+		if (next === entryOf(tab)) return; // same page again
+		tab.back.push(entryOf(tab));
+		if (tab.back.length > 100) tab.back.shift();
+		tab.forward.length = 0;
+		updateNavButtons();
+	}
+	function step(tab, dir) {
+		const from = dir < 0 ? tab.back : tab.forward;
+		if (!from.length) return;
+		(dir < 0 ? tab.forward : tab.back).push(entryOf(tab));
+		navigate(from.pop(), tab, { replace: true }).catch(() => {});
+		updateNavButtons();
+	}
+	function updateNavButtons() {
+		$("back").disabled = !activeTab?.back.length;
+		$("forward").disabled = !activeTab?.forward.length;
+	}
+
+	// A page tidying its own URL with history.replaceState isn't a new page to go back to.
+	function watchReplace(tab) {
+		try {
+			const win = tab.iframe.contentWindow;
+			if (win.__arcReplace) return;
+			win.__arcReplace = true;
+			const replace = win.history.replaceState;
+			win.history.replaceState = function (...args) {
+				tab.replaced = true;
+				return replace.apply(this, args);
+			};
+		} catch {
+			// not a proxied page
+		}
+	}
+
+	function goHome(tab, { replace = false } = {}) {
+		if (!replace) record(tab, HOME_URL);
 		tab.loader?.cancel();
 		tab.url = "";
 		tab.page = null;
@@ -709,29 +778,36 @@ async function main() {
 		tab.loader = new PageLoader(els.frames, tab.iframe);
 		tab.loader.setVisible(tab === activeTab);
 		tab.frame = proxy.controller.createFrame(tab.iframe);
-		tab.iframe.addEventListener("load", () => syncTab(tab));
+		tab.iframe.addEventListener("load", () => {
+			tab.pending = false;
+			watchReplace(tab);
+			syncTab(tab);
+		});
 	}
 
-	async function navigate(input, tab = activeTab) {
+	// `replace` leaves the tab's Back list alone (Back/Forward themselves, search retries).
+	async function navigate(input, tab = activeTab, { replace = false } = {}) {
 		const page = input.trim().match(INTERNAL)?.[1].toLowerCase();
 		if (page) {
-			const os = document.body.dataset.mode === "os";
-			if (page === "movies") return os ? launch("movies") : navigate(MOVIES_URL, tab);
-			if (page === "music") return os ? launch("music") : navigate(MUSIC_URL, tab);
+			if (page === "movies") return navigate(MOVIES_URL, tab, { replace });
+			if (page === "music") return navigate(MUSIC_URL, tab, { replace });
 			if (page === "history") openHistory();
-			else if (PAGES.includes(page)) openPage(page, tab);
-			else goHome(tab);
+			else if (PAGES.includes(page)) openPage(page, tab, { replace });
+			else goHome(tab, { replace });
 			return;
 		}
 		const url = toUrl(input);
 		if (!url) return;
 		// Remember searches, to re-run them elsewhere if the engine turns the proxy away.
 		tab.searchQuery = url === els.engine.value.replace("%s", encodeURIComponent(input.trim())) ? input.trim() : null;
-		setView("browser");
 		if (!proxy) setStatus("Still starting, one moment…");
 		await ready;
 		if (!tabs.includes(tab)) return; // closed while the proxy was starting
 		ensureFrame(tab);
+		if (!replace) record(tab, url);
+		// Until the new page loads, the frame may still report the page being left.
+		tab.leaving = tab.url ? currentRealUrl(tab) : null;
+		tab.pending = true;
 		tab.page = null;
 		tab.url = url;
 		tab.title = "";
@@ -758,9 +834,14 @@ async function main() {
 	function syncTab(tab) {
 		if (!tab.frame || !tab.url) return;
 		const url = currentRealUrl(tab);
+		if (tab.pending && url && url === tab.leaving) return;
 		const title = currentTitle(tab);
 		const changed = (url && url !== tab.url) || title !== tab.title;
 		if (url) {
+			// The page moved on by itself (a link, a redirect, an in-page route): that's a
+			// step Back can return to, unless the page only replaced its URL.
+			if (url !== tab.url && !tab.pending && !tab.replaced) record(tab, url);
+			tab.replaced = false;
 			tab.url = url;
 			if (url !== tab.recordedUrl) {
 				tab.recordedUrl = url;
@@ -774,7 +855,7 @@ async function main() {
 			const query = tab.searchQuery;
 			tab.searchQuery = null;
 			setStatus("DuckDuckGo turned the proxy away, so this search ran on Bing.");
-			navigate(FALLBACK_SEARCH.replace("%s", encodeURIComponent(query)), tab).catch(() => {});
+			navigate(FALLBACK_SEARCH.replace("%s", encodeURIComponent(query)), tab, { replace: true }).catch(() => {});
 			return;
 		}
 		if (changed) updateTabLabel(tab);
@@ -864,26 +945,19 @@ async function main() {
 	});
 
 	$("add-tab").addEventListener("click", () => createTab());
-	// Back/forward only within the page's own history: with nothing to go back to, the
-	// browser would go back in Arc4dia itself and lose every tab.
-	function canStep(iframe, dir) {
-		try {
-			const nav = iframe?.contentWindow?.navigation;
-			if (nav) return dir < 0 ? nav.canGoBack : nav.canGoForward;
-		} catch {}
-		return false;
-	}
-	$("back").addEventListener("click", () => activeTab.url && canStep(activeTab.iframe, -1) && activeTab.frame?.back());
-	$("forward").addEventListener("click", () => activeTab.url && canStep(activeTab.iframe, 1) && activeTab.frame?.forward());
+	$("back").addEventListener("click", () => step(activeTab, -1));
+	$("forward").addEventListener("click", () => step(activeTab, 1));
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
-	$("show-settings").addEventListener("click", () => openPage("settings"));
+	$("history-button").addEventListener("click", () => openHistory());
 
 	// Built-in pages (arc4dia://settings, arc4dia://games): shown in a tab like any site. One
 	// opens in the tab it's asked for if that's a new tab, in the tab already showing it,
 	// or in a new tab.
-	function openPage(name, tab = activeTab) {
-		const target = tab && !tab.url && !tab.page ? tab : tabs.find((t) => t.page === name) || createTab();
+	function openPage(name, tab = activeTab, { replace = false } = {}) {
+		// A Back or Forward step always stays in its own tab.
+		const target = replace || (tab && !tab.url && !tab.page) ? tab : tabs.find((t) => t.page === name) || createTab();
+		if (!replace) record(target, "arc4dia://" + name);
 		target.loader?.cancel();
 		if (target.iframe) target.iframe.src = "about:blank";
 		target.url = "";
@@ -893,179 +967,8 @@ async function main() {
 		if (name === "games") renderGamesPage();
 		updateTabLabel(target);
 		selectTab(target);
-		setView("browser");
-	}
-	// Two views: the desktop and the browser. In OS mode the desktop stays up and the
-	// browser is a window on it; in browser mode the browser is the whole page.
-	const osWindow = $("os-window");
-	function setView(view) {
-		document.body.dataset.view = view;
-		const os = document.body.dataset.mode === "os";
-		els.desktop.hidden = !os && view !== "desktop";
-		els.browser.hidden = !os && view !== "browser";
-		osWindow.hidden = os && view !== "browser";
-		if (os && view === "browser") focusWindow(osWindow);
-		if (view === "browser" && !activeTab?.url) els.search.focus();
-		updateDock();
 	}
 
-	// OS mode windows: the browser, plus a window per app (Movies, Games, each game).
-	// Drag by the title bar, resize from the corner, double-click or the middle button to
-	// maximize, click to bring to the front. Phones get every window full screen.
-	let zTop = 30;
-	function focusWindow(win) {
-		win.style.zIndex = ++zTop;
-		for (const w of document.querySelectorAll(".os-window")) w.classList.toggle("focused", w === win);
-		updateDock();
-	}
-	function makeWindow(win, key, fallback) {
-		const place = (rect) => {
-			// Between the top bar (26px) and the taskbar (44px), so the corner stays reachable.
-			const top = 26;
-			const bottom = innerHeight - 44;
-			const w = Math.min(Math.max(rect.w, 340), innerWidth);
-			const h = Math.min(Math.max(rect.h, 220), bottom - top);
-			const x = Math.min(Math.max(rect.x, 0), innerWidth - w);
-			const y = Math.min(Math.max(rect.y, top), bottom - h);
-			Object.assign(win.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
-			return { x, y, w, h };
-		};
-		let rect;
-		try {
-			rect = JSON.parse(settings.get(key, "null"));
-		} catch {
-			rect = null;
-		}
-		rect = place(rect ?? fallback());
-		const drag = (e, resize) => {
-			if (e.button !== 0 || win.classList.contains("maximized") || innerWidth < 700) return;
-			e.preventDefault();
-			const start = { px: e.clientX, py: e.clientY, ...rect };
-			document.body.classList.add("moving-window"); // pages can't swallow the pointer meanwhile
-			const move = (ev) => {
-				const dx = ev.clientX - start.px;
-				const dy = ev.clientY - start.py;
-				rect = place(resize ? { ...start, w: start.w + dx, h: start.h + dy } : { ...start, x: start.x + dx, y: start.y + dy });
-			};
-			const up = () => {
-				document.body.classList.remove("moving-window");
-				removeEventListener("pointermove", move);
-				removeEventListener("pointerup", up);
-				settings.set(key, JSON.stringify(rect));
-			};
-			addEventListener("pointermove", move);
-			addEventListener("pointerup", up);
-		};
-		const bar = win.querySelector(".os-window-bar");
-		win.addEventListener("pointerdown", () => focusWindow(win), true);
-		bar.addEventListener("pointerdown", (e) => !e.target.closest("button") && drag(e, false));
-		win.querySelector(".os-window-resize").addEventListener("pointerdown", (e) => drag(e, true));
-		bar.addEventListener("dblclick", (e) => !e.target.closest("button") && win.classList.toggle("maximized"));
-		addEventListener("resize", () => (rect = place(rect)));
-	}
-	const cascade = (n) => () => ({
-		x: innerWidth * 0.1 + n * 28,
-		y: 52 + n * 28,
-		w: Math.min(1100, innerWidth * 0.78),
-		h: innerHeight - 150 - n * 28,
-	});
-	makeWindow(osWindow, "window", cascade(0));
-	$("os-window-bar").addEventListener("click", (e) => {
-		const action = e.target.closest("[data-win]")?.dataset.win;
-		if (action === "max") osWindow.classList.toggle("maximized");
-		else if (action === "min") setView("desktop");
-		else if (action === "close") {
-			for (const tab of [...tabs]) closeTab(tab); // leaves one new tab
-			setView("desktop");
-		}
-	});
-
-	// App windows show one site through the proxy, without the browser's tabs and bar.
-	const appWindows = new Map(); // id -> { win, iframe, frame }
-	const WIN_BUTTONS = [
-		["back", "Back", "M15 6l-6 6 6 6"],
-		["reload", "Reload", "M20 11a8 8 0 1 0-2.3 5.6M20 4v7h-7"],
-		["full", "Full screen", "M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"],
-		["min", "Minimize", "M6 12h12"],
-		["max", "Maximize", "M6 6h12v12H6z"],
-		["close", "Close", "M7 7l10 10M17 7L7 17"],
-	];
-	function windowShell(id, title) {
-		const win = el("div", "os-window app-window");
-		win.dataset.app = id;
-		const bar = el("div", "os-window-bar");
-		bar.append(el("span", "os-window-title", title));
-		for (const [action, label, d] of WIN_BUTTONS) {
-			const button = el("button");
-			button.type = "button";
-			button.dataset.win = action;
-			button.title = label;
-			button.setAttribute("aria-label", label);
-			button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" /></svg>`;
-			bar.append(button);
-		}
-		const body = el("div", "app-window-body");
-		win.append(bar, body, el("div", "os-window-resize"));
-		document.body.append(win);
-		makeWindow(win, "win:" + id, cascade(1 + (appWindows.size % 5)));
-		return { win, bar, body };
-	}
-	function closeAppWindow(id) {
-		const entry = appWindows.get(id);
-		if (!entry) return;
-		const frames = proxy?.controller.frames;
-		if (frames?.includes(entry.frame)) frames.splice(frames.indexOf(entry.frame), 1);
-		entry.win.remove();
-		appWindows.delete(id);
-		updateDock();
-	}
-	function showAppWindow(entry) {
-		entry.win.hidden = false;
-		focusWindow(entry.win);
-	}
-	// Opens (or brings back) a window showing `url`.
-	async function openAppWindow(id, title, url) {
-		const open = appWindows.get(id);
-		if (open) return showAppWindow(open);
-		const { win, bar, body } = windowShell(id, title);
-		const entry = { win, iframe: null, frame: null };
-		appWindows.set(id, entry);
-		focusWindow(win);
-		bar.addEventListener("click", (e) => {
-			const action = e.target.closest("[data-win]")?.dataset.win;
-			if (!action) return;
-			const page = entry.iframe?.contentWindow;
-			if (action === "close") closeAppWindow(id);
-			else if (action === "min") {
-				win.hidden = true;
-				updateDock();
-			} else if (action === "max") win.classList.toggle("maximized");
-			else if (action === "full") (entry.iframe ?? win).requestFullscreen?.().catch(() => {});
-			else if (action === "back") canStep(entry.iframe, -1) && page?.history.back();
-			else if (action === "reload") page?.location.reload();
-		});
-		await ready;
-		if (!appWindows.has(id) || !proxy) return;
-		entry.iframe = el("iframe");
-		entry.iframe.title = title;
-		entry.iframe.allow = "fullscreen; autoplay; encrypted-media; picture-in-picture";
-		body.append(entry.iframe);
-		entry.loader = new PageLoader(body, entry.iframe);
-		entry.frame = proxy.controller.createFrame(entry.iframe);
-		entry.frame.go(url);
-		entry.loader.start(title);
-	}
-	// A taskbar button for a window: open it, bring it to the front, or minimize it.
-	function toggleWindow(win, open) {
-		if (!win || win.hidden) return open();
-		if (win.classList.contains("focused")) {
-			win.hidden = true;
-			updateDock();
-		} else focusWindow(win);
-	}
-
-	// Games: free game sites, opened through the proxy like any other site.
-	// Each card shows the site's own banner and logo (public/games/).
 	// Game sites shown on arc4dia://games, opened through the proxy like any other site.
 	// Cards are drawn in each site's color with its logo (Simple Icons, CC0) or a letter.
 	const GAME_SITES = [
@@ -1118,61 +1021,36 @@ async function main() {
 	// The bottom bar. The highlighted button follows what's on screen.
 	const dockButtons = [...document.querySelectorAll("[data-dock]")];
 	function updateDock() {
-		let current = "browser";
-		if (document.body.dataset.view === "desktop") current = "desktop";
-		else if (!activeTab?.url) current = "browser";
-		else if (isMovies(activeTab.url)) current = "movies";
-		else if (isMusic(activeTab.url)) current = "music";
-		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
-			current = "games";
+		let current = activeTab?.page ?? null;
+		if (!current && activeTab?.url) {
+			if (isMovies(activeTab.url)) current = "movies";
+			else if (isMusic(activeTab.url)) current = "music";
+			else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
+				current = "games";
+			}
 		}
-		if (activeTab?.page && document.body.dataset.view !== "desktop") current = activeTab.page;
-		$("os-window-title").textContent = activeTab ? activeTab.label.textContent : "New tab";
-		// In OS mode the taskbar marks every open window, and the focused one more strongly.
-		const os = document.body.dataset.mode === "os";
-		const openApps = os ? [...document.querySelectorAll(".app-window")] : [];
-		const windowFor = {
-			browser: osWindow.hidden ? [] : [osWindow],
-			movies: openApps.filter((w) => w.dataset.app === "movies"),
-			music: openApps.filter((w) => w.dataset.app === "music"),
-		};
 		for (const button of dockButtons) {
-			const wins = windowFor[button.dataset.dock] ?? [];
-			const on = os ? wins.length > 0 : button.dataset.dock === current;
+			const on = button.dataset.dock === current || (button.dataset.dock === "apps" && $("apps-panel").open);
 			button.classList.toggle("active", on);
-			const dialogOpen =
-				(button.dataset.dock === "apps" && $("apps-panel").open) ||
-				(PAGES.includes(button.dataset.dock) && current === button.dataset.dock && !osWindow.hidden);
-			button.classList.toggle(
-				"focused",
-				os && (dialogOpen || wins.some((w) => !w.hidden && w.classList.contains("focused")))
-			);
 			if (on) button.setAttribute("aria-current", "page");
 			else button.removeAttribute("aria-current");
 		}
 	}
-	// Dock buttons and desktop icons share these.
+	// Bottom bar buttons and the home screen's app buttons share these.
 	function launch(target) {
-		const os = document.body.dataset.mode === "os";
-		if (PAGES.includes(target)) {
-			openPage(target);
-		} else if (target === "movies" && os) {
-			toggleWindow(appWindows.get("movies")?.win, () => openAppWindow("movies", "Movies", MOVIES_URL));
-		} else if (target === "music" && os) {
-			toggleWindow(appWindows.get("music")?.win, () => openAppWindow("music", "Music", MUSIC_URL));
-		} else if (target === "browser" && os) {
-			toggleWindow(osWindow.hidden ? null : osWindow, () => {
-				setView("browser");
-				focusWindow(osWindow);
-			});
-		} else if (target === "apps") {
-			$("apps-panel").showModal();
-		} else if (target === "browser-mode") setMode("browser");
-		else if (target === "desktop") setView("desktop");
-		else if (target === "browser") setView("browser");
+		if (PAGES.includes(target)) openPage(target);
 		else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
 		else if (target === "music") navigate(MUSIC_URL).catch(() => {});
+		else if (target === "history") openHistory();
+		else if (target === "apps" || target === "edit") openApps(target === "edit");
 		updateDock();
+	}
+	function openApps(editing = false) {
+		const panel = $("apps-panel");
+		panel.classList.toggle("editing", editing);
+		$("apps-edit").textContent = editing ? "Done" : "Edit";
+		$("apps-edit").setAttribute("aria-pressed", String(editing));
+		panel.showModal();
 	}
 
 	for (const button of dockButtons) button.addEventListener("click", () => launch(button.dataset.dock));
@@ -1186,15 +1064,18 @@ async function main() {
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
 	function renderShortcuts() {
 		els.shortcuts.replaceChildren(...shortcutItems(true));
-		$("home-shortcuts").replaceChildren(...shortcutItems(false));
+		// The home screen shows the sites; Games, Movies and Music have their own row there.
+		$("home-shortcuts").replaceChildren(...shortcutItems(false, (s) => !INTERNAL.test(s.url)));
 	}
 	// The Apps panel can edit (Add, and remove in Edit mode); the new-tab page just opens.
-	function shortcutItems(editable) {
+	function shortcutItems(editable, keep = () => true) {
 		const items = Shortcuts.list.map((shortcut, index) => {
+			if (!keep(shortcut)) return null;
 			const item = el("div", "shortcut-item");
 			const open = el("button", "shortcut");
 			open.type = "button";
 			open.title = `${shortcut.name}\n${shortcut.url}`;
+			open.setAttribute("aria-label", shortcut.name);
 			const tile = el("span", "shortcut-icon");
 			tile.append(Shortcuts.iconFor(shortcut));
 			open.append(tile, el("span", "shortcut-label", shortcut.name));
@@ -1221,7 +1102,7 @@ async function main() {
 			item.append(open);
 			if (editable && !internal) item.append(remove); // built-in apps can't be removed
 			return item;
-		});
+		}).filter(Boolean);
 		if (editable && !Shortcuts.full) {
 			const add = el("button", "shortcut shortcut-add");
 			add.type = "button";
@@ -1311,8 +1192,8 @@ async function main() {
 		setMenu(false);
 		const url = activeTab.frame && currentRealUrl(activeTab);
 		switch (item.dataset.action) {
-			case "history":
-				openHistory();
+			case "apps":
+				openApps(true);
 				break;
 			case "bookmark":
 				if (url) openShortcutForm(activeTab.title || hostOf(url), url);
@@ -1373,204 +1254,47 @@ async function main() {
 		reconnect();
 	});
 
-	// Browser themes: the colors live in style.css (:root[data-theme=...]).
+	// Themes: the colors live in style.css (:root[data-theme=...]). Forest is the default.
 	const THEME_COLORS = {
-		lavender: "#e9e7f6",
+		forest: "#070c0a",
+		midnight: "#070a14",
+		ocean: "#05100f",
+		lavender: "#0b0912",
+		sunset: "#100907",
+		rose: "#10080b",
+		mono: "#0a0a0a",
 		dark: "#000000",
-		midnight: "#0a1024",
-		forest: "#0b1510",
-		sunset: "#1a0f12",
-		ocean: "#06171c",
-		rose: "#f8eef1",
-		mono: "#efefef",
 	};
+	// The constellation behind the home screen, drawn in the theme's star color.
+	let stopStars = null;
+	function startStars() {
+		stopStars?.();
+		const color = getComputedStyle(document.documentElement).getPropertyValue("--star").trim() || "150 230 190";
+		stopStars = Constellation.start($("stars"), color);
+	}
 	function applyTheme(name) {
-		if (!THEME_COLORS[name]) name = "lavender";
+		if (!THEME_COLORS[name]) name = "forest";
 		els.theme.value = name;
-		if (name === "lavender") delete document.documentElement.dataset.theme;
-		else document.documentElement.dataset.theme = name;
+		document.documentElement.dataset.theme = name;
 		document.querySelector('meta[name="theme-color"]').content = THEME_COLORS[name];
+		startStars();
 	}
 	els.theme.addEventListener("change", () => {
 		settings.set("theme", els.theme.value);
 		applyTheme(els.theme.value);
 	});
-	applyTheme(settings.get("theme", "lavender"));
-
-	// Wallpaper: a photo, or an animation drawn on the canvas. "Change wallpaper" opens a
-	// picker with all of them.
-	const WALLPAPERS = [
-		{ id: "gtr-sunset", name: "GT-R sunset" },
-		{ id: "r34-night", name: "Night drive" },
-		{ id: "maybach-night", name: "Maybach night" },
-		{ id: "maybach-driveway", name: "Maybach driveway" },
-		{ id: "flower-field", name: "Flower field" },
-		{ id: "hokage", name: "Hokage" },
-		{ id: "overcast", name: "Overcast" },
-		{ id: "beach", name: "Beach" },
-		{ id: "blue-hour", name: "Blue hour" },
-		{ id: "cabin", name: "Cabin" },
-		{ id: "snow", name: "Snow", animated: true },
-		{ id: "night", name: "Night sky", animated: true },
-	];
-	const DEFAULT_WALLPAPER = "gtr-sunset";
-	const animations = { snow: Snowfall, night: Constellation };
-	let stopAnimation = null;
-	let currentWallpaper = null;
-	function applyWallpaper(name) {
-		if (!WALLPAPERS.some((w) => w.id === name)) name = DEFAULT_WALLPAPER;
-		currentWallpaper = name;
-		$("wallpaper-layer").dataset.wallpaper = name;
-		$("wallpaper-layer").classList.toggle("photo", !animations[name]);
-		stopAnimation?.();
-		stopAnimation = animations[name]?.start($("stars")) ?? null;
+	// Themes from before the redesign start over on Forest.
+	if (settings.get("themeV", "") !== "2") {
+		settings.set("theme", "forest");
+		settings.set("themeV", "2");
 	}
-	applyWallpaper(settings.get("wallpaper", DEFAULT_WALLPAPER));
+	applyTheme(settings.get("theme", "forest"));
 
-	const wallpaperPanel = $("wallpaper-panel");
-	function openWallpapers() {
-		const cards = WALLPAPERS.map((wallpaper) => {
-			const card = el("button", "wallpaper-card");
-			card.type = "button";
-			card.setAttribute("role", "radio");
-			card.setAttribute("aria-checked", String(wallpaper.id === currentWallpaper));
-			const preview = el("span", "wallpaper-preview");
-			preview.dataset.wallpaper = wallpaper.id;
-			const label = el("span", "wallpaper-name", wallpaper.name);
-			if (wallpaper.animated) label.append(el("span", "wallpaper-tag", "Animated"));
-			card.append(preview, label);
-			// Applies right away and stays open, so several can be tried in a row.
-			card.addEventListener("click", () => {
-				settings.set("wallpaper", wallpaper.id);
-				applyWallpaper(wallpaper.id);
-				for (const other of cards) other.setAttribute("aria-checked", String(other === card));
-			});
-			return card;
-		});
-		$("wallpaper-list").replaceChildren(...cards);
-		wallpaperPanel.showModal();
-		cards.find((c) => c.getAttribute("aria-checked") === "true")?.focus();
-	}
-	$("choose-wallpaper").addEventListener("click", openWallpapers);
-	$("wallpaper-close").addEventListener("click", () => wallpaperPanel.close());
-
-	// The lock screen's date and clock, and the top bar's clock.
-	const dateEl = $("lock-date");
-	const timeEl = $("lock-time");
-	const smallTimeEl = $("topbar-time");
-	function tick() {
-		const now = new Date();
-		dateEl.textContent = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-		// The big clock leaves out AM/PM.
-		timeEl.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" })
-			.formatToParts(now)
-			.filter((part) => part.type !== "dayPeriod")
-			.map((part) => part.value)
-			.join("")
-			.trim();
-		smallTimeEl.textContent = now.toLocaleTimeString(undefined, {
-			hour: "numeric",
-			minute: "2-digit",
-			second: "2-digit",
-		});
-		setTimeout(tick, 1000 - now.getMilliseconds() + 5);
-	}
-	tick();
+	// Settings saved by the old OS mode (window places, mode, wallpaper) aren't used any more.
+	for (const key of ["mode", "wallpaper", "window", "win:movies", "win:music"]) settings.remove(key);
 
 	createTab();
-	// OS mode (desktop, dock) or browser mode (just the browser). Asked on the first visit.
-	function setMode(mode, lockScreen = false) {
-		settings.set("mode", mode);
-		document.body.dataset.mode = mode;
-		$("switch-mode").textContent = mode === "os" ? "Switch to browser mode" : "Switch to OS mode";
-		if (mode !== "os") for (const id of [...appWindows.keys()]) closeAppWindow(id);
-		const browsing = tabs.some((t) => t.url || t.page);
-		setView(mode === "os" && !(browsing && !lockScreen) ? "desktop" : "browser");
-		if (mode === "os" && lockScreen) showLock();
-		else hideLock();
-	}
-
-	// OS mode starts on a lock screen: drag or swipe it up (or scroll, press Enter / an
-	// arrow key, or tap the hint) to get to the desktop.
-	const lock = $("lock");
-	function showLock() {
-		lock.style.transform = "";
-		lock.hidden = false;
-		document.body.classList.add("locked");
-		lock.focus({ preventScroll: true });
-	}
-	function hideLock() {
-		lock.hidden = true;
-		document.body.classList.remove("locked");
-	}
-	let tourAfterUnlock = false;
-	function unlock() {
-		if (lock.hidden || lock.classList.contains("unlocking")) return;
-		if (tourAfterUnlock) setTimeout(() => Tour.openIfNew(), 500);
-		tourAfterUnlock = false;
-		lock.classList.add("unlocking");
-		lock.style.transform = "translateY(-100%)";
-		document.body.classList.remove("locked");
-		setTimeout(() => {
-			lock.classList.remove("unlocking");
-			hideLock();
-		}, 450);
-	}
-	lock.addEventListener("pointerdown", (e) => {
-		const y0 = e.clientY;
-		const t0 = performance.now();
-		let dy = 0;
-		lock.setPointerCapture(e.pointerId);
-		lock.classList.add("dragging");
-		const move = (ev) => {
-			dy = Math.min(0, ev.clientY - y0);
-			lock.style.transform = `translateY(${dy}px)`;
-		};
-		const up = () => {
-			lock.classList.remove("dragging");
-			lock.removeEventListener("pointermove", move);
-			lock.removeEventListener("pointerup", up);
-			lock.removeEventListener("pointercancel", up);
-			const fast = -dy / (performance.now() - t0) > 0.6; // a flick
-			if (-dy > innerHeight * 0.18 || (fast && -dy > 30)) unlock();
-			else lock.style.transform = "";
-		};
-		lock.addEventListener("pointermove", move);
-		lock.addEventListener("pointerup", up);
-		lock.addEventListener("pointercancel", up);
-	});
-	lock.addEventListener("wheel", (e) => Math.abs(e.deltaY) > 20 && unlock(), { passive: true });
-	lock.addEventListener("keydown", (e) => {
-		if (["Enter", " ", "ArrowUp", "PageUp"].includes(e.key)) {
-			e.preventDefault();
-			unlock();
-		}
-	});
-	$("lock-hint").addEventListener("click", unlock);
-	$("to-browser-mode").addEventListener("click", () => setMode("browser"));
-	$("switch-mode").addEventListener("click", () => {
-		setMode(document.body.dataset.mode === "os" ? "browser" : "os");
-	});
-	const modePanel = $("mode-panel");
-	for (const option of modePanel.querySelectorAll("[data-mode]")) {
-		option.addEventListener("click", () => {
-			setMode(option.dataset.mode);
-			modePanel.close();
-		});
-	}
-	// The picker needs an answer (Escape doesn't close it); the tour follows it.
-	modePanel.addEventListener("cancel", (e) => e.preventDefault());
-	modePanel.addEventListener("close", () => Tour.openIfNew());
-	const savedMode = settings.get("mode", "");
-	if (savedMode) {
-		setMode(savedMode === "browser" ? "browser" : "os", true); // OS mode opens on the lock screen
-		if (lock.hidden) Tour.openIfNew();
-		else tourAfterUnlock = true;
-	} else {
-		document.body.dataset.mode = "os";
-		setView("desktop");
-		modePanel.showModal();
-	}
+	Tour.openIfNew();
 }
 /* filler: c__o__d__e */
 main();

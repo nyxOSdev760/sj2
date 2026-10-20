@@ -1,4 +1,12 @@
-/* Outfit by The Outfit Project Authors, SIL Open Font License (fonts/outfit-OFL.txt). */
+/* Playball by The Playball Project Authors and Outfit by The Outfit Project Authors, SIL
+   Open Font License (fonts/playball-OFL.txt, fonts/outfit-OFL.txt). */
+@font-face {
+	font-family: "Playball";
+	src: url("fonts/playball-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+}
+
 @font-face {
 	font-family: "Outfit";
 	src: url("fonts/outfit-600.woff2") format("woff2");
@@ -6,52 +14,162 @@
 	font-display: swap;
 }
 
-/* Lavender (default): a soft, cool light theme. */
+/* ---- Themes. Forest is the default; every theme is dark. --star is the background
+   constellation's color as "r g b". ---- */
 :root {
-	--bg: #e9e7f6;
-	--panel: #f3f1fb;
-	--surface: rgb(250 249 255 / 0.78);
-	--raised: #fbfaff;
-	--chip: #e6e3f5;
-	--hover: #e0dcf2;
-	--border: #d2cdea;
-	--text: #1d1a33;
-	--body-text: #4b4768;
-	--muted: #6e6a8c;
-	--accent: #6b57e8;
-	--on-accent: #fff;
-	--accent-soft: #d6cdfc;
-	--on-accent-soft: #241a5e;
-	--secure: #15803d;
-	--error: #d33a4a;
-	--shadow: rgb(70 55 150 / 0.18);
-	--backdrop: rgb(45 38 90 / 0.3);
-	color-scheme: light;
-}
-
-/* AMOLED dark. */
-:root[data-theme="dark"] {
-	--bg: #000;
-	--panel: #000;
-	--surface: rgb(14 14 18 / 0.9);
-	--raised: #07070a;
-	--chip: #111116;
-	--hover: #141414;
-	--border: #2a2f3a;
-	--text: #e7e9ee;
-	--body-text: #c9cbd3;
-	--muted: #8b91a0;
-	--accent: #7c5cff;
-	--on-accent: #fff;
-	--accent-soft: #c4b5fd;
-	--on-accent-soft: #120c24;
-	--secure: #4ade80;
-	--error: #ff6b6b;
-	--shadow: rgb(0 0 0 / 0.6);
+	--bg: #070c0a;
+	--bar: #040806;
+	--surface: #0f1814;
+	--raised: #15211c;
+	--panel: #0b1310;
+	--hover: #1c2b24;
+	--border: rgb(210 255 230 / 0.07);
+	--text: #e9f2ed;
+	--body-text: #c3d1c9;
+	--muted: #8b9c93;
+	--accent: #c7f5dc;
+	--on-accent: #0b1a12;
+	--go: #5f8d76;
+	--on-go: #0b1a12;
+	--star: 150 230 190;
+	--secure: #6fdc9c;
+	--error: #ff7b7b;
+	--shadow: rgb(0 0 0 / 0.5);
 	--backdrop: rgb(0 0 0 / 0.55);
+	/* Older names, used by the panels. */
+	--chip: var(--surface);
+	--accent-soft: var(--accent);
+	--on-accent-soft: var(--on-accent);
 	color-scheme: dark;
 }
 
+:root[data-theme="midnight"] {
+	--bg: #070a14;
+	--bar: #04060d;
+	--surface: #0e1324;
+	--raised: #151c33;
+	--panel: #0a0f1d;
+	--hover: #1c2541;
+	--border: rgb(200 215 255 / 0.08);
+	--text: #e9edfb;
+	--body-text: #c5cbe2;
+	--muted: #8c94b3;
+	--accent: #cdd8ff;
+	--on-accent: #0c1433;
+	--go: #5d70aa;
+	--on-go: #0c1433;
+	--star: 165 185 255;
+}
+
+:root[data-theme="ocean"] {
+	--bg: #05100f;
+	--bar: #030a0a;
+	--surface: #0b1a19;
+	--raised: #112624;
+	--panel: #081412;
+	--hover: #17322f;
+	--border: rgb(190 255 245 / 0.08);
+	--text: #e6f5f3;
+	--body-text: #c0d6d3;
+	--muted: #86a29e;
+	--accent: #bff3ee;
+	--on-accent: #062320;
+	--go: #4f8f88;
+	--on-go: #062320;
+	--star: 140 225 220;
+}
+
+:root[data-theme="lavender"] {
+	--bg: #0b0912;
+	--bar: #07060c;
+	--surface: #151122;
+	--raised: #1e1832;
+	--panel: #100d1a;
+	--hover: #272040;
+	--border: rgb(225 210 255 / 0.08);
+	--text: #f0ecfb;
+	--body-text: #d0c9e5;
+	--muted: #9a91b6;
+	--accent: #e0d4ff;
+	--on-accent: #1d1240;
+	--go: #7a68b8;
+	--on-go: #1d1240;
+	--star: 200 180 255;
+}
+
+:root[data-theme="sunset"] {
+	--bg: #100907;
+	--bar: #0a0504;
+	--surface: #1d120d;
+	--raised: #291a12;
+	--panel: #160d09;
+	--hover: #352217;
+	--border: rgb(255 220 200 / 0.08);
+	--text: #fbefe8;
+	--body-text: #e3cfc4;
+	--muted: #b09586;
+	--accent: #ffd9c2;
+	--on-accent: #3a1a0a;
+	--go: #b0684a;
+	--on-go: #2a1206;
+	--star: 255 190 150;
+}
+
+:root[data-theme="rose"] {
+	--bg: #10080b;
+	--bar: #0a0507;
+	--surface: #1e1016;
+	--raised: #2a1620;
+	--panel: #170c11;
+	--hover: #361c29;
+	--border: rgb(255 210 230 / 0.08);
+	--text: #fbecf2;
+	--body-text: #e3c9d4;
+	--muted: #b08e9c;
+	--accent: #ffd3e2;
+	--on-accent: #3d0f22;
+	--go: #b05d7d;
+	--on-go: #2c0817;
+	--star: 255 170 205;
+}
+
+:root[data-theme="mono"] {
+	--bg: #0a0a0a;
+	--bar: #050505;
+	--surface: #151515;
+	--raised: #1e1e1e;
+	--panel: #101010;
+	--hover: #272727;
+	--border: rgb(255 255 255 / 0.08);
+	--text: #f2f2f2;
+	--body-text: #d0d0d0;
+	--muted: #999;
+	--accent: #f2f2f2;
+	--on-accent: #111;
+	--go: #6b6b6b;
+	--on-go: #fff;
+	--star: 220 220 220;
+}
+
+:root[data-theme="dark"] {
+	--bg: #000;
+	--bar: #000;
+	--surface: #0d0d0d;
+	--raised: #151515;
+	--panel: #070707;
+	--hover: #1c1c1c;
+	--border: rgb(255 255 255 / 0.09);
+	--text: #f2f2f2;
+	--body-text: #d0d0d0;
+	--muted: #8e8e8e;
+	--accent: #ffffff;
+	--on-accent: #000;
+	--go: #3a3a3a;
+	--on-go: #fff;
+	--star: 200 200 200;
+}
+
+/* ---- Base ---- */
 * {
 	box-sizing: border-box;
 }
@@ -63,8 +181,7 @@ body {
 }
 
 body {
-	display: flex;
-	flex-direction: column;
+	overflow: hidden;
 	background: var(--bg);
 	color: var(--text);
 	font-family:
@@ -82,667 +199,135 @@ a {
 	display: none !important;
 }
 
-/* Wallpaper: fixed behind the desktop and the browser's new tab page. */
-.wallpaper {
-	position: fixed;
-	inset: 0;
-	z-index: -1;
-	isolation: isolate;
-	overflow: hidden;
-}
-
-/* Desktop: top bar, date and clock, app icons; brand and the wallpaper button along the
-   bottom, above the floating dock. */
-.desktop {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	padding: 0 20px calc(var(--dock-space) + 6px);
-	overflow: hidden auto;
-	color: #fff;
-}
-
-/* Browser: tabs, toolbar and pages, over the wallpaper. */
-.browser {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 0;
-}
-
-.topbar {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	min-height: 56px;
-	padding-top: env(safe-area-inset-top);
-	text-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
-}
-
-.topbar-name {
-	margin: 0;
-	font-size: 14px;
-	font-weight: 600;
-	letter-spacing: 0.4em;
-	text-transform: uppercase;
-}
-
-.topbar-spacer {
-	flex: 1;
-}
-
-.topbar-button {
-	display: grid;
-	place-items: center;
-	width: 36px;
-	height: 36px;
-	border: 1px solid rgb(255 255 255 / 0.18);
-	border-radius: 12px;
-	background: rgb(16 16 22 / 0.45);
-	backdrop-filter: blur(12px);
-	color: #fff;
-	cursor: pointer;
-}
-
-.topbar-button svg {
-	width: 18px;
-	height: 18px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-.topbar-time {
-	font-size: 14px;
-	font-weight: 500;
-	font-variant-numeric: tabular-nums;
-}
-
-.desktop-main {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 18px;
-	margin: auto 0;
-	padding: 16px 0;
-}
-
-.desktop-apps {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: clamp(10px, 3.4vw, 28px);
-	animation: rise-in 0.6s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.desktop-app {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	padding: 0;
-	border: 0;
-	background: none;
-	color: #fff;
+button,
+input,
+select {
 	font: inherit;
-	cursor: pointer;
-}
-
-.desktop-app-icon {
-	display: grid;
-	place-items: center;
-	width: clamp(54px, 14vw, 76px);
-	height: clamp(54px, 14vw, 76px);
-	border: 1px solid rgb(255 255 255 / 0.22);
-	border-radius: 22px;
-	background: rgb(255 255 255 / 0.14);
-	backdrop-filter: blur(16px);
-	box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
-	transition:
-		transform 0.15s,
-		background 0.15s;
-}
-
-.desktop-app:hover .desktop-app-icon {
-	background: rgb(255 255 255 / 0.24);
-	transform: translateY(-2px);
-}
-
-.desktop-app:active .desktop-app-icon {
-	transform: scale(0.95);
-}
-
-.desktop-app-icon svg {
-	width: 44%;
-	height: 44%;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 1.8;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-.desktop-app-label {
-	font-size: 13px;
-	font-weight: 500;
-	text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
-}
-
-/* The browser's new tab page: just search, transparent over the wallpaper. */
-#home-screen {
-	position: relative;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 24px 20px calc(var(--dock-space) + 8px);
-	overflow: hidden auto;
-}
-
-.home-main {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 14px;
-	width: 100%;
-	margin: auto 0;
-}
-
-.home-clock {
-	color: #fff;
-	text-align: center;
-	text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
-}
-
-.home-date {
-	margin: 0;
-	font-size: clamp(15px, 3.6vw, 19px);
-	font-weight: 500;
-	letter-spacing: 0.02em;
-}
-
-.home-time {
-	margin: 0 0 8px;
-	font-size: clamp(64px, 19vw, 132px);
-	font-weight: 300;
-	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.03em;
-	line-height: 1;
-}
-
-.home-footer {
-	display: flex;
-	align-items: flex-end;
-	justify-content: flex-end;
-	flex-wrap: wrap;
-	gap: 12px 16px;
-	width: 100%;
-	color: #fff;
-}
-
-/* Frosted glass, for controls that sit on the wallpaper. */
-.glass-button {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	flex: none;
-	padding: 11px 18px;
-	border: 1px solid rgb(255 255 255 / 0.2);
-	border-radius: 16px;
-	background: rgb(16 16 22 / 0.55);
-	backdrop-filter: blur(14px);
-	color: #fff;
-	font: inherit;
-	font-size: 14px;
-	font-weight: 500;
-	cursor: pointer;
-}
-
-.glass-button:hover {
-	background: rgb(16 16 22 / 0.7);
-}
-
-.glass-button svg {
-	width: 18px;
-	height: 18px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-}
-
-/* Animated constellation behind everything on the home screen. */
-.stars {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	z-index: -2;
-	pointer-events: none;
-}
-
-/* Glow rising from the bottom edge of the home screen. */
-.wallpaper::after {
-	content: "";
-	position: absolute;
-	inset: auto 0 0;
-	height: 55%;
-	z-index: -1;
-	background:
-		radial-gradient(70% 90% at 50% 100%, rgb(124 92 255 / 0.5), transparent 70%),
-		radial-gradient(45% 70% at 20% 100%, rgb(214 51 132 / 0.3), transparent 70%),
-		radial-gradient(45% 70% at 80% 100%, rgb(56 120 255 / 0.28), transparent 70%);
-	pointer-events: none;
-	animation: glow-in 1.2s ease-out both;
-}
-
-/* Wallpapers. Night (the default styles above) is the constellation with a glow. */
-/* Photo wallpapers; the position keeps each car in view on wide screens. */
-.wallpaper[data-wallpaper="gtr-sunset"] {
-	background: #3a3150 url("wallpapers/gtr-sunset.jpg") center 48% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="r34-night"] {
-	background: #000 url("wallpapers/r34-night.jpg") center 80% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="maybach-night"] {
-	background: #111 url("wallpapers/maybach-night.jpg") center 62% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="maybach-driveway"] {
-	background: #3d4a7a url("wallpapers/maybach-driveway.jpg") center 58% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="flower-field"] {
-	background: #c98a8a url("wallpapers/flower-field.jpg") center 62% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="hokage"] {
-	background: #3aa0e8 url("wallpapers/hokage.jpg") center 35% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="overcast"] {
-	background: #8a94a8 url("wallpapers/overcast.jpg") center 30% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="beach"] {
-	background: #a9b8c8 url("wallpapers/beach.jpg") center 58% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="blue-hour"] {
-	background: #1b3a6b url("wallpapers/blue-hour.jpg") center 55% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="cabin"] {
-	background: #1d2a1d url("wallpapers/cabin.jpg") center 62% / cover no-repeat;
-}
-
-.wallpaper[data-wallpaper="snow"] {
-	background: radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
-}
-
-.wallpaper.photo::after {
-	display: none;
-}
-
-.wallpaper[data-wallpaper="snow"]::after {
-	background: radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.28), transparent 70%);
-}
-
-/* Labels sit on the wallpaper, so they're white with a shadow whatever the theme. */
-.apps-grid .shortcut-label,
-#home-screen .status {
-	color: #fff;
-	font-weight: 500;
-	text-shadow:
-		0 1px 2px rgb(28 22 70 / 0.75),
-		0 0 10px rgb(28 22 70 / 0.5);
-}
-
-/* Clock, search and shortcuts rise in one after another on load. */
-.home-clock,
-.search {
-	animation: rise-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.search {
-	animation-delay: 0.08s;
-}
-
-@keyframes rise-in {
-	from {
-		opacity: 0;
-		transform: translateY(14px);
-	}
-}
-
-@keyframes glow-in {
-	from {
-		opacity: 0;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.home-clock,
-	.search,
-	.desktop-apps,
-	.wallpaper::after {
-		animation: none;
-	}
 }
 
 input,
 select {
-	font: inherit;
-	color: var(--text);
-	background: var(--panel);
 	border: 1px solid var(--border);
-	border-radius: 999px;
-	outline: none;
-}
-
-input:focus,
-select:focus {
-	border-color: var(--accent);
-}
-
-/* Search bar: icon, input and a round arrow button in one pill. */
-.search {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	width: min(640px, 100%);
-	padding: 6px 6px 6px 20px;
-	border: 1px solid var(--border);
-	border-radius: 999px;
+	border-radius: 12px;
 	background: var(--surface);
-	box-shadow: 0 10px 40px var(--shadow);
-	backdrop-filter: blur(8px);
-}
-
-.search:focus-within {
-	border-color: var(--accent);
-}
-
-.search-icon {
-	width: 20px;
-	height: 20px;
-	flex: none;
-	fill: none;
-	stroke: var(--muted);
-	stroke-width: 2;
-	stroke-linecap: round;
-}
-
-#search {
-	flex: 1;
-	min-width: 0;
-	padding: 10px 0;
-	border: 0;
-	background: transparent;
-	font-size: 17px;
-}
-
-.search-go {
-	display: grid;
-	place-items: center;
-	width: 44px;
-	height: 44px;
-	flex: none;
-	padding: 0;
-	border: 0;
-	border-radius: 50%;
-	background: var(--accent);
-	color: #fff;
-	cursor: pointer;
-}
-
-.search-go:hover {
-	filter: brightness(1.12);
-}
-
-.search-go svg {
-	width: 20px;
-	height: 20px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2.2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-/* Shortcut tiles: rounded squares with a remove button and an Add tile at the end. */
-.shortcuts {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, 84px);
-	justify-content: center;
-	gap: 14px 10px;
-	width: min(780px, 100%);
-	margin-top: 10px;
-}
-
-.shortcut-item {
-	position: relative;
-}
-
-.shortcut {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	width: 100%;
-	padding: 0;
-	border: 0;
-	background: transparent;
 	color: var(--text);
-	font: inherit;
-	cursor: pointer;
 }
 
-.shortcut-icon {
-	display: grid;
-	place-items: center;
-	width: 64px;
-	height: 64px;
-	border: 1px solid rgb(255 255 255 / 0.22);
-	border-radius: 20px;
-	background: rgb(255 255 255 / 0.16);
-	backdrop-filter: blur(14px);
-	color: #fff;
-	transition:
-		border-color 0.15s,
-		transform 0.15s;
+input::placeholder {
+	color: var(--muted);
 }
 
-.shortcut:hover .shortcut-icon {
-	border-color: var(--accent);
-	transform: translateY(-2px);
-}
-
-.shortcut:focus-visible {
-	outline: none;
-}
-
-.shortcut:focus-visible .shortcut-icon {
+:focus-visible {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
-.shortcut-icon svg {
-	width: 28px;
-	height: 28px;
-}
-
-.shortcut-letter {
-	font-size: 26px;
-	font-weight: 700;
-	line-height: 1;
-}
-
-.shortcut-label {
-	max-width: 100%;
-	overflow: hidden;
-	font-size: 13px;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.shortcut-add .shortcut-icon {
-	border-style: dashed;
-	background: transparent;
-}
-
-.shortcut-add .shortcut-icon svg {
-	fill: none;
-	stroke: rgb(255 255 255 / 0.85);
-	stroke-width: 2;
-	stroke-linecap: round;
-}
-
-.shortcut-remove {
-	position: absolute;
-	top: -6px;
-	right: 2px;
+/* Round icon buttons (toolbar, + tab, panel close). */
+.icon {
 	display: grid;
 	place-items: center;
-	width: 26px;
-	height: 26px;
+	width: 42px;
+	height: 42px;
+	flex: none;
 	padding: 0;
-	border: 1px solid var(--border);
+	border: 0;
 	border-radius: 50%;
-	background: var(--raised);
-	color: var(--muted);
+	background: transparent;
+	color: var(--text);
 	cursor: pointer;
-	opacity: 0;
-	transition: opacity 0.15s;
+	transition: background 0.15s;
 }
 
-.shortcut-item:hover .shortcut-remove,
-.shortcut-remove:focus-visible {
-	opacity: 1;
+.icon:hover {
+	background: var(--surface);
 }
 
-/* No hover on touch screens, so keep the trash button visible. */
-@media (hover: none) {
-	.shortcut-remove {
-		opacity: 1;
-	}
+.icon:disabled {
+	opacity: 0.35;
+	background: transparent;
+	cursor: default;
 }
 
-.shortcut-remove:hover {
-	color: var(--error);
-	border-color: var(--error);
-}
-
-.shortcut-remove svg {
-	width: 14px;
-	height: 14px;
+.icon svg {
+	width: 22px;
+	height: 22px;
 	fill: none;
 	stroke: currentColor;
-	stroke-width: 2;
+	stroke-width: 1.9;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 }
 
-.status {
-	min-height: 1.4em;
-	margin: 0;
-	font-size: 14px;
-	color: var(--muted);
-}
-
-.status.error {
-	color: var(--error);
-}
-
-.settings {
+/* ---- The browser: toolbar, tabs, the page area and the bottom bar ---- */
+.browser {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
-	padding: 18px 20px 20px;
-	font-size: 14px;
-}
-
-.settings label {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-}
-
-.settings .status {
-	min-height: 0;
-}
-
-.settings select,
-.settings input {
-	width: 240px;
-	max-width: 55%;
-	padding: 6px 12px;
-	border-radius: 8px;
+	height: 100vh;
+	height: 100dvh;
 }
 
 #toolbar {
 	display: flex;
 	align-items: center;
-	gap: 4px;
-	padding: 6px 8px;
-	background: var(--panel);
-	border-bottom: 1px solid var(--border);
+	gap: 6px;
+	padding: 12px 20px 6px;
+	background: var(--bar);
 }
 
-.icon {
+#toolbar > .icon {
+	color: var(--muted);
+}
+
+#toolbar > .icon:hover {
+	color: var(--text);
+}
+
+/* The address bar: a pill with the page's icon (a home button) and the URL. */
+.bar {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	min-width: 0;
+	height: 48px;
+	margin: 0 8px;
+	padding: 0 18px 0 6px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+	transition: border-color 0.15s;
+}
+
+.bar:focus-within {
+	border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.bar-home {
 	display: grid;
 	place-items: center;
-	width: 34px;
-	height: 34px;
+	width: 38px;
+	height: 38px;
 	flex: none;
 	padding: 0;
 	border: 0;
-	border-radius: 8px;
+	border-radius: 50%;
 	background: transparent;
-	color: var(--text);
+	color: var(--muted);
 	cursor: pointer;
 }
 
-.icon:hover {
-	background: var(--border);
+.bar-home:hover {
+	background: var(--hover);
+	color: var(--text);
 }
 
-.icon svg {
-	width: 18px;
-	height: 18px;
+.bar-icon {
+	width: 19px;
+	height: 19px;
 	fill: none;
 	stroke: currentColor;
 	stroke-width: 2;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-}
-
-/* Address bar with a status icon: home on arc4dia:// pages, lock on https. */
-.bar {
-	position: relative;
-	display: flex;
-	align-items: center;
-	flex: 1;
-	min-width: 0;
-	margin: 0 4px;
-}
-
-.bar-icon {
-	position: absolute;
-	left: 12px;
-	width: 16px;
-	height: 16px;
-	fill: none;
-	stroke: var(--muted);
-	stroke-width: 2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	pointer-events: none;
 }
 
 .bar-icon.secure {
@@ -750,9 +335,46 @@ select:focus {
 }
 
 #bar {
-	width: 100%;
-	padding: 8px 14px 8px 36px;
-	font-size: 14px;
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	padding: 0 6px;
+	border: 0;
+	background: transparent;
+	font-size: 17px;
+	outline: none;
+}
+
+.pill-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	height: 46px;
+	flex: none;
+	margin-left: 4px;
+	padding: 0 20px 0 16px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+	color: var(--text);
+	font-size: 16px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.pill-button:hover {
+	background: var(--hover);
+}
+
+.pill-button svg {
+	width: 21px;
+	height: 21px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.9;
+	stroke-linecap: round;
+	stroke-linejoin: round;
 }
 
 /* The ☰ dropdown. */
@@ -770,10 +392,9 @@ select:focus {
 	min-width: 240px;
 	padding: 8px;
 	border: 1px solid var(--border);
-	border-radius: 18px;
-	background: radial-gradient(120% 80% at 0% 0%, rgb(124 92 255 / 0.12), transparent 60%), var(--raised);
+	border-radius: 20px;
+	background: var(--panel);
 	box-shadow: 0 18px 50px var(--shadow);
-	backdrop-filter: blur(12px);
 	animation: menu-in 0.14s ease-out;
 }
 
@@ -790,10 +411,9 @@ select:focus {
 	gap: 14px;
 	padding: 11px 12px;
 	border: 0;
-	border-radius: 10px;
+	border-radius: 12px;
 	background: transparent;
 	color: var(--text);
-	font: inherit;
 	font-size: 15px;
 	text-align: left;
 	cursor: pointer;
@@ -829,36 +449,41 @@ select:focus {
 	border-top: 1px solid var(--border);
 }
 
+/* Tabs: + first, then pills; the open one is filled with the accent. */
 #tabbar {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 8px 8px 6px;
-	background: var(--bg);
+	gap: 10px;
+	padding: 8px 20px 14px;
+	background: var(--bar);
+	border-bottom: 1px solid var(--border);
+}
+
+#add-tab {
+	color: var(--text);
 }
 
 #tabs {
 	display: flex;
-	gap: 6px;
+	gap: 8px;
 	min-width: 0;
 	overflow-x: auto;
 	scrollbar-width: none;
 }
 
-/* Pill-shaped tabs; the active one is filled with the accent. */
 .tab {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	width: 200px;
-	min-width: 96px;
+	gap: 10px;
+	width: 230px;
+	min-width: 120px;
 	flex: 0 1 auto;
-	height: 34px;
-	padding: 0 6px 0 14px;
-	border: 1px solid var(--border);
+	height: 46px;
+	padding: 0 8px 0 16px;
 	border-radius: 999px;
 	color: var(--muted);
-	font-size: 13px;
+	font-size: 16px;
+	font-weight: 600;
 	cursor: default;
 	user-select: none;
 	transition:
@@ -867,20 +492,34 @@ select:focus {
 }
 
 .tab:hover {
-	background: var(--hover);
+	background: var(--surface);
 	color: var(--text);
 }
 
 .tab.active {
-	border-color: transparent;
-	background: var(--accent-soft);
-	color: var(--on-accent-soft);
-	font-weight: 600;
+	background: var(--accent);
+	color: var(--on-accent);
 }
 
-.tab:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
+.tab-icon {
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	flex: none;
+}
+
+.tab-icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+.tab-icon .line-icon {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
 }
 
 .tab-title {
@@ -894,16 +533,14 @@ select:focus {
 .tab-close {
 	display: grid;
 	place-items: center;
-	width: 24px;
-	height: 24px;
+	width: 30px;
+	height: 30px;
 	flex: none;
 	padding: 0;
 	border: 0;
 	border-radius: 50%;
 	background: transparent;
 	color: inherit;
-	font-size: 17px;
-	line-height: 1;
 	cursor: pointer;
 }
 
@@ -911,17 +548,29 @@ select:focus {
 	background: rgb(127 127 127 / 0.25);
 }
 
-#add-tab {
-	width: 34px;
-	height: 34px;
-	border-radius: 50%;
+.tab-close svg {
+	width: 17px;
+	height: 17px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2.4;
+	stroke-linecap: round;
+}
+
+/* Everything between the tabs and the bottom bar. */
+#stage {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
 }
 
 #frames {
-	flex: 1;
+	position: relative;
 	display: flex;
+	flex: 1;
 	min-height: 0;
-	margin-bottom: var(--dock-space);
 }
 
 #frames iframe {
@@ -931,182 +580,532 @@ select:focus {
 	background: #fff;
 }
 
-/* Home screen and frames share the space under the toolbar. */
+/* The home screen and built-in pages take the place of the frames. */
 #home-screen:not([hidden]) ~ #frames,
 .internal-page:not([hidden]) ~ #frames {
 	display: none;
 }
 
+/* Pages with no dark theme of their own (DuckDuckGo HTML) are shown inverted. */
+#frames iframe.force-dark {
+	filter: invert(0.9) hue-rotate(180deg);
+	background: #fff;
+}
+
+/* The bottom bar: the apps, spread across the width. */
+.dock {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	height: 64px;
+	flex: none;
+	padding: 0 20px;
+	background: var(--bar);
+	border-top: 1px solid var(--border);
+}
+
+.dock button {
+	display: grid;
+	place-items: center;
+	width: 56px;
+	height: 46px;
+	padding: 0;
+	border: 0;
+	border-radius: 16px;
+	background: transparent;
+	color: var(--body-text);
+	cursor: pointer;
+	transition:
+		background 0.15s,
+		color 0.15s;
+}
+
+.dock button:hover {
+	background: var(--surface);
+	color: var(--text);
+}
+
+.dock button.active {
+	background: var(--surface);
+	color: var(--accent);
+}
+
+.dock svg {
+	width: 24px;
+	height: 24px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ---- Home screen: the constellation, the wordmark, search and the launcher ---- */
+#home-screen {
+	position: relative;
+	display: grid;
+	place-items: center;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden auto;
+	background:
+		radial-gradient(70% 55% at 50% 62%, rgb(var(--star) / 0.07), transparent 70%),
+		var(--bg);
+}
+
+.stars {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.home-main {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+	width: min(780px, calc(100% - 48px));
+	padding: 32px 0 40px;
+}
+
+.home-main > * {
+	animation: rise-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.home-main > :nth-child(2) {
+	animation-delay: 0.06s;
+}
+
+.home-main > :nth-child(3),
+.home-main > :nth-child(4) {
+	animation-delay: 0.12s;
+}
+
+@keyframes rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+}
+
+.home-wordmark {
+	margin: 0 0 4px;
+	color: var(--text);
+	font-family: "Playball", cursive;
+	font-size: clamp(72px, 9vw, 118px);
+	font-weight: 400;
+	line-height: 1.1;
+	text-shadow: 0 0 40px rgb(var(--star) / 0.18);
+}
+
+/* Search: a pill with an icon, the input and a round arrow button. */
+.search {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	height: 68px;
+	padding: 0 9px 0 26px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--surface) 88%, transparent);
+	box-shadow: 0 18px 50px rgb(0 0 0 / 0.35);
+	backdrop-filter: blur(10px);
+	transition: border-color 0.15s;
+}
+
+.search:focus-within {
+	border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.search-icon {
+	width: 24px;
+	height: 24px;
+	flex: none;
+	fill: none;
+	stroke: var(--muted);
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+#search {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	font-size: 19px;
+	outline: none;
+}
+
+.search-go {
+	display: grid;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	flex: none;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--go);
+	color: var(--on-go);
+	cursor: pointer;
+	transition:
+		filter 0.15s,
+		transform 0.15s;
+}
+
+.search-go:hover {
+	filter: brightness(1.15);
+	transform: translateX(2px);
+}
+
+.search-go svg {
+	width: 22px;
+	height: 22px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2.2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.status {
+	min-height: 1.4em;
+	margin: 0;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+.status.error {
+	color: var(--error);
+}
+
+#status {
+	margin: -14px 0 -8px;
+	text-align: center;
+}
+
+/* The launcher: round buttons for your sites, then the built-in apps. */
+.launcher {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 18px;
+	padding: 24px 30px;
+	border: 1px solid var(--border);
+	border-radius: 40px;
+	background: color-mix(in srgb, var(--panel) 82%, transparent);
+	backdrop-filter: blur(10px);
+}
+
+.launcher-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 16px;
+}
+
+.launcher-row:empty {
+	display: none;
+}
+
+.launcher .shortcut-item {
+	position: relative;
+}
+
+.launcher .shortcut,
+.launcher-button {
+	display: grid;
+	place-items: center;
+	width: 70px;
+	height: 70px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--raised);
+	color: var(--text);
+	cursor: pointer;
+	transition:
+		background 0.15s,
+		transform 0.15s;
+}
+
+.launcher .shortcut:hover,
+.launcher-button:hover {
+	background: var(--hover);
+	transform: translateY(-2px);
+}
+
+/* Inside the launcher the round button is the tile; the name is for screen readers. */
+.launcher .shortcut-icon {
+	display: grid;
+	place-items: center;
+}
+
+.launcher .shortcut-icon svg {
+	width: 32px;
+	height: 32px;
+}
+
+.launcher .shortcut-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.launcher-button svg,
+.launcher .internal-icon {
+	width: 30px;
+	height: 30px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.shortcut-letter {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+/* ---- The Shortcuts panel: round tiles with names, Add at the end, trash in Edit ---- */
+.shortcuts {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 86px);
+	justify-content: center;
+	gap: 18px 12px;
+	padding: 20px;
+	overflow-y: auto;
+}
+
+.shortcut-item {
+	position: relative;
+}
+
+.shortcut {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.shortcuts .shortcut-icon {
+	display: grid;
+	place-items: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: var(--raised);
+	transition:
+		background 0.15s,
+		transform 0.15s;
+}
+
+.shortcuts .shortcut:hover .shortcut-icon {
+	background: var(--hover);
+	transform: translateY(-2px);
+}
+
+.shortcuts .shortcut-icon svg {
+	width: 28px;
+	height: 28px;
+}
+
+.shortcuts .internal-icon,
+.shortcut-add .shortcut-icon svg {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.shortcut-add .shortcut-icon {
+	border: 1.5px dashed var(--border);
+	background: transparent;
+}
+
+.shortcut-label {
+	max-width: 100%;
+	overflow: hidden;
+	font-size: 13px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.shortcut-remove {
+	position: absolute;
+	top: -6px;
+	right: 4px;
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: 50%;
+	background: var(--panel);
+	color: var(--muted);
+	cursor: pointer;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s;
+}
+
+.apps.editing .shortcut-remove {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.shortcut-remove:hover {
+	border-color: var(--error);
+	color: var(--error);
+}
+
+.shortcut-remove svg {
+	width: 14px;
+	height: 14px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ---- Built-in pages: arc4dia://settings and arc4dia://games ---- */
+.internal-page {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 36px 24px 48px;
+	background:
+		radial-gradient(60% 40% at 50% 0%, rgb(var(--star) / 0.06), transparent 70%),
+		var(--bg);
+}
+
+.internal-page > * {
+	max-width: 760px;
+	margin-inline: auto;
+}
+
+.internal-title {
+	margin-block: 0 18px;
+	color: var(--text);
+	font-family: "Playball", cursive;
+	font-size: 54px;
+	font-weight: 400;
+	line-height: 1.15;
+}
+
+.internal-empty {
+	padding: 48px 20px;
+	border: 1px dashed var(--border);
+	border-radius: 20px;
+	color: var(--muted);
+	text-align: center;
+}
+
+#games-list:empty {
+	display: none;
+}
+
+.settings {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 20px 22px 22px;
+	font-size: 15px;
+}
+
+.internal-page .settings {
+	border: 1px solid var(--border);
+	border-radius: 24px;
+	background: var(--panel);
+}
+
+.settings label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.settings .status {
+	min-height: 0;
+}
+
+.settings select,
+.settings input {
+	width: 260px;
+	min-width: 0;
+	max-width: 62%;
+	padding: 9px 14px;
+}
+
 .settings input[type="checkbox"] {
-	width: auto;
-	accent-color: var(--accent);
+	width: 20px;
+	height: 20px;
+	accent-color: var(--go);
+}
+
+.setting-name {
+	display: flex;
+	flex-direction: column;
+}
+
+.setting-hint {
+	color: var(--muted);
+	font-size: 12px;
 }
 
 .text-button {
 	flex: none;
-	padding: 6px 12px;
+	padding: 8px 16px;
 	border: 1px solid var(--border);
-	border-radius: 8px;
-	background: transparent;
+	border-radius: 999px;
+	background: var(--surface);
 	color: var(--text);
-	font: inherit;
 	font-size: 14px;
 	cursor: pointer;
 }
 
 .text-button:hover {
-	background: var(--border);
-}
-
-.panel {
-	width: min(760px, calc(100vw - 32px));
-	max-height: min(80vh, 900px);
-	padding: 0;
-	border: 1px solid var(--border);
-	border-radius: 12px;
-	background: var(--panel);
-	color: var(--text);
-}
-
-#settings-panel {
-	width: min(520px, calc(100vw - 32px));
-}
-
-.panel[open] {
-	display: flex;
-	flex-direction: column;
-}
-
-.panel::backdrop {
-	background: var(--backdrop);
-}
-
-.panel-head {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 12px 12px 20px;
-	border-bottom: 1px solid var(--border);
-}
-
-.panel-head h2 {
-	margin: 0 auto 0 0;
-	font-size: 18px;
-}
-
-#history-search {
-	width: min(260px, 40vw);
-	padding: 6px 14px;
-	font-size: 14px;
-}
-
-#history-list {
-	overflow-y: auto;
-	padding: 4px 8px 12px;
-}
-
-#history-list h3 {
-	margin: 14px 12px 6px;
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--muted);
-}
-
-#history-list ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.history-item {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	border-radius: 8px;
-}
-
-.history-item:hover {
 	background: var(--hover);
-}
-
-.history-open {
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	min-width: 0;
-	padding: 8px 12px;
-	border: 0;
-	background: transparent;
-	color: var(--text);
-	font: inherit;
-	text-align: left;
-	cursor: pointer;
-}
-
-.history-title,
-.history-url {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.history-title {
-	font-size: 14px;
-}
-
-.history-url {
-	font-size: 12px;
-	color: var(--muted);
-}
-
-.history-time {
-	flex: none;
-	font-size: 12px;
-	color: var(--muted);
-}
-
-.history-remove {
-	width: 28px;
-	height: 28px;
-	font-size: 16px;
-	color: var(--muted);
-}
-
-.history-empty {
-	margin: 32px 12px;
-	text-align: center;
-	color: var(--muted);
-}
-
-.panel-actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
 }
 
 .text-button.primary {
 	border-color: transparent;
 	background: var(--accent);
-	color: #fff;
+	color: var(--on-accent);
+	font-weight: 600;
 }
 
 .text-button.primary:hover {
 	background: var(--accent);
-	filter: brightness(1.12);
+	filter: brightness(1.08);
 }
 
-/* Games picker: a grid of cards with each site's banner and logo. */
-.games {
-	width: min(720px, calc(100vw - 24px));
-}
-
+/* Game sites: cards in each site's color with its logo or letter. */
 .games-list {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 14px;
-	padding: 16px;
-	overflow-y: auto;
+	gap: 16px;
 }
 
 .game-site {
@@ -1115,10 +1114,9 @@ select:focus {
 	overflow: hidden;
 	padding: 0;
 	border: 1px solid var(--border);
-	border-radius: 18px;
-	background: var(--surface);
+	border-radius: 24px;
+	background: var(--panel);
 	color: var(--text);
-	font: inherit;
 	text-align: left;
 	cursor: pointer;
 	transition:
@@ -1129,1721 +1127,19 @@ select:focus {
 
 .game-site:hover,
 .game-site:focus-visible {
-	border-color: var(--accent);
-	box-shadow: 0 12px 30px var(--shadow);
+	border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+	box-shadow: 0 14px 34px var(--shadow);
 	transform: translateY(-2px);
 	outline: none;
 }
 
 .game-banner {
-	display: block;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
 	width: 100%;
 	aspect-ratio: 1.9;
-	object-fit: cover;
-	background: var(--chip);
-}
-
-.game-info {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 10px 12px 12px;
-}
-
-.game-icon {
-	width: 36px;
-	height: 36px;
-	flex: none;
-	border-radius: 10px;
-	object-fit: cover;
-}
-
-.game-text {
-	display: flex;
-	flex-direction: column;
-	min-width: 0;
-}
-
-.game-name {
-	overflow: hidden;
-	font-size: 15px;
-	font-weight: 700;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.game-about {
-	overflow: hidden;
-	color: var(--muted);
-	font-size: 12px;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-/* Phones: four smaller tiles per row so the home screen fits above the dock. */
-@media (max-width: 520px) {
-	.shortcuts {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 12px 6px;
-	}
-
-	.shortcut-icon {
-		width: 56px;
-		height: 56px;
-		border-radius: 17px;
-	}
-
-	.shortcut-icon svg {
-		width: 24px;
-		height: 24px;
-	}
-
-	.shortcut-label {
-		font-size: 12px;
-	}
-
-	.shortcut-remove {
-		top: -6px;
-		right: 0;
-		width: 22px;
-		height: 22px;
-	}
-}
-
-@media (max-width: 420px) {
-	.games-list {
-		gap: 10px;
-		padding: 12px;
-	}
-
-	.game-info {
-		padding: 8px 10px 10px;
-	}
-
-	.game-icon {
-		width: 28px;
-		height: 28px;
-		border-radius: 8px;
-	}
-
-	.game-name {
-		font-size: 14px;
-	}
-
-	.game-about {
-		display: none;
-	}
-}
-
-/* Credits. */
-.credits {
-	width: min(420px, calc(100vw - 32px));
-}
-
-.credits-body {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 6px;
-	padding: 26px 24px 28px;
-	text-align: center;
-}
-
-.credits-logo {
-	margin: 0 0 10px;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: 44px;
-	font-weight: 600;
-	letter-spacing: -0.035em;
-	color: var(--accent);
-}
-
-.credits-made {
-	margin: 0;
-	color: var(--muted);
-	font-size: 13px;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-}
-
-.credits-names {
-	margin: 0 0 14px;
-	font-size: 26px;
-	font-weight: 700;
-}
-
-.credits-and {
-	color: var(--accent);
-}
-
-.credits-built {
-	margin: 0;
-	color: var(--muted);
-	font-size: 13px;
-	line-height: 1.5;
-}
-
-/* Welcome tour. */
-.tour {
-	width: min(560px, calc(100vw - 32px));
-	padding: 0;
-	border: 1px solid var(--border);
-	border-radius: 28px;
-	background: var(--raised);
-	color: var(--text);
-	box-shadow: 0 30px 80px var(--shadow);
-}
-
-.tour::backdrop {
-	background: var(--backdrop);
-	backdrop-filter: blur(14px);
-}
-
-.tour-card {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
-	padding: 24px;
-	animation: rise-in 0.3s ease-out;
-}
-
-.tour svg {
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-.tour-steps {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-}
-
-.tour-pills {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	flex: 1;
-	min-width: 0;
-	margin: 0;
-	padding: 5px;
-	list-style: none;
-	border-radius: 999px;
-	background: var(--chip);
-}
-
-.tour-pill {
-	display: grid;
-	place-items: center;
-	width: 30px;
-	height: 30px;
-	flex: none;
-	border: 1.5px solid var(--border);
-	border-radius: 999px;
-	color: var(--muted);
-	font-size: 14px;
-	font-weight: 600;
-}
-
-.tour-pill.done {
-	border-color: transparent;
-	background: var(--accent-soft);
-	color: var(--on-accent-soft);
-}
-
-.tour-pill.done svg {
-	width: 16px;
-	height: 16px;
-	stroke-width: 3;
-}
-
-.tour-pill.current {
-	display: flex;
-	gap: 8px;
-	width: auto;
-	min-width: 0;
-	flex: 0 1 auto;
-	padding: 0 14px 0 4px;
-	border-color: transparent;
-	background: var(--accent-soft);
-	color: var(--on-accent-soft);
-}
-
-.tour-num {
-	display: grid;
-	place-items: center;
-	width: 22px;
-	height: 22px;
-	flex: none;
-	border-radius: 50%;
-}
-
-.tour-pill.current .tour-num {
-	background: rgb(18 12 36 / 0.12);
-}
-
-.tour-pill-label {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.tour-skip {
-	flex: none;
-	padding: 6px 4px;
-	border: 0;
-	background: transparent;
-	color: var(--muted);
-	font: inherit;
-	font-size: 15px;
-	cursor: pointer;
-}
-
-.tour-skip:hover {
-	color: var(--text);
-}
-
-.tour-badge {
-	display: grid;
-	place-items: center;
-	width: 52px;
-	height: 52px;
-	margin-top: 8px;
-	border-radius: 50%;
-	background: rgb(124 92 255 / 0.16);
-	color: var(--accent);
-}
-
-.tour-badge svg {
-	width: 24px;
-	height: 24px;
-}
-
-.tour-title {
-	margin: 0;
-	font-size: 24px;
-	letter-spacing: -0.01em;
-}
-
-.tour-body {
-	margin: 0;
-	color: var(--body-text);
-	font-size: 16px;
-	line-height: 1.6;
-}
-
-.tour-actions {
-	display: flex;
-	justify-content: space-between;
-	gap: 10px;
-	margin-top: 8px;
-}
-
-.tour-button {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 20px;
-	border: 1px solid var(--border);
-	border-radius: 999px;
-	background: var(--chip);
-	color: var(--text);
-	font: inherit;
-	font-size: 15px;
-	font-weight: 500;
-	cursor: pointer;
-}
-
-.tour-button svg {
-	width: 18px;
-	height: 18px;
-}
-
-.tour-button.primary {
-	margin-left: auto;
-	border-color: transparent;
-	background: var(--accent-soft);
-	color: var(--on-accent-soft);
-}
-
-.tour-button:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
-.tour-button:hover {
-	filter: brightness(1.1);
-}
-
-.tour-skip:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-	border-radius: 8px;
-}
-
-/* Bottom bar: a floating sheet of dark glass. --dock-space is the room it takes up. */
-:root {
-	--dock-space: calc(84px + env(safe-area-inset-bottom));
-}
-
-.dock {
-	position: fixed;
-	left: 50%;
-	bottom: calc(12px + env(safe-area-inset-bottom));
-	z-index: 25;
-	display: flex;
-	justify-content: space-between;
-	gap: 4px;
-	width: min(560px, calc(100vw - 24px));
-	height: 62px;
-	padding: 8px;
-	border: 1px solid rgb(255 255 255 / 0.14);
-	border-radius: 22px;
-	background: rgb(18 18 26 / 0.72);
-	backdrop-filter: blur(18px) saturate(1.4);
-	box-shadow: 0 14px 40px rgb(0 0 0 / 0.35);
-	transform: translateX(-50%);
-}
-
-.dock button {
-	position: relative;
-	display: grid;
-	place-items: center;
-	flex: 1;
-	padding: 0;
-	border: 0;
-	border-radius: 14px;
-	background: transparent;
-	color: rgb(255 255 255 / 0.72);
-	cursor: pointer;
-	transition:
-		background 0.15s,
-		color 0.15s;
-}
-
-@media (hover: hover) {
-	.dock button:hover {
-		background: rgb(255 255 255 / 0.1);
-		color: #fff;
-	}
-}
-
-.dock button.active {
-	background: rgb(255 255 255 / 0.18);
-	color: #fff;
-}
-
-.dock button:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
-.dock svg {
-	width: 22px;
-	height: 22px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 1.9;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-@media (max-width: 540px) {
-	.history-time {
-		display: none;
-	}
-
-	/* Room for the address bar on phones. */
-	#forward {
-		display: none;
-	}
-
-	#toolbar {
-		gap: 2px;
-	}
-
-	#history-search {
-		order: 1;
-		width: 100%;
-	}
-}
-
-/* Apps: the shortcut grid on a sheet of dark glass, whatever the theme. */
-.panel.apps {
-	width: min(640px, calc(100vw - 24px));
-	border-color: rgb(255 255 255 / 0.16);
-	border-radius: 24px;
-	background: rgb(18 18 26 / 0.78);
-	backdrop-filter: blur(22px);
-	color: #fff;
-}
-
-.panel.apps .panel-head {
-	border-bottom-color: rgb(255 255 255 / 0.12);
-}
-
-.panel.apps .icon {
-	color: #fff;
-}
-
-.apps-grid {
-	margin: 0;
-	padding: 20px 14px 22px;
-	overflow-y: auto;
-}
-
-/* Browser chrome: tabs and toolbar on dark glass over the wallpaper, like the dock. */
-#tabbar,
-#toolbar,
-#home-screen .search {
-	--panel: transparent;
-	--surface: rgb(18 18 26 / 0.62);
-	--raised: #16161e;
-	--chip: rgb(255 255 255 / 0.1);
-	--hover: rgb(255 255 255 / 0.12);
-	--border: rgb(255 255 255 / 0.14);
-	--text: #f4f3fa;
-	--body-text: #d9d7e6;
-	--muted: #a9a6be;
-	--accent-soft: rgb(255 255 255 / 0.2);
-	--on-accent-soft: #fff;
-	--secure: #4ade80;
-	color-scheme: dark;
-	color: var(--text);
-}
-
-#tabbar {
-	background: rgb(12 12 18 / 0.72);
-	backdrop-filter: blur(20px);
-}
-
-#toolbar {
-	position: relative;
-	z-index: 30;
-	background: rgb(12 12 18 / 0.72);
-	backdrop-filter: blur(20px);
-}
-
-#home-screen .search {
-	backdrop-filter: blur(18px);
-	box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
-}
-
-/* Wallpaper picker: a card per wallpaper; the photos double as previews. */
-.wallpaper-list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-	gap: 14px;
-	padding: 18px;
-	overflow-y: auto;
-}
-
-.wallpaper-card {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	padding: 0;
-	border: 0;
-	background: none;
-	color: #fff;
-	font: inherit;
-	text-align: left;
-	cursor: pointer;
-}
-
-.wallpaper-preview {
-	display: block;
-	width: 100%;
-	aspect-ratio: 16 / 10;
-	border: 2px solid rgb(255 255 255 / 0.14);
-	border-radius: 16px;
-	background: #222 center / cover no-repeat;
-	transition:
-		border-color 0.15s,
-		transform 0.15s;
-}
-
-.wallpaper-card:hover .wallpaper-preview {
-	transform: translateY(-2px);
-}
-
-.wallpaper-card[aria-checked="true"] .wallpaper-preview,
-.wallpaper-card:focus-visible .wallpaper-preview {
-	border-color: var(--accent);
-	box-shadow: 0 0 0 3px rgb(124 92 255 / 0.35);
-}
-
-.wallpaper-card:focus-visible {
-	outline: none;
-}
-
-.wallpaper-name {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 0 4px;
-	font-size: 14px;
-	font-weight: 500;
-}
-
-.wallpaper-card[aria-checked="true"] .wallpaper-name::after {
-	content: "✓";
-	margin-left: auto;
-	color: var(--accent-soft);
-}
-
-.wallpaper-tag {
-	padding: 2px 8px;
-	border-radius: 999px;
-	background: rgb(255 255 255 / 0.14);
-	font-size: 11px;
-}
-
-.wallpaper-preview[data-wallpaper="gtr-sunset"] {
-	background-image: url("wallpapers/gtr-sunset.jpg");
-	background-position: center 48%;
-}
-
-.wallpaper-preview[data-wallpaper="r34-night"] {
-	background-image: url("wallpapers/r34-night.jpg");
-	background-position: center 80%;
-}
-
-.wallpaper-preview[data-wallpaper="maybach-night"] {
-	background-image: url("wallpapers/maybach-night.jpg");
-	background-position: center 62%;
-}
-
-.wallpaper-preview[data-wallpaper="maybach-driveway"] {
-	background-image: url("wallpapers/maybach-driveway.jpg");
-	background-position: center 58%;
-}
-
-.wallpaper-preview[data-wallpaper="flower-field"] {
-	background-image: url("wallpapers/flower-field.jpg");
-	background-position: center 62%;
-}
-
-.wallpaper-preview[data-wallpaper="hokage"] {
-	background-image: url("wallpapers/hokage.jpg");
-	background-position: center 35%;
-}
-
-.wallpaper-preview[data-wallpaper="overcast"] {
-	background-image: url("wallpapers/overcast.jpg");
-	background-position: center 30%;
-}
-
-.wallpaper-preview[data-wallpaper="beach"] {
-	background-image: url("wallpapers/beach.jpg");
-	background-position: center 58%;
-}
-
-.wallpaper-preview[data-wallpaper="blue-hour"] {
-	background-image: url("wallpapers/blue-hour.jpg");
-	background-position: center 55%;
-}
-
-.wallpaper-preview[data-wallpaper="cabin"] {
-	background-image: url("wallpapers/cabin.jpg");
-	background-position: center 62%;
-}
-
-.wallpaper-preview[data-wallpaper="snow"] {
-	background:
-		radial-gradient(circle at 20% 30%, #fff 0 1.5px, transparent 2px),
-		radial-gradient(circle at 65% 20%, #fff 0 2px, transparent 2.5px),
-		radial-gradient(circle at 80% 60%, #fff 0 1.5px, transparent 2px),
-		radial-gradient(circle at 35% 70%, #fff 0 2px, transparent 2.5px),
-		radial-gradient(circle at 50% 45%, #fff 0 1px, transparent 1.5px),
-		radial-gradient(70% 90% at 50% 100%, rgb(150 180 255 / 0.3), transparent 70%),
-		radial-gradient(120% 80% at 50% 0%, #1b2550 0%, #0a0f24 45%, #000 100%);
-}
-
-.wallpaper-preview[data-wallpaper="night"] {
-	background:
-		radial-gradient(circle at 15% 25%, #fff 0 1px, transparent 1.5px),
-		radial-gradient(circle at 40% 15%, #fff 0 1.2px, transparent 1.7px),
-		radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 1.5px),
-		radial-gradient(circle at 85% 18%, #fff 0 1.2px, transparent 1.7px),
-		radial-gradient(circle at 55% 55%, #fff 0 1px, transparent 1.5px),
-		radial-gradient(70% 90% at 50% 100%, rgb(124 92 255 / 0.5), transparent 70%),
-		radial-gradient(45% 70% at 20% 100%, rgb(214 51 132 / 0.3), transparent 70%),
-		#05050c;
-}
-
-@media (max-width: 420px) {
-	.wallpaper-list {
-		grid-template-columns: 1fr 1fr;
-		gap: 10px;
-		padding: 14px;
-	}
-}
-
-/* OS mode, after the reference: a full-width glass top bar, apps in the top left on wide
-   screens, and a dock with dividers. */
-.topbar {
-	margin: 0 -20px;
-	padding-inline: 20px;
-	border-bottom: 1px solid rgb(255 255 255 / 0.08);
-	background: rgb(12 12 18 / 0.45);
-	backdrop-filter: blur(18px);
-	text-shadow: none;
-}
-
-.topbar-link {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 6px 10px;
-	border: 0;
-	border-radius: 10px;
-	background: none;
-	color: rgb(255 255 255 / 0.85);
-	font: inherit;
-	font-size: 13px;
-	cursor: pointer;
-}
-
-.topbar-link:hover {
-	background: rgb(255 255 255 / 0.1);
-	color: #fff;
-}
-
-.topbar-link svg {
-	width: 16px;
-	height: 16px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 1.8;
-}
-
-.topbar .topbar-button {
-	border: 0;
-	background: none;
-}
-
-.dock-sep {
-	flex: none;
-	width: 1px;
-	height: 26px;
-	margin: 0 2px;
-	background: rgb(255 255 255 / 0.16);
-}
-
-@media (min-width: 900px) {
-	.desktop {
-		position: relative;
-	}
-
-	.desktop-main {
-		margin: 28px 0 auto;
-	}
-
-	.home-time {
-		font-size: 84px;
-	}
-
-	.desktop-apps {
-		position: absolute;
-		top: 84px;
-		left: 24px;
-		display: grid;
-		grid-template-columns: repeat(2, 92px);
-		gap: 22px 4px;
-	}
-
-	.desktop-app-icon {
-		width: 52px;
-		height: 52px;
-		border-radius: 14px;
-	}
-
-	.desktop-app-label {
-		font-size: 12px;
-	}
-}
-
-/* Browser mode: no desktop and no dock, the browser fills the screen. */
-body[data-mode="browser"] {
-	--dock-space: 0px;
-}
-
-body[data-mode="browser"] .dock,
-body[data-mode="browser"] .desktop {
-	display: none !important;
-}
-
-/* First visit: OS mode or browser mode. */
-.mode-panel {
-	width: min(620px, calc(100vw - 24px));
-}
-
-.mode-body {
-	padding: 26px 22px 22px;
-	text-align: center;
-}
-
-.mode-title {
-	margin: 0;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: 24px;
-	font-weight: 600;
-}
-
-.mode-sub {
-	margin: 6px 0 20px;
-	color: rgb(255 255 255 / 0.65);
-	font-size: 14px;
-}
-
-.mode-options {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 14px;
-}
-
-.mode-option {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	padding: 22px 16px;
-	border: 1px solid rgb(255 255 255 / 0.14);
-	border-radius: 20px;
-	background: rgb(255 255 255 / 0.06);
-	color: #fff;
-	font: inherit;
-	cursor: pointer;
-	transition:
-		background 0.15s,
-		border-color 0.15s,
-		transform 0.15s;
-}
-
-.mode-option:hover,
-.mode-option:focus-visible {
-	border-color: var(--accent);
-	background: rgb(255 255 255 / 0.12);
-	outline: none;
-	transform: translateY(-2px);
-}
-
-.mode-icon {
-	display: grid;
-	place-items: center;
-	width: 56px;
-	height: 56px;
-	border-radius: 16px;
-	background: rgb(255 255 255 / 0.12);
-}
-
-.mode-icon svg {
-	width: 28px;
-	height: 28px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 1.8;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-.mode-name {
-	font-size: 17px;
-	font-weight: 600;
-}
-
-.mode-about {
-	color: rgb(255 255 255 / 0.65);
-	font-size: 13px;
-	line-height: 1.4;
-}
-
-@media (max-width: 480px) {
-	.mode-options {
-		grid-template-columns: 1fr;
-	}
-
-	.topbar-link {
-		font-size: 0;
-	}
-
-	.topbar-link svg {
-		width: 18px;
-		height: 18px;
-	}
-}
-
-/* ---- OS mode, after GalaxyV7's desktop: thin black bars, a clean wallpaper and the
-   browser in a window. ---- */
-body[data-mode="os"] {
-	--dock-space: calc(44px + env(safe-area-inset-bottom));
-	--bar: rgb(8 8 10 / 0.92);
-}
-
-body[data-mode="os"] .desktop {
-	padding: 0;
-}
-
-body[data-mode="os"] .topbar {
-	position: fixed;
-	inset: 0 0 auto;
-	z-index: 40;
-	min-height: 0;
-	height: calc(28px + env(safe-area-inset-top));
-	margin: 0;
-	padding: env(safe-area-inset-top) 10px 0;
-	gap: 4px;
-	border: 0;
-	background: var(--bar);
-	backdrop-filter: none;
-	font-size: 13px;
-}
-
-body[data-mode="os"] .topbar-name {
-	font-size: 13px;
-	font-weight: 500;
-	letter-spacing: 0;
-	text-transform: none;
-}
-
-body[data-mode="os"] .topbar-button,
-body[data-mode="os"] .topbar-link {
-	width: auto;
-	height: 24px;
-	padding: 0 6px;
-	border-radius: 6px;
-	color: rgb(255 255 255 / 0.85);
-	font-size: 12px;
-}
-
-body[data-mode="os"] .topbar-button svg,
-body[data-mode="os"] .topbar-link svg {
-	width: 15px;
-	height: 15px;
-}
-
-body[data-mode="os"] .topbar-time {
-	margin-left: 6px;
-	font-size: 13px;
-}
-
-/* The taskbar. */
-body[data-mode="os"] .dock {
-	left: 0;
-	right: 0;
-	bottom: 0;
-	width: 100%;
-	height: var(--dock-space);
-	padding: 0 8px env(safe-area-inset-bottom);
-	gap: 2px;
-	justify-content: center;
-	transform: none;
-	border: 0;
-	border-top: 1px solid rgb(255 255 255 / 0.06);
-	border-radius: 0;
-	background: var(--bar);
-	box-shadow: none;
-}
-
-body[data-mode="os"] .dock button {
-	flex: 0 0 42px;
-	height: 36px;
-	border-radius: 8px;
-}
-
-body[data-mode="os"] .dock svg {
-	width: 20px;
-	height: 20px;
-}
-
-body[data-mode="os"] .dock .dock-sep,
-body[data-mode="os"] .dock [data-dock="browser-mode"] {
-	display: none;
-}
-
-/* The browser window. In browser mode it's just a wrapper with no box of its own. */
-body:not([data-mode="os"]) .os-window {
-	display: contents;
-}
-
-body:not([data-mode="os"]) .os-window-bar,
-body:not([data-mode="os"]) .os-window-resize {
-	display: none;
-}
-
-body[data-mode="os"] .os-window {
-	position: fixed;
-	z-index: 30;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	border: 1px solid rgb(255 255 255 / 0.1);
-	border-radius: 10px;
-	background: rgb(10 10 14 / 0.55);
-	backdrop-filter: blur(24px);
-	box-shadow: 0 24px 70px rgb(0 0 0 / 0.55);
-}
-
-body[data-mode="os"] .os-window .browser {
-	flex: 1;
-	min-height: 0;
-}
-
-body[data-mode="os"] .os-window #frames {
-	margin-bottom: 0;
-}
-
-body[data-mode="os"] .os-window #home-screen {
-	padding-bottom: 24px;
-}
-
-body[data-mode="os"] .os-window.maximized,
-body[data-mode="os"][data-view] .os-window.maximized {
-	inset: calc(26px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
-	width: auto !important;
-	height: auto !important;
-	border-radius: 0;
-	border: 0;
-}
-
-/* While moving or resizing, pages can't catch the pointer. */
-body.moving-window iframe {
-	pointer-events: none;
-}
-
-.os-window-bar {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	height: 32px;
-	padding: 0 4px 0 12px;
-	background: rgb(14 14 18 / 0.96);
-	color: rgb(255 255 255 / 0.85);
-	font-size: 13px;
-	cursor: grab;
-	user-select: none;
-	touch-action: none;
-}
-
-body.moving-window .os-window-bar {
-	cursor: grabbing;
-}
-
-.os-window-title {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.os-window-bar button {
-	display: grid;
-	place-items: center;
-	width: 30px;
-	height: 26px;
-	padding: 0;
-	border: 0;
-	border-radius: 6px;
-	background: none;
-	color: inherit;
-	cursor: pointer;
-}
-
-.os-window-bar button:hover {
-	background: rgb(255 255 255 / 0.12);
-}
-
-.os-window-bar button[data-win="close"]:hover {
-	background: #e5484d;
-	color: #fff;
-}
-
-.os-window-bar svg {
-	width: 14px;
-	height: 14px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-}
-
-.os-window-resize {
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	width: 18px;
-	height: 18px;
-	cursor: nwse-resize;
-	touch-action: none;
-}
-
-/* Phones: the window always fills the screen between the bars. */
-@media (max-width: 699px) {
-	body[data-mode="os"] .os-window {
-		inset: calc(26px + env(safe-area-inset-top)) 0 var(--dock-space) !important;
-		width: auto !important;
-		height: auto !important;
-		border: 0;
-		border-radius: 0;
-	}
-
-	body[data-mode="os"] .os-window-bar [data-win="max"],
-	body[data-mode="os"] .os-window-resize {
-		display: none;
-	}
-
-	body[data-mode="os"] .topbar-link {
-		font-size: 0;
-	}
-}
-
-/* ---- Lock screen (OS mode): swipe up to unlock. ---- */
-.lock {
-	position: fixed;
-	inset: 0;
-	z-index: 60;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-between;
-	padding: calc(14vh + env(safe-area-inset-top)) 20px calc(36px + env(safe-area-inset-bottom));
-	background: linear-gradient(rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.42));
-	color: #fff;
-	text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
-	touch-action: none;
-	user-select: none;
-	cursor: grab;
-	outline: none;
-	transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.lock.dragging {
-	cursor: grabbing;
-	transition: none;
-}
-
-body.locked .desktop,
-body.locked .dock,
-body.locked .os-window {
-	visibility: hidden;
-}
-
-.lock-clock {
-	text-align: center;
-}
-
-.lock-time {
-	margin: 0;
-	font-size: clamp(72px, 20vw, 140px);
-	font-weight: 300;
-	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.03em;
-	line-height: 1;
-}
-
-.lock-date {
-	margin: 8px 0 0;
-	font-size: clamp(16px, 3.8vw, 21px);
-	font-weight: 500;
-}
-
-.lock-hint {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 2px;
-	padding: 8px 18px;
-	border: 0;
-	background: none;
-	color: rgb(255 255 255 / 0.9);
-	font: inherit;
-	font-size: 14px;
-	cursor: pointer;
-	animation: lock-nudge 2.2s ease-in-out infinite;
-}
-
-.lock-hint svg {
-	width: 26px;
-	height: 26px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-@keyframes lock-nudge {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-6px);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.lock {
-		transition: opacity 0.2s;
-	}
-
-	.lock.unlocking {
-		opacity: 0;
-		transform: none !important;
-	}
-
-	.lock-hint {
-		animation: none;
-	}
-}
-
-/* ---- Closer to GalaxyV7: pure black bars and windows, solid white taskbar icons with
-   a dot under the open app, and app panels (Apps, Settings, Games...) as black windows. */
-body[data-mode="os"] {
-	--bar: rgb(0 0 0 / 0.88);
-}
-
-body[data-mode="os"] .topbar {
-	height: calc(26px + env(safe-area-inset-top));
-	padding-inline: 8px;
-}
-
-body[data-mode="os"] .topbar-name {
-	font-size: 14px;
-	font-weight: 400;
-}
-
-body[data-mode="os"] .topbar-time {
-	font-size: 14px;
-}
-
-body[data-mode="os"] .dock button {
-	flex-basis: 40px;
-	color: #fff;
-	background: none;
-}
-
-body[data-mode="os"] .dock button:hover {
-	background: rgb(255 255 255 / 0.1);
-}
-
-body[data-mode="os"] .dock button.active {
-	background: rgb(255 255 255 / 0.08);
-}
-
-body[data-mode="os"] .dock button.active::after {
-	content: "";
-	position: absolute;
-	bottom: 1px;
-	left: 50%;
-	width: 4px;
-	height: 4px;
-	margin-left: -2px;
-	border-radius: 50%;
-	background: #fff;
-}
-
-body[data-mode="os"] .dock svg {
-	stroke-width: 2.3;
-}
-
-body[data-mode="os"] .dock [data-dock="desktop"] {
-	display: none;
-}
-
-/* Windows: black, square-ish, plain title bar. */
-body[data-mode="os"] .os-window {
-	border-color: rgb(255 255 255 / 0.08);
-	border-radius: 6px;
-	background: #000;
-	backdrop-filter: none;
-	box-shadow: 0 18px 50px rgb(0 0 0 / 0.6);
-}
-
-body[data-mode="os"] .os-window-bar {
-	height: 28px;
-	background: #000;
-	color: #fff;
-	font-size: 14px;
-}
-
-body[data-mode="os"] .os-window #tabbar,
-body[data-mode="os"] .os-window #toolbar {
-	background: #000;
-	backdrop-filter: none;
-}
-
-body[data-mode="os"] .os-window #home-screen {
-	background: #000;
-}
-
-/* App panels become black windows over the desktop (no dimmed backdrop). */
-body[data-mode="os"] .panel {
-	--bg: #000;
-	--panel: #000;
-	--surface: #0c0c0e;
-	--raised: #111114;
-	--chip: #16161a;
-	--hover: #1c1c21;
-	--border: rgb(255 255 255 / 0.12);
-	--text: #f2f2f4;
-	--body-text: #d4d4da;
-	--muted: #9a9aa6;
-	--accent-soft: rgb(255 255 255 / 0.18);
-	--on-accent-soft: #fff;
-	color-scheme: dark;
-	border: 1px solid rgb(255 255 255 / 0.08);
-	border-radius: 6px;
-	background: #000;
-	color: var(--text);
-	box-shadow: 0 18px 50px rgb(0 0 0 / 0.6);
-	backdrop-filter: none;
-}
-
-body[data-mode="os"] .panel::backdrop {
-	background: transparent;
-}
-
-body[data-mode="os"] .panel .panel-head {
-	padding: 4px 4px 4px 12px;
-	border-bottom: 0;
-}
-
-body[data-mode="os"] .panel .panel-head h2 {
-	font-size: 14px;
-	font-weight: 400;
-}
-
-body[data-mode="os"] .panel .panel-head .icon {
-	width: 30px;
-	height: 26px;
-	border-radius: 6px;
-	color: #fff;
-}
-
-/* Built-in tiles (Games, Movies) draw a line icon. */
-.internal-icon {
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 1.8;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-
-/* App windows (Movies, Games, each game). Only exist in OS mode. */
-.app-window-body {
-	position: relative;
-	flex: 1;
-	min-height: 0;
-	display: flex;
-	background: #000;
-}
-
-.app-window-body iframe {
-	flex: 1;
-	width: 100%;
-	border: 0;
-	background: #000;
-}
-
-
-.games-window-list {
-	flex: 1;
-	overflow-y: auto;
-	align-content: start;
-}
-
-body[data-mode="os"] .os-window:not(.focused) .os-window-bar {
-	color: rgb(255 255 255 / 0.55);
-}
-
-body[data-mode="os"] .dock button.focused {
-	background: rgb(255 255 255 / 0.14);
-}
-
-body[data-mode="os"] .app-window {
-	--panel: #000;
-	--surface: #0c0c0e;
-	--raised: #111114;
-	--border: rgb(255 255 255 / 0.12);
-	--text: #f2f2f4;
-	--muted: #9a9aa6;
-	color-scheme: dark;
-	color: var(--text);
-}
-
-/* The bars and the lock screen stay above every window, however many get focused. */
-body[data-mode="os"] .topbar,
-body[data-mode="os"] .dock {
-	z-index: 100000;
-}
-
-.lock {
-	z-index: 100001;
-}
-
-/* ---- Round 1 fixes ---- */
-/* Taskbar: a dot for open apps, a highlight only for the focused one. */
-body[data-mode="os"] .dock button.active {
-	background: none;
-}
-
-body[data-mode="os"] .dock button.focused {
-	background: rgb(255 255 255 / 0.14);
-}
-
-/* OS panels get a dimmed, blurred backdrop so they stand out from busy windows. */
-body[data-mode="os"] .panel::backdrop {
-	background: rgb(0 0 0 / 0.45);
-	backdrop-filter: blur(6px);
-}
-
-/* The tour matches the black panels in OS mode; Theme only applies to browser mode. */
-body[data-mode="os"] .tour {
-	--raised: #000;
-	--text: #f2f2f4;
-	--body-text: #d4d4da;
-	--muted: #9a9aa6;
-	--border: rgb(255 255 255 / 0.12);
-	--chip: #16161a;
-	--accent-soft: rgb(255 255 255 / 0.18);
-	--on-accent-soft: #fff;
-	border-radius: 10px;
-	color-scheme: dark;
-}
-
-.os-only {
-	display: none;
-}
-
-body[data-mode="os"] .os-only {
-	display: block;
-}
-
-.tour-pill.current {
-	flex: none;
-	white-space: nowrap;
-}
-
-@media (max-width: 420px) {
-	.tour-pill-label {
-		display: none;
-	}
-}
-
-.setting-hint {
-	margin-left: 4px;
-	color: var(--muted);
-	font-size: 12px;
-	font-weight: 400;
-}
-
-/* Game cards never clip their text. */
-.game-banner,
-.game-info {
-	flex: none;
-}
-
-.games-list {
-	grid-auto-rows: max-content;
-}
-
-
-/* Phones: big enough title-bar buttons, close set apart. */
-@media (max-width: 699px) {
-	body[data-mode="os"] .os-window-bar {
-		height: 44px;
-		gap: 4px;
-	}
-
-	body[data-mode="os"] .os-window-bar button {
-		width: 40px;
-		height: 40px;
-	}
-
-	body[data-mode="os"] .os-window-bar [data-win="close"] {
-		margin-left: 6px;
-	}
-}
-
-/* Trash buttons only in the Apps panel's Edit mode (or on hover with a mouse). */
-.home-shortcuts .shortcut-remove {
-	display: none;
-}
-
-@media (hover: none) {
-	.shortcut-remove {
-		opacity: 0;
-		pointer-events: none;
-	}
-}
-
-.apps.editing .shortcut-remove {
-	opacity: 1;
-	pointer-events: auto;
-}
-
-/* The new-tab page: a wordmark above the search, shortcuts below it. */
-.home-wordmark {
-	margin: 0 0 4px;
-	color: #fff;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: clamp(30px, 6vw, 44px);
-	font-weight: 600;
-	letter-spacing: -0.02em;
-	text-shadow: 0 2px 16px rgb(0 0 0 / 0.4);
-}
-
-.home-shortcuts {
-	margin-top: 18px;
-}
-
-.home-shortcuts .shortcut-label {
-	color: #fff;
-	font-weight: 500;
-	text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
-}
-
-/* ---- More browser themes. Dark ones: Midnight, Forest, Sunset, Ocean; light ones:
-   Rose, Mono. --chrome tints the tab bar and toolbar. ---- */
-:root[data-theme="dark"],
-:root[data-theme="midnight"],
-:root[data-theme="forest"],
-:root[data-theme="sunset"],
-:root[data-theme="ocean"] {
-	color-scheme: dark;
-}
-
-:root[data-theme="midnight"] {
-	--bg: #0a1024;
-	--panel: #0d1530;
-	--surface: rgb(16 24 54 / 0.92);
-	--raised: #111a3a;
-	--chip: #18224a;
-	--hover: #1c2856;
-	--border: #26325f;
-	--text: #e6ebff;
-	--body-text: #c3cbea;
-	--muted: #8b95c2;
-	--accent: #5b8cff;
-	--on-accent: #fff;
-	--accent-soft: #b9ccff;
-	--on-accent-soft: #0a1024;
-	--secure: #4ade80;
-	--error: #ff6b7a;
-	--shadow: rgb(0 0 0 / 0.55);
-	--backdrop: rgb(2 6 20 / 0.6);
-	--chrome: rgb(10 18 44 / 0.78);
-}
-
-:root[data-theme="forest"] {
-	--bg: #0b1510;
-	--panel: #0e1c15;
-	--surface: rgb(16 34 24 / 0.92);
-	--raised: #12241a;
-	--chip: #183024;
-	--hover: #1d3a2b;
-	--border: #284a38;
-	--text: #e5f5ea;
-	--body-text: #c2dccb;
-	--muted: #86a894;
-	--accent: #34c77b;
-	--on-accent: #04140b;
-	--accent-soft: #a8ecc6;
-	--on-accent-soft: #062314;
-	--secure: #4ade80;
-	--error: #ff7a6b;
-	--shadow: rgb(0 0 0 / 0.55);
-	--backdrop: rgb(2 10 6 / 0.6);
-	--chrome: rgb(10 30 20 / 0.78);
-}
-
-:root[data-theme="sunset"] {
-	--bg: #1a0f12;
-	--panel: #221418;
-	--surface: rgb(40 20 26 / 0.92);
-	--raised: #2a171d;
-	--chip: #341d24;
-	--hover: #3d222b;
-	--border: #4f2c37;
-	--text: #ffeef0;
-	--body-text: #f0cfd5;
-	--muted: #c398a2;
-	--accent: #ff7a59;
-	--on-accent: #1a0f12;
-	--accent-soft: #ffc2b0;
-	--on-accent-soft: #2a0f08;
-	--secure: #4ade80;
-	--error: #ff5c7a;
-	--shadow: rgb(0 0 0 / 0.55);
-	--backdrop: rgb(16 4 8 / 0.6);
-	--chrome: rgb(44 18 26 / 0.78);
-}
-
-:root[data-theme="ocean"] {
-	--bg: #06171c;
-	--panel: #082026;
-	--surface: rgb(10 36 44 / 0.92);
-	--raised: #0b2830;
-	--chip: #0f333d;
-	--hover: #133d49;
-	--border: #1c4d5a;
-	--text: #e2f8fb;
-	--body-text: #bfe3e9;
-	--muted: #82b3bc;
-	--accent: #22c3d6;
-	--on-accent: #03161a;
-	--accent-soft: #a5eef6;
-	--on-accent-soft: #03242a;
-	--secure: #4ade80;
-	--error: #ff6b7a;
-	--shadow: rgb(0 0 0 / 0.55);
-	--backdrop: rgb(1 10 14 / 0.6);
-	--chrome: rgb(6 34 42 / 0.78);
-}
-
-:root[data-theme="rose"] {
-	--bg: #f8eef1;
-	--panel: #fdf5f7;
-	--surface: rgb(255 250 251 / 0.8);
-	--raised: #fffafb;
-	--chip: #f6e2e8;
-	--hover: #f1d6de;
-	--border: #e8c6d1;
-	--text: #3a1622;
-	--body-text: #5e3443;
-	--muted: #8f6271;
-	--accent: #d6336c;
-	--on-accent: #fff;
-	--accent-soft: #fbc9da;
-	--on-accent-soft: #4a0d23;
-	--secure: #15803d;
-	--error: #c92a2a;
-	--shadow: rgb(150 50 90 / 0.18);
-	--backdrop: rgb(80 20 40 / 0.3);
-	--chrome: rgb(255 244 247 / 0.8);
-	color-scheme: light;
-}
-
-:root[data-theme="mono"] {
-	--bg: #efefef;
-	--panel: #f7f7f7;
-	--surface: rgb(255 255 255 / 0.82);
-	--raised: #ffffff;
-	--chip: #e7e7e7;
-	--hover: #dedede;
-	--border: #d0d0d0;
-	--text: #161616;
-	--body-text: #3d3d3d;
-	--muted: #6e6e6e;
-	--accent: #1f1f1f;
-	--on-accent: #fff;
-	--accent-soft: #d6d6d6;
-	--on-accent-soft: #111;
-	--secure: #15803d;
-	--error: #c92a2a;
-	--shadow: rgb(0 0 0 / 0.14);
-	--backdrop: rgb(0 0 0 / 0.3);
-	--chrome: rgb(250 250 250 / 0.82);
-	color-scheme: light;
-}
-
-/* Browser mode's bars take the theme's tint. */
-body:not([data-mode="os"]) #tabbar,
-body:not([data-mode="os"]) #toolbar {
-	background: var(--chrome, rgb(12 12 18 / 0.72));
-}
-
-/* The theme's accent on the active tab and the search buttons. */
-body:not([data-mode="os"]) #tabbar .tab.active {
-	box-shadow: inset 0 -2px 0 var(--accent);
-}
-
-/* Pages with no dark theme of their own (DuckDuckGo HTML) are shown inverted. */
-#frames iframe.force-dark {
-	filter: invert(0.9) hue-rotate(180deg);
-	background: #fff;
-}
-
-.setting-name {
-	display: flex;
-	flex-direction: column;
-}
-
-.setting-name .setting-hint {
-	margin: 0;
-}
-
-/* ---- Built-in pages: arc4dia://settings and arc4dia://games ---- */
-.internal-page {
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
-	padding: 32px 20px calc(var(--dock-space) + 28px);
-}
-
-.internal-page > * {
-	max-width: 720px;
-	margin-inline: auto;
-}
-
-.internal-title {
-	margin-block: 0 16px;
-	color: #fff;
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: clamp(26px, 5vw, 34px);
-	font-weight: 600;
-	text-shadow: 0 2px 14px rgb(0 0 0 / 0.45);
-}
-
-.internal-page .settings {
-	border: 1px solid var(--border);
-	border-radius: 16px;
-	background: var(--panel);
-	color: var(--text);
-	box-shadow: 0 18px 50px var(--shadow);
-}
-
-.internal-empty {
-	padding: 48px 20px;
-	border: 1px dashed rgb(255 255 255 / 0.25);
-	border-radius: 16px;
-	background: rgb(0 0 0 / 0.35);
-	color: rgb(255 255 255 / 0.8);
-	text-align: center;
-	backdrop-filter: blur(10px);
-}
-
-#games-list:empty {
-	display: none;
-}
-
-/* Inside the OS-mode browser window the pages are black like the rest of OS mode. */
-body[data-mode="os"] .os-window .internal-page {
-	--panel: #0b0b0d;
-	--raised: #111114;
-	--surface: #0c0c0e;
-	--border: rgb(255 255 255 / 0.1);
-	--text: #f2f2f4;
-	--body-text: #d4d4da;
-	--muted: #9a9aa6;
-	--chip: #16161a;
-	--hover: #1c1c21;
-	color-scheme: dark;
-	padding-bottom: 28px;
-	background: #000;
-}
-
-/* Drawn game cards: the site's color, its logo or letter, and its name. */
-.game-banner {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 14px;
 	background:
 		radial-gradient(120% 90% at 20% 10%, rgb(255 255 255 / 0.22), transparent 60%),
 		linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand), #000 45%));
@@ -2881,158 +1177,413 @@ body[data-mode="os"] .os-window .internal-page {
 	text-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
 }
 
+.game-info {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 14px 14px;
+}
+
 .game-icon {
+	width: 38px;
+	height: 38px;
+	flex: none;
+	border-radius: 12px;
 	background: var(--brand);
 	color: #fff;
 	font-size: 20px;
 }
 
-/* ---- Round 2 fixes ---- */
-/* Light themes (Lavender, Rose, Mono): light frosted bars, menus and search in browser
-   mode, matching their light panels. */
-:root:not([data-theme]) {
-	--chrome: rgb(250 249 255 / 0.8);
+.game-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
 }
 
-:root:is(:not([data-theme]), [data-theme="rose"], [data-theme="mono"])
-	body:not([data-mode="os"])
-	:is(#tabbar, #toolbar, #home-screen .search) {
-	--panel: transparent;
-	--surface: rgb(255 255 255 / 0.72);
-	--raised: #fff;
-	--chip: rgb(0 0 0 / 0.06);
-	--hover: rgb(0 0 0 / 0.08);
-	--border: rgb(0 0 0 / 0.1);
-	--text: #1d1a2b;
-	--body-text: #3d3a4f;
-	--muted: #6b6880;
-	--secure: #15803d;
-	color-scheme: light;
-	color: var(--text);
-}
-
-:root:is(:not([data-theme]), [data-theme="rose"], [data-theme="mono"]) body:not([data-mode="os"]) #home-screen .search {
-	box-shadow: 0 10px 40px rgb(0 0 0 / 0.18);
-}
-
-/* Shortcut tiles: a darker frosted base so they stay readable on bright wallpapers. */
-.home-shortcuts .shortcut-icon,
-.apps-grid .shortcut-icon {
-	border: 1px solid rgb(255 255 255 / 0.14);
-	background: rgb(16 16 22 / 0.62);
-	backdrop-filter: blur(14px) saturate(140%);
-}
-
-/* The chosen wallpaper's check shows on any background. */
-.wallpaper-card[aria-checked="true"] .wallpaper-name::after {
-	display: grid;
-	place-items: center;
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	background: var(--accent);
-	color: #fff;
-	font-size: 12px;
-}
-
-/* OS panels: a real title and a divider. */
-body[data-mode="os"] .panel .panel-head {
-	padding: 8px 6px 8px 14px;
-	border-bottom: 1px solid rgb(255 255 255 / 0.08);
-}
-
-body[data-mode="os"] .panel .panel-head h2 {
+.game-name {
 	font-size: 15px;
+	font-weight: 700;
+}
+
+.game-about {
+	color: var(--muted);
+	font-size: 13px;
+}
+
+/* ---- Dialogs: shortcut form, Shortcuts, history, credits ---- */
+.panel {
+	width: min(760px, calc(100vw - 32px));
+	max-height: min(80vh, 900px);
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: 26px;
+	background: var(--panel);
+	color: var(--text);
+	box-shadow: 0 30px 80px var(--shadow);
+}
+
+#shortcut-panel {
+	width: min(480px, calc(100vw - 32px));
+}
+
+.panel[open] {
+	display: flex;
+	flex-direction: column;
+	animation: rise-in 0.2s ease-out;
+}
+
+.panel::backdrop {
+	background: var(--backdrop);
+	backdrop-filter: blur(6px);
+}
+
+.panel-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding: 14px 14px 14px 24px;
+	border-bottom: 1px solid var(--border);
+}
+
+.panel-head h2 {
+	margin: 0 auto 0 0;
+	font-size: 19px;
+}
+
+.panel-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+#history-search {
+	width: min(280px, 40vw);
+	padding: 8px 16px;
+	border-radius: 999px;
+	font-size: 14px;
+}
+
+#history-list {
+	overflow-y: auto;
+	padding: 4px 10px 14px;
+}
+
+#history-list h3 {
+	margin: 16px 12px 6px;
+	color: var(--muted);
+	font-size: 13px;
 	font-weight: 600;
 }
 
-/* The tour's progress capsule wraps its pills. */
+#history-list ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.history-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 14px;
+}
+
+.history-item:hover {
+	background: var(--hover);
+}
+
+.history-open {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	padding: 9px 14px;
+	border: 0;
+	background: transparent;
+	color: var(--text);
+	text-align: left;
+	cursor: pointer;
+}
+
+.history-title,
+.history-url {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.history-title {
+	font-size: 14px;
+}
+
+.history-url {
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.history-time {
+	flex: none;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.history-remove {
+	width: 30px;
+	height: 30px;
+	color: var(--muted);
+	font-size: 16px;
+}
+
+.history-empty {
+	margin: 32px 12px;
+	color: var(--muted);
+	text-align: center;
+}
+
+.credits {
+	width: min(420px, calc(100vw - 32px));
+}
+
+.credits-body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 22px 24px 28px;
+	text-align: center;
+}
+
+.credits-logo {
+	margin: 0 0 6px;
+	color: var(--accent);
+	font-family: "Playball", cursive;
+	font-size: 60px;
+	line-height: 1.2;
+}
+
+.credits-made {
+	margin: 0;
+	color: var(--muted);
+	font-size: 13px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.credits-names {
+	margin: 0 0 14px;
+	font-size: 26px;
+	font-weight: 700;
+}
+
+.credits-and {
+	color: var(--accent);
+}
+
+.credits-built {
+	margin: 0;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* ---- Welcome tour ---- */
+.tour {
+	width: min(560px, calc(100vw - 32px));
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: 28px;
+	background: var(--panel);
+	color: var(--text);
+	box-shadow: 0 30px 80px var(--shadow);
+}
+
+.tour::backdrop {
+	background: var(--backdrop);
+	backdrop-filter: blur(14px);
+}
+
+.tour-card {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 24px;
+	animation: rise-in 0.3s ease-out;
+}
+
+.tour svg {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.tour-steps {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
 .tour-pills {
+	display: flex;
+	align-items: center;
+	gap: 6px;
 	flex: 0 1 auto;
+	min-width: 0;
+	margin: 0;
+	padding: 5px;
+	list-style: none;
+	border-radius: 999px;
+	background: var(--surface);
+}
+
+.tour-pill {
+	display: grid;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	flex: none;
+	border: 1.5px solid var(--border);
+	border-radius: 999px;
+	color: var(--muted);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.tour-pill.done,
+.tour-pill.current {
+	border-color: transparent;
+	background: var(--accent);
+	color: var(--on-accent);
+}
+
+.tour-pill.done svg {
+	width: 16px;
+	height: 16px;
+	stroke-width: 3;
+}
+
+.tour-pill.current {
+	display: flex;
+	gap: 8px;
+	width: auto;
+	min-width: 0;
+	flex: 0 1 auto;
+	padding: 0 14px 0 4px;
+}
+
+.tour-num {
+	display: grid;
+	place-items: center;
+	width: 22px;
+	height: 22px;
+	flex: none;
+	border-radius: 50%;
+}
+
+.tour-pill.current .tour-num {
+	background: rgb(0 0 0 / 0.12);
+}
+
+.tour-pill-label {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .tour-skip {
+	flex: none;
 	margin-left: auto;
+	padding: 6px 4px;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--muted);
+	font-size: 15px;
+	cursor: pointer;
 }
 
-/* Settings inputs never push past the card. */
-.settings label > :is(input, select) {
-	min-width: 0;
-	max-width: 62%;
+.tour-skip:hover {
+	color: var(--text);
 }
 
-/* Touch screens: bigger taskbar buttons; windows are full screen there already. */
-@media (pointer: coarse) {
-	body[data-mode="os"] .dock button {
-		flex-basis: 46px;
-		height: 44px;
-	}
+.tour-badge {
+	display: grid;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	margin-top: 8px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--accent) 16%, transparent);
+	color: var(--accent);
 }
 
-@media (max-width: 699px) {
-	body[data-mode="os"] .os-window-bar [data-win="full"] {
-		display: none;
-	}
+.tour-badge svg {
+	width: 24px;
+	height: 24px;
 }
 
-/* Laptops and other wide screens get wallpapers made for them: each tall photo cropped
-   to 1920x1080 around its subject and sharpened (public/wallpapers/*-wide.jpg). */
-@media (orientation: landscape) and (min-width: 700px) {
-	.wallpaper[data-wallpaper="gtr-sunset"],
-	.wallpaper-preview[data-wallpaper="gtr-sunset"] {
-		background-image: url("wallpapers/gtr-sunset-wide.jpg");
-	}
+.tour-title {
+	margin: 0;
+	font-size: 24px;
+	letter-spacing: -0.01em;
+}
 
-	.wallpaper[data-wallpaper="r34-night"],
-	.wallpaper-preview[data-wallpaper="r34-night"] {
-		background-image: url("wallpapers/r34-night-wide.jpg");
-	}
+.tour-body {
+	margin: 0;
+	color: var(--body-text);
+	font-size: 16px;
+	line-height: 1.6;
+}
 
-	.wallpaper[data-wallpaper="maybach-night"],
-	.wallpaper-preview[data-wallpaper="maybach-night"] {
-		background-image: url("wallpapers/maybach-night-wide.jpg");
-	}
+.tour-actions {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: 8px;
+}
 
-	.wallpaper[data-wallpaper="maybach-driveway"],
-	.wallpaper-preview[data-wallpaper="maybach-driveway"] {
-		background-image: url("wallpapers/maybach-driveway-wide.jpg");
-	}
+.tour-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+	color: var(--text);
+	font-size: 15px;
+	font-weight: 500;
+	cursor: pointer;
+}
 
-	.wallpaper[data-wallpaper="flower-field"],
-	.wallpaper-preview[data-wallpaper="flower-field"] {
-		background-image: url("wallpapers/flower-field-wide.jpg");
-	}
+.tour-button svg {
+	width: 18px;
+	height: 18px;
+}
 
-	.wallpaper[data-wallpaper="hokage"],
-	.wallpaper-preview[data-wallpaper="hokage"] {
-		background-image: url("wallpapers/hokage-wide.jpg");
-	}
+.tour-button.primary {
+	margin-left: auto;
+	border-color: transparent;
+	background: var(--accent);
+	color: var(--on-accent);
+}
 
-	.wallpaper[data-wallpaper="beach"],
-	.wallpaper-preview[data-wallpaper="beach"] {
-		background-image: url("wallpapers/beach-wide.jpg");
-	}
+.tour-button:hover {
+	filter: brightness(1.1);
+}
 
-	.wallpaper[data-wallpaper="blue-hour"],
-	.wallpaper-preview[data-wallpaper="blue-hour"] {
-		background-image: url("wallpapers/blue-hour-wide.jpg");
-	}
-
-	.wallpaper[data-wallpaper="cabin"],
-	.wallpaper-preview[data-wallpaper="cabin"] {
-		background-image: url("wallpapers/cabin-wide.jpg");
-	}
-
-	.wallpaper[data-wallpaper],
-	.wallpaper-preview[data-wallpaper] {
-		background-position: center;
+@media (prefers-reduced-motion: reduce) {
+	.home-main > *,
+	.panel[open],
+	.tour-card,
+	.menu {
+		animation: none;
 	}
 }
 
 /* ---- Page loading screen ---- */
-#frames {
-	position: relative;
-}
 
 .page-loader {
 	position: absolute;
@@ -3046,7 +1597,7 @@ body[data-mode="os"] .panel .panel-head h2 {
 	padding: 24px;
 	background:
 		radial-gradient(60% 50% at 50% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
-		rgb(8 8 12 / 0.9);
+		color-mix(in srgb, var(--bg) 92%, transparent);
 	backdrop-filter: blur(18px);
 	color: #fff;
 	animation: loader-in 0.25s ease-out;
@@ -3078,9 +1629,9 @@ body[data-mode="os"] .panel .panel-head h2 {
 }
 
 .loader-letter {
-	font-family: "Outfit", system-ui, sans-serif;
-	font-size: 38px;
-	font-weight: 600;
+	font-family: "Playball", cursive;
+	font-size: 44px;
+	font-weight: 400;
 	animation: loader-pulse 1.6s ease-in-out infinite;
 }
 
