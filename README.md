@@ -40,8 +40,8 @@ Edit). **☰ → Bookmark this page** pins the site you're on. Shortcuts are sav
 *Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
 [Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
 
-Every theme is dark: **Forest** (the default), Midnight, Ocean, Lavender, Sunset, Rose, Mono
-and AMOLED black, under *Settings → Theme*. The constellation pauses while a page is open or
+Every theme is dark: **AMOLED black** (the default), Midnight, Ocean, Lavender, Sunset, Rose
+and Mono, under *Settings → Theme*. The constellation pauses while a page is open or
 the tab is hidden, and stays still for people who prefer reduced motion.
 
 The **☰ menu** has Bookmark this page, Edit shortcuts, Credits and Take the tour. The address

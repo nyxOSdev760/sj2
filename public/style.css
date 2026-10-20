@@ -1,12 +1,4 @@
-/* Playball by The Playball Project Authors and Outfit by The Outfit Project Authors, SIL
-   Open Font License (fonts/playball-OFL.txt, fonts/outfit-OFL.txt). */
-@font-face {
-	font-family: "Playball";
-	src: url("fonts/playball-400.woff2") format("woff2");
-	font-weight: 400;
-	font-display: swap;
-}
-
+/* Outfit by The Outfit Project Authors, SIL Open Font License (fonts/outfit-OFL.txt). */
 @font-face {
 	font-family: "Outfit";
 	src: url("fonts/outfit-600.woff2") format("woff2");
@@ -14,24 +6,24 @@
 	font-display: swap;
 }
 
-/* ---- Themes. Forest is the default; every theme is dark. --star is the background
-   constellation's color as "r g b". ---- */
+/* ---- Themes. AMOLED black is the default; every theme is dark. --star is the
+   background constellation's color as "r g b". ---- */
 :root {
-	--bg: #070c0a;
-	--bar: #040806;
-	--surface: #0f1814;
-	--raised: #15211c;
-	--panel: #0b1310;
-	--hover: #1c2b24;
-	--border: rgb(210 255 230 / 0.07);
-	--text: #e9f2ed;
-	--body-text: #c3d1c9;
-	--muted: #8b9c93;
-	--accent: #c7f5dc;
-	--on-accent: #0b1a12;
-	--go: #5f8d76;
-	--on-go: #0b1a12;
-	--star: 150 230 190;
+	--bg: #000;
+	--bar: #000;
+	--surface: #0d0d0d;
+	--raised: #151515;
+	--panel: #070707;
+	--hover: #1c1c1c;
+	--border: rgb(255 255 255 / 0.09);
+	--text: #f2f2f2;
+	--body-text: #d0d0d0;
+	--muted: #8e8e8e;
+	--accent: #ffffff;
+	--on-accent: #000;
+	--go: #3a3a3a;
+	--on-go: #fff;
+	--star: 200 200 200;
 	--secure: #6fdc9c;
 	--error: #ff7b7b;
 	--shadow: rgb(0 0 0 / 0.5);
@@ -151,23 +143,6 @@
 	--star: 220 220 220;
 }
 
-:root[data-theme="dark"] {
-	--bg: #000;
-	--bar: #000;
-	--surface: #0d0d0d;
-	--raised: #151515;
-	--panel: #070707;
-	--hover: #1c1c1c;
-	--border: rgb(255 255 255 / 0.09);
-	--text: #f2f2f2;
-	--body-text: #d0d0d0;
-	--muted: #8e8e8e;
-	--accent: #ffffff;
-	--on-accent: #000;
-	--go: #3a3a3a;
-	--on-go: #fff;
-	--star: 200 200 200;
-}
 
 /* ---- Base ---- */
 * {
@@ -694,9 +669,10 @@ input::placeholder {
 .home-wordmark {
 	margin: 0 0 4px;
 	color: var(--text);
-	font-family: "Playball", cursive;
-	font-size: clamp(72px, 9vw, 118px);
-	font-weight: 400;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: clamp(60px, 7vw, 92px);
+	font-weight: 600;
+	letter-spacing: -0.035em;
 	line-height: 1.1;
 	text-shadow: 0 0 40px rgb(var(--star) / 0.18);
 }
@@ -1007,9 +983,10 @@ input::placeholder {
 .internal-title {
 	margin-block: 0 18px;
 	color: var(--text);
-	font-family: "Playball", cursive;
-	font-size: 54px;
-	font-weight: 400;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: 40px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
 	line-height: 1.15;
 }
 
@@ -1357,8 +1334,10 @@ input::placeholder {
 .credits-logo {
 	margin: 0 0 6px;
 	color: var(--accent);
-	font-family: "Playball", cursive;
-	font-size: 60px;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: 46px;
+	font-weight: 600;
+	letter-spacing: -0.035em;
 	line-height: 1.2;
 }
 
@@ -1629,9 +1608,9 @@ input::placeholder {
 }
 
 .loader-letter {
-	font-family: "Playball", cursive;
-	font-size: 44px;
-	font-weight: 400;
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: 38px;
+	font-weight: 600;
 	animation: loader-pulse 1.6s ease-in-out infinite;
 }
 

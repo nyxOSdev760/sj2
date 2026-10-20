@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" data-theme="forest">
+<html lang="en" data-theme="dark">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#070c0a" />
+		<meta name="theme-color" content="#000000" />
 		<script>
 			// Apply the saved theme before first paint so there's no flash. Themes saved before
-			// the redesign (sj2:themeV < 2) start over on Forest.
+			// the redesign (sj2:themeV < 2) start over on AMOLED black.
 			try {
 				const saved = localStorage.getItem("sj2:themeV") === "2" && localStorage.getItem("sj2:theme");
 				if (/^(dark|midnight|ocean|lavender|sunset|rose|mono)$/.test(saved)) document.documentElement.dataset.theme = saved;
@@ -14,7 +14,7 @@
 		</script>
 		<title>Arc4dia</title>
 		<link rel="icon" href="data:," />
-		<link rel="preload" href="fonts/playball-400.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="fonts/outfit-600.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="stylesheet" href="style.css" />
 		<script src="config.js"></script>
 		<script src="adblock.js"></script>
@@ -160,14 +160,13 @@
 						<label>
 							Theme
 							<select id="theme">
-								<option value="forest">Forest</option>
+								<option value="dark">AMOLED black</option>
 								<option value="midnight">Midnight</option>
 								<option value="ocean">Ocean</option>
 								<option value="lavender">Lavender</option>
 								<option value="sunset">Sunset</option>
 								<option value="rose">Rose</option>
 								<option value="mono">Mono</option>
-								<option value="dark">AMOLED black</option>
 							</select>
 						</label>
 						<label>
@@ -303,7 +302,7 @@
 					<span>Claude</span>
 				</p>
 				<p class="credits-built">
-					Built with Scramjet by Mercury Workshop, AdGuard DNS, the Playball font and Simple Icons.
+					Built with Scramjet by Mercury Workshop, AdGuard DNS, the Outfit font and Simple Icons.
 				</p>
 			</div>
 		</dialog>

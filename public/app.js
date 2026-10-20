@@ -1254,26 +1254,25 @@ async function main() {
 		reconnect();
 	});
 
-	// Themes: the colors live in style.css (:root[data-theme=...]). Forest is the default.
+	// Themes: the colors live in style.css (:root[data-theme=...]). AMOLED black is the default.
 	const THEME_COLORS = {
-		forest: "#070c0a",
+		dark: "#000000",
 		midnight: "#070a14",
 		ocean: "#05100f",
 		lavender: "#0b0912",
 		sunset: "#100907",
 		rose: "#10080b",
 		mono: "#0a0a0a",
-		dark: "#000000",
 	};
 	// The constellation behind the home screen, drawn in the theme's star color.
 	let stopStars = null;
 	function startStars() {
 		stopStars?.();
-		const color = getComputedStyle(document.documentElement).getPropertyValue("--star").trim() || "150 230 190";
+		const color = getComputedStyle(document.documentElement).getPropertyValue("--star").trim() || "200 200 200";
 		stopStars = Constellation.start($("stars"), color);
 	}
 	function applyTheme(name) {
-		if (!THEME_COLORS[name]) name = "forest";
+		if (!THEME_COLORS[name]) name = "dark"; // also the old Forest theme
 		els.theme.value = name;
 		document.documentElement.dataset.theme = name;
 		document.querySelector('meta[name="theme-color"]').content = THEME_COLORS[name];
@@ -1283,12 +1282,12 @@ async function main() {
 		settings.set("theme", els.theme.value);
 		applyTheme(els.theme.value);
 	});
-	// Themes from before the redesign start over on Forest.
+	// Themes from before the redesign start over on AMOLED black.
 	if (settings.get("themeV", "") !== "2") {
-		settings.set("theme", "forest");
+		settings.set("theme", "dark");
 		settings.set("themeV", "2");
 	}
-	applyTheme(settings.get("theme", "forest"));
+	applyTheme(settings.get("theme", "dark"));
 
 	// Settings saved by the old OS mode (window places, mode, wallpaper) aren't used any more.
 	for (const key of ["mode", "wallpaper", "window", "win:movies", "win:music"]) settings.remove(key);
