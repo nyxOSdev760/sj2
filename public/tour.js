@@ -52,7 +52,7 @@ self.Tour = (() => {
 			label: "Settings",
 			icon: "gear",
 			title: "Make it yours",
-			body: `The gear (skeld://settings) has your theme, wallpaper, search engine and server settings. History never leaves this browser.`,
+			body: `The gear (arc4dia://settings) has your theme, wallpaper, search engine and server settings. History never leaves this browser.`,
 		},
 	];
 	let STEPS = []; // worked out when the tour opens (the page body isn't there yet now)

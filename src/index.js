@@ -108,7 +108,7 @@ server.on("upgrade", (req, socket, head) => {
 });
 /* filler: c__o__d__e */
 server.listen(port, host, () => {
-	console.log(`Skeld listening on http://localhost:${port}`);
+	console.log(`Arc4dia listening on http://localhost:${port}`);
 	console.log(`DNS: ${dnsServers.length ? dnsServers.join(", ") : "system resolver"}`);
 });
 

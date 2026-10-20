@@ -1,4 +1,4 @@
-# Skeld
+# Arc4dia
 
 A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
 service-worker-based interception proxy from Mercury Workshop.
@@ -47,13 +47,13 @@ animations pause while a page is open or the tab is hidden, and stay still for p
 prefer reduced motion.
 
 The **☰ menu** has History, Bookmark this page and Take the tour. The
-address bar shows `skeld://home` on the home screen; `skeld://history` and `skeld://settings`
+address bar shows `arc4dia://home` on the home screen; `arc4dia://history` and `arc4dia://settings`
 open those panels. A five-step welcome tour shows on the first visit.
 
 The bottom bar holds Browser, Games, Movies, Music, Apps and Settings.
-**Games** opens `skeld://games` (itch.io free web games and Armor Games) and **Settings** opens `skeld://settings`, both as pages in a tab. **Movies**
-(`skeld://movies`) opens movy.sx; the address bar, tab and history show it as
-`skeld://movies`. **Change wallpaper** opens a picker with every wallpaper.
+**Games** opens `arc4dia://games` (itch.io free web games and Armor Games) and **Settings** opens `arc4dia://settings`, both as pages in a tab. **Movies**
+(`arc4dia://movies`) opens movy.sx; the address bar, tab and history show it as
+`arc4dia://movies`. **Change wallpaper** opens a picker with every wallpaper.
 
 YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
 videos for traffic from datacenter IPs, which every Wisp server (Render included) uses.
@@ -63,7 +63,7 @@ videos for traffic from datacenter IPs, which every Wisp server (Render included
 
 ## Server (Rust)
 
-`server/` is Skeld's server in Rust: it serves the site and runs the Wisp endpoint
+`server/` is Arc4dia's server in Rust: it serves the site and runs the Wisp endpoint
 (`/wisp/`), resolves hostnames through AdGuard DNS and refuses private and loopback
 addresses. It uses less CPU and memory than the Node server, which matters on small hosts
 like Render's free plan. The `Dockerfile` builds it together with the site, and
@@ -106,7 +106,7 @@ those requests are blocked at lookup time and never connect:
 
 ## Static hosting
 
-Skeld can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
+Arc4dia can also run with no backend at all, on GitHub Pages, Netlify, Cloudflare Pages, Vercel
 or any plain file host, including from a subpath like `https://you.github.io/sj2/`.
 A static host can't run the Wisp server, so the browser connects to external ones instead.
 

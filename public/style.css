@@ -722,7 +722,7 @@ select:focus {
 	stroke-linejoin: round;
 }
 
-/* Address bar with a status icon: home on skeld:// pages, lock on https. */
+/* Address bar with a status icon: home on arc4dia:// pages, lock on https. */
 .bar {
 	position: relative;
 	display: flex;
@@ -2450,15 +2450,6 @@ body[data-mode="os"] .panel .panel-head .icon {
 	background: #000;
 }
 
-.app-window-loading {
-	position: absolute;
-	inset: 0;
-	display: grid;
-	place-items: center;
-	margin: 0;
-	color: rgb(255 255 255 / 0.6);
-	font-size: 14px;
-}
 
 .games-window-list {
 	flex: 1;
@@ -2561,35 +2552,6 @@ body[data-mode="os"] .os-only {
 	grid-auto-rows: max-content;
 }
 
-/* App window loading state. */
-.app-window-loading {
-	z-index: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 14px;
-	background: #000;
-}
-
-.app-window-loading p {
-	margin: 0;
-}
-
-.spinner {
-	width: 28px;
-	height: 28px;
-	border: 3px solid rgb(255 255 255 / 0.18);
-	border-top-color: #fff;
-	border-radius: 50%;
-	animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
 
 /* Phones: big enough title-bar buttons, close set apart. */
 @media (max-width: 699px) {
@@ -2816,7 +2778,7 @@ body:not([data-mode="os"]) #tabbar .tab.active {
 	margin: 0;
 }
 
-/* ---- Built-in pages: skeld://settings and skeld://games ---- */
+/* ---- Built-in pages: arc4dia://settings and arc4dia://games ---- */
 .internal-page {
 	flex: 1;
 	min-height: 0;
@@ -3064,5 +3026,148 @@ body[data-mode="os"] .panel .panel-head h2 {
 	.wallpaper[data-wallpaper],
 	.wallpaper-preview[data-wallpaper] {
 		background-position: center;
+	}
+}
+
+/* ---- Page loading screen ---- */
+#frames {
+	position: relative;
+}
+
+.page-loader {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+	padding: 24px;
+	background:
+		radial-gradient(60% 50% at 50% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+		rgb(8 8 12 / 0.9);
+	backdrop-filter: blur(18px);
+	color: #fff;
+	animation: loader-in 0.25s ease-out;
+}
+
+.page-loader.leaving {
+	opacity: 0;
+	transform: scale(1.02);
+	transition:
+		opacity 0.35s ease,
+		transform 0.35s ease;
+}
+
+.loader-mark {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: 84px;
+	height: 84px;
+}
+
+.loader-ring {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background: conic-gradient(from 0deg, transparent 0 20%, var(--accent) 60%, #fff 100%);
+	mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+	animation: loader-spin 0.9s linear infinite;
+}
+
+.loader-letter {
+	font-family: "Outfit", system-ui, sans-serif;
+	font-size: 38px;
+	font-weight: 600;
+	animation: loader-pulse 1.6s ease-in-out infinite;
+}
+
+.loader-site {
+	max-width: min(520px, 90%);
+	margin: 0;
+	overflow: hidden;
+	font-size: 16px;
+	font-weight: 600;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.loader-track {
+	width: min(360px, 70%);
+	height: 6px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: rgb(255 255 255 / 0.12);
+}
+
+.loader-bar {
+	width: 0;
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--accent), #fff, var(--accent));
+	background-size: 200% 100%;
+	box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 70%, transparent);
+	transition: width 0.18s ease-out;
+	animation: loader-shimmer 1.2s linear infinite;
+}
+
+.loader-meta {
+	margin: 0;
+	color: rgb(255 255 255 / 0.65);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+	white-space: pre;
+}
+
+/* The page waits under the loader, then fades in. */
+iframe.page-hidden {
+	opacity: 0;
+}
+
+iframe.page-reveal {
+	animation: page-reveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes loader-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes loader-pulse {
+	50% {
+		opacity: 0.55;
+		transform: scale(0.94);
+	}
+}
+
+@keyframes loader-shimmer {
+	to {
+		background-position: -200% 0;
+	}
+}
+
+@keyframes loader-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes page-reveal {
+	from {
+		opacity: 0;
+		transform: scale(0.985);
+		filter: blur(6px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.loader-ring,
+	.loader-letter,
+	.loader-bar,
+	iframe.page-reveal {
+		animation: none;
 	}
 }

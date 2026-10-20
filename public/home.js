@@ -46,9 +46,9 @@ self.Shortcuts = (() => {
 	const FILM_ICON = "M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4";
 
 	const DEFAULTS = [
-		{ name: "Movies", url: "skeld://movies" },
-		{ name: "Music", url: "skeld://music" },
-		{ name: "Games", url: "skeld://games" },
+		{ name: "Movies", url: "arc4dia://movies" },
+		{ name: "Music", url: "arc4dia://music" },
+		{ name: "Games", url: "arc4dia://games" },
 		{ name: "YouTube", url: "https://www.youtube.com/" },
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
 		{ name: "Discord", url: "https://discord.com/app" },
@@ -58,11 +58,11 @@ self.Shortcuts = (() => {
 	// Defaults added after people may already have saved their own list; each is
 	// appended once to saved lists that don't have it.
 	const ADDED_LATER = [
-		{ version: 3, name: "AI", url: "skeld://ai" },
+		{ version: 3, name: "AI", url: "arc4dia://ai" },
 		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
-		{ version: 5, name: "Games", url: "skeld://games" },
-		{ version: 6, name: "Movies", url: "skeld://movies" },
-		{ version: 7, name: "Music", url: "skeld://music" },
+		{ version: 5, name: "Games", url: "arc4dia://games" },
+		{ version: 6, name: "Movies", url: "arc4dia://movies" },
+		{ version: 7, name: "Music", url: "arc4dia://music" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
@@ -71,15 +71,15 @@ self.Shortcuts = (() => {
 			const saved = JSON.parse(localStorage.getItem(KEY));
 			if (Array.isArray(saved)) {
 				const list = saved.filter((s) => s && s.name && s.url);
-				// Built-in tiles saved before the rename to Skeld.
-				for (const s of list) s.url = s.url.replace(/^skyline:/, "skeld:");
-				// The old Music tiles (Audiomack, SoundCloud) go; Music is skeld://music (Ripple) now.
+				// Built-in tiles saved before the rename to Arc4dia.
+				for (const s of list) s.url = s.url.replace(/^(skyline|skeld):/, "arc4dia:");
+				// The old Music tiles (Audiomack, SoundCloud) go; Music is arc4dia://music (Ripple) now.
 				for (let i = list.length - 1; i >= 0; i--) {
 					if (list[i].name === "Music" && /(audiomack|soundcloud|tidal)\.com/.test(list[i].url)) list.splice(i, 1);
 				}
 				// AI and chat were removed.
 				for (let i = list.length - 1; i >= 0; i--) {
-					if (/^skeld:\/\/(ai|chat)\/?$/i.test(list[i].url)) list.splice(i, 1);
+					if (/^arc4dia:\/\/(ai|chat)\/?$/i.test(list[i].url)) list.splice(i, 1);
 				}
 				const version = Number(localStorage.getItem(VERSION_KEY)) || 1;
 				for (const extra of ADDED_LATER) {
@@ -94,9 +94,9 @@ self.Shortcuts = (() => {
 					if (extra.version > version && !list.some((s) => site(s.url) === site(extra.url)) && list.length < MAX) {
 						const tile = { name: extra.name, url: extra.url };
 						// Built-in tiles go after the other built-in ones at the front.
-						if (extra.url.startsWith("skeld:")) {
+						if (extra.url.startsWith("arc4dia:")) {
 							let at = 0;
-							while (at < list.length && list[at].url.startsWith("skeld:")) at++;
+							while (at < list.length && list[at].url.startsWith("arc4dia:")) at++;
 							list.splice(at, 0, tile);
 						} else list.push(tile);
 					}
@@ -132,9 +132,9 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
-		// Built-in pages: a gamepad for skeld://games, a note for skeld://music, a film strip
-		// for skeld://movies.
-		if (shortcut.url.startsWith("skeld:")) {
+		// Built-in pages: a gamepad for arc4dia://games, a note for arc4dia://music, a film strip
+		// for arc4dia://movies.
+		if (shortcut.url.startsWith("arc4dia:")) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
@@ -142,9 +142,9 @@ self.Shortcuts = (() => {
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 			path.setAttribute(
 				"d",
-				shortcut.url.startsWith("skeld://games")
+				shortcut.url.startsWith("arc4dia://games")
 					? GAMEPAD_ICON
-					: shortcut.url.startsWith("skeld://music")
+					: shortcut.url.startsWith("arc4dia://music")
 						? MUSIC_ICON
 						: FILM_ICON
 			);

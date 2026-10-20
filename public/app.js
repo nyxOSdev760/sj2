@@ -308,10 +308,10 @@ function currentTitle(tab) {
 }
 
 // Internal pages shown in the address bar, e.g. the home screen.
-const HOME_URL = "skeld://home";
+const HOME_URL = "arc4dia://home";
 const PAGES = ["settings", "games"];
 const PAGE_TITLES = { settings: "Settings", games: "Games" };
-const INTERNAL = /^(?:skeld|skyline):\/\/(\w+)\/?$/i; // skyline:// from before the rename
+const INTERNAL = /^(?:arc4dia|skeld|skyline):\/\/(\w+)\/?$/i; // older names still work
 
 const BAR_ICONS = {
 	home: "M3 11l9-7 9 7M5 10v10h14V10",
@@ -320,7 +320,7 @@ const BAR_ICONS = {
 		"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z",
 };
 
-// Movies is movy.sx, but the address bar, tabs and history call it skeld://movies.
+// Movies is movy.sx, but the address bar, tabs and history call it arc4dia://movies.
 const MOVIES_URL = "https://www.movy.sx/";
 const MOVIES_HOST = "movy.sx";
 function isMovies(url) {
@@ -332,7 +332,7 @@ function isMovies(url) {
 	}
 }
 // What the address bar shows for `url`.
-// Music is Ripple (GalaxyV7's music app), shown as skeld://music the same way.
+// Music is Ripple (GalaxyV7's music app), shown as arc4dia://music the same way.
 const MUSIC_URL = "https://galxy.it.com/ripple/";
 function isMusic(url) {
 	try {
@@ -343,7 +343,137 @@ function isMusic(url) {
 	}
 }
 function shownUrl(url) {
-	return isMovies(url) ? "skeld://movies" : isMusic(url) ? "skeld://music" : url;
+	return isMovies(url) ? "arc4dia://movies" : isMusic(url) ? "arc4dia://music" : url;
+}
+
+// The loading screen over a proxied page: an animated Arc4dia mark, the site, a progress
+// bar and an assets count. Progress comes from the page itself (document state, files
+// fetched, images finished); the page stays hidden until its images are in, then fades
+// in. Links clicked inside the page start it too. A page that never finishes is shown
+// after 20 seconds anyway.
+class PageLoader {
+	constructor(container, iframe) {
+		this.iframe = iframe;
+		this.el = el("div", "page-loader");
+		this.el.hidden = true;
+		const mark = el("div", "loader-mark");
+		mark.append(el("span", "loader-ring"), el("span", "loader-letter", "A"));
+		this.site = el("p", "loader-site");
+		const track = el("div", "loader-track");
+		this.bar = el("div", "loader-bar");
+		track.append(this.bar);
+		this.meta = el("p", "loader-meta");
+		this.el.append(mark, this.site, track, this.meta);
+		container.append(this.el);
+		this.visible = true;
+		this.loading = false;
+		iframe.addEventListener("load", () => this.watchLeaving());
+	}
+	// Starts the loader when the page in the frame begins navigating away.
+	watchLeaving() {
+		try {
+			const win = this.iframe.contentWindow;
+			if (!win.location.href.includes("/~/sj/") || win.__arcWatched) return;
+			win.__arcWatched = true;
+			win.addEventListener("beforeunload", () => this.start(this.label));
+		} catch {}
+	}
+	start(label) {
+		this.label = label;
+		this.site.textContent = label ? `Loading ${label}` : "Loading…";
+		if (!this.loading) {
+			this.p = 0;
+			this.t0 = performance.now();
+		}
+		try {
+			this.oldDoc = this.iframe.contentDocument; // the page being left, if any
+		} catch {
+			this.oldDoc = null;
+		}
+		this.loading = true;
+		this.el.classList.remove("leaving");
+		this.iframe.classList.add("page-hidden");
+		this.meta.textContent = "Connecting…";
+		this.render();
+		this.sync();
+		clearInterval(this.timer);
+		this.timer = setInterval(() => this.tick(), 120);
+	}
+	tick() {
+		let state = "loading";
+		let total = 0;
+		let done = 0;
+		let files = 0;
+		try {
+			const win = this.iframe.contentWindow;
+			const doc = win.document;
+			if (doc !== this.oldDoc && win.location.href.includes("/~/sj/")) {
+				state = doc.readyState;
+				// Only images on screen; the rest of the page can keep loading behind it.
+				const images = [...doc.images].filter((img) => {
+					if (!img.src || !img.getClientRects().length) return false;
+					const box = img.getBoundingClientRect();
+					return box.top < win.innerHeight && box.bottom > 0 && box.left < win.innerWidth && box.right > 0;
+				});
+				total = images.length;
+				done = images.filter((img) => img.complete).length;
+				files = win.performance.getEntriesByType("resource").length;
+			}
+		} catch {}
+		const elapsed = performance.now() - this.t0;
+		let target;
+		if (state === "loading") target = 6 + Math.min(40, files * 1.5);
+		else if (state === "interactive") target = 50 + (total ? (35 * done) / total : 25);
+		else target = 88 + (total ? (12 * done) / total : 12);
+		this.p += (Math.min(target, 99.5) - this.p) * 0.3;
+		if (state === "complete" && (done >= total || elapsed > 9000)) this.p = 100;
+		this.meta.textContent =
+			state === "loading" && !files
+				? "Connecting…"
+				: `${Math.round(this.p)}%  ·  ${total ? `${done} of ${total} images` : `${files} files`}`;
+		this.render();
+		if (this.p >= 100 || elapsed > 20000) this.finish();
+	}
+	render() {
+		this.bar.style.width = this.p + "%";
+	}
+	finish() {
+		if (!this.loading) return;
+		clearInterval(this.timer);
+		this.loading = false;
+		this.p = 100;
+		this.render();
+		this.iframe.classList.remove("page-hidden");
+		this.iframe.classList.add("page-reveal");
+		setTimeout(() => this.iframe.classList.remove("page-reveal"), 600);
+		this.el.classList.add("leaving");
+		setTimeout(() => {
+			this.el.classList.remove("leaving");
+			this.sync();
+		}, 350);
+	}
+	cancel() {
+		clearInterval(this.timer);
+		this.loading = false;
+		this.iframe.classList.remove("page-hidden");
+		this.sync();
+	}
+	setVisible(visible) {
+		this.visible = visible;
+		this.sync();
+	}
+	sync() {
+		this.el.hidden = !(this.loading || this.el.classList.contains("leaving")) || !this.visible;
+	}
+	destroy() {
+		clearInterval(this.timer);
+		this.el.remove();
+	}
+}
+
+// What the loader calls a site: "Movies", "Music" or its hostname.
+function siteLabel(url) {
+	return isMovies(url) ? "Movies" : isMusic(url) ? "Music" : hostOf(url);
 }
 
 function setBarIcon(url) {
@@ -456,7 +586,7 @@ async function main() {
 	}
 
 	function createTab({ activate = true } = {}) {
-		// `page` is a built-in page (skeld://settings, skeld://games) shown instead of a site.
+		// `page` is a built-in page (arc4dia://settings, arc4dia://games) shown instead of a site.
 		const tab = { url: "", page: null, title: "", recordedUrl: null, iframe: null, frame: null };
 		tab.el = el("div", "tab");
 		tab.el.setAttribute("role", "tab");
@@ -495,10 +625,11 @@ async function main() {
 			t.el.classList.toggle("active", active);
 			t.el.setAttribute("aria-selected", String(active));
 			if (t.iframe) t.iframe.hidden = !active || !t.url;
+			t.loader?.setVisible(active && !!t.url);
 		}
 		els.home.hidden = !!tab.url || !!tab.page;
 		for (const name of PAGES) $("page-" + name).hidden = tab.page !== name;
-		els.bar.value = tab.page ? "skeld://" + tab.page : tab.url ? shownUrl(tab.url) : HOME_URL;
+		els.bar.value = tab.page ? "arc4dia://" + tab.page : tab.url ? shownUrl(tab.url) : HOME_URL;
 		setBarIcon(tab.url);
 		updateDock();
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -514,6 +645,7 @@ async function main() {
 		tabs.splice(index, 1);
 		tab.el.remove();
 		if (tab.iframe) {
+			tab.loader?.destroy();
 			tab.iframe.remove();
 			const frames = proxy.controller.frames;
 			if (frames.includes(tab.frame)) frames.splice(frames.indexOf(tab.frame), 1);
@@ -523,6 +655,7 @@ async function main() {
 	}
 
 	function goHome(tab) {
+		tab.loader?.cancel();
 		tab.url = "";
 		tab.page = null;
 		tab.title = "";
@@ -538,6 +671,8 @@ async function main() {
 		tab.iframe.title = "Proxied page";
 		tab.iframe.hidden = true;
 		els.frames.append(tab.iframe);
+		tab.loader = new PageLoader(els.frames, tab.iframe);
+		tab.loader.setVisible(tab === activeTab);
 		tab.frame = proxy.controller.createFrame(tab.iframe);
 		tab.iframe.addEventListener("load", () => syncTab(tab));
 	}
@@ -566,6 +701,7 @@ async function main() {
 		tab.url = url;
 		tab.title = "";
 		tab.frame.go(url);
+		tab.loader.start(siteLabel(url));
 		updateTabLabel(tab);
 		if (tab === activeTab) selectTab(tab);
 	}
@@ -694,7 +830,7 @@ async function main() {
 
 	$("add-tab").addEventListener("click", () => createTab());
 	// Back/forward only within the page's own history: with nothing to go back to, the
-	// browser would go back in Skeld itself and lose every tab.
+	// browser would go back in Arc4dia itself and lose every tab.
 	function canStep(iframe, dir) {
 		try {
 			const nav = iframe?.contentWindow?.navigation;
@@ -708,11 +844,12 @@ async function main() {
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("show-settings").addEventListener("click", () => openPage("settings"));
 
-	// Built-in pages (skeld://settings, skeld://games): shown in a tab like any site. One
+	// Built-in pages (arc4dia://settings, arc4dia://games): shown in a tab like any site. One
 	// opens in the tab it's asked for if that's a new tab, in the tab already showing it,
 	// or in a new tab.
 	function openPage(name, tab = activeTab) {
 		const target = tab && !tab.url && !tab.page ? tab : tabs.find((t) => t.page === name) || createTab();
+		target.loader?.cancel();
 		if (target.iframe) target.iframe.src = "about:blank";
 		target.url = "";
 		target.title = "";
@@ -859,10 +996,6 @@ async function main() {
 		const entry = { win, iframe: null, frame: null };
 		appWindows.set(id, entry);
 		focusWindow(win);
-		const loading = el("div", "app-window-loading");
-		const loadingText = el("p", null, `Loading ${title}…`);
-		loading.append(el("span", "spinner"), loadingText);
-		body.append(loading);
 		bar.addEventListener("click", (e) => {
 			const action = e.target.closest("[data-win]")?.dataset.win;
 			if (!action) return;
@@ -881,29 +1014,11 @@ async function main() {
 		entry.iframe = el("iframe");
 		entry.iframe.title = title;
 		entry.iframe.allow = "fullscreen; autoplay; encrypted-media; picture-in-picture";
-		// The overlay stays until the proxied page itself loads (not the first about:blank).
-		entry.iframe.addEventListener("load", () => {
-			try {
-				if (entry.iframe.contentWindow.location.href.includes("/~/sj/")) loading.remove();
-			} catch {
-				loading.remove();
-			}
-		});
 		body.append(entry.iframe);
+		entry.loader = new PageLoader(body, entry.iframe);
 		entry.frame = proxy.controller.createFrame(entry.iframe);
 		entry.frame.go(url);
-		setTimeout(() => {
-			if (!loading.isConnected) return;
-			loadingText.textContent = `${title} is taking a while…`;
-			const retry = el("button", "text-button", "Retry");
-			retry.type = "button";
-			retry.addEventListener("click", () => {
-				loadingText.textContent = `Loading ${title}…`;
-				retry.remove();
-				entry.frame.go(url);
-			});
-			loading.append(retry);
-		}, 20000);
+		entry.loader.start(title);
 	}
 	// A taskbar button for a window: open it, bring it to the front, or minimize it.
 	function toggleWindow(win, open) {
@@ -916,7 +1031,7 @@ async function main() {
 
 	// Games: free game sites, opened through the proxy like any other site.
 	// Each card shows the site's own banner and logo (public/games/).
-	// Game sites shown on skeld://games, opened through the proxy like any other site.
+	// Game sites shown on arc4dia://games, opened through the proxy like any other site.
 	// Cards are drawn in each site's color with its logo (Simple Icons, CC0) or a letter.
 	const GAME_SITES = [
 		{
@@ -1030,7 +1145,7 @@ async function main() {
 		button.addEventListener("click", () => launch(button.dataset.app));
 	}
 	$("apps-close").addEventListener("click", () => $("apps-panel").close());
-	// Selecting the whole address on focus, so typing replaces skeld://home or the URL.
+	// Selecting the whole address on focus, so typing replaces arc4dia://home or the URL.
 	els.bar.addEventListener("focus", () => els.bar.select());
 
 	// Home screen shortcuts: click opens in this tab; Ctrl/Cmd- or middle-click in a new one.
@@ -1048,7 +1163,7 @@ async function main() {
 			const tile = el("span", "shortcut-icon");
 			tile.append(Shortcuts.iconFor(shortcut));
 			open.append(tile, el("span", "shortcut-label", shortcut.name));
-			// skeld:// tiles (like AI) open a panel, not a page, so never in a new tab.
+			// arc4dia:// tiles (like AI) open a panel, not a page, so never in a new tab.
 			const internal = INTERNAL.test(shortcut.url);
 			open.addEventListener("click", (e) => {
 				const tab = !internal && (e.ctrlKey || e.metaKey) ? createTab({ activate: false }) : activeTab;

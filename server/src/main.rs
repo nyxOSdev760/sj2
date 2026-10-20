@@ -1,4 +1,4 @@
-// Skeld's server, in Rust: serves the site and runs the Wisp endpoint (/wisp/) that
+// Arc4dia's server, in Rust: serves the site and runs the Wisp endpoint (/wisp/) that
 // proxied pages tunnel their TCP connections through. It does what src/index.js does:
 //
 // * static files from the same mounts as src/mounts.js (public/ plus the proxy builds in
@@ -85,7 +85,7 @@ async fn main() {
 	let port: u16 = std::env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8080);
 	let host: IpAddr = std::env::var("HOST").ok().and_then(|h| h.parse().ok()).unwrap_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED));
 	let listener = TcpListener::bind(SocketAddr::new(host, port)).await.expect("bind");
-	println!("Skeld listening on http://localhost:{port}");
+	println!("Arc4dia listening on http://localhost:{port}");
 	if dns.is_empty() {
 		println!("DNS: system resolver");
 	} else {
