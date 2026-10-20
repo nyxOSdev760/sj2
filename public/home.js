@@ -42,10 +42,12 @@ self.Shortcuts = (() => {
 
 	const GAMEPAD_ICON =
 		"M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z";
+	const MUSIC_ICON = "M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z";
 	const FILM_ICON = "M4 4h16v16H4zM8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4";
 
 	const DEFAULTS = [
 		{ name: "Movies", url: "skeld://movies" },
+		{ name: "Music", url: "skeld://music" },
 		{ name: "Games", url: "skeld://games" },
 		{ name: "YouTube", url: "https://www.youtube.com/" },
 		{ name: "TikTok", url: "https://www.tiktok.com/" },
@@ -60,6 +62,7 @@ self.Shortcuts = (() => {
 		{ version: 4, name: "TikTok", url: "https://www.tiktok.com/" },
 		{ version: 5, name: "Games", url: "skeld://games" },
 		{ version: 6, name: "Movies", url: "skeld://movies" },
+		{ version: 7, name: "Music", url: "skeld://music" },
 	];
 	const VERSION_KEY = "sj2:shortcutsVersion";
 
@@ -70,7 +73,7 @@ self.Shortcuts = (() => {
 				const list = saved.filter((s) => s && s.name && s.url);
 				// Built-in tiles saved before the rename to Skeld.
 				for (const s of list) s.url = s.url.replace(/^skyline:/, "skeld:");
-				// Music was removed (as were AI and chat).
+				// The old Music tiles (Audiomack, SoundCloud) go; Music is skeld://music (Ripple) now.
 				for (let i = list.length - 1; i >= 0; i--) {
 					if (list[i].name === "Music" && /(audiomack|soundcloud|tidal)\.com/.test(list[i].url)) list.splice(i, 1);
 				}
@@ -129,14 +132,22 @@ self.Shortcuts = (() => {
 	}
 
 	function iconFor(shortcut) {
-		// Built-in pages: a gamepad for skeld://games, a film strip for skeld://movies.
+		// Built-in pages: a gamepad for skeld://games, a note for skeld://music, a film strip
+		// for skeld://movies.
 		if (shortcut.url.startsWith("skeld:")) {
 			const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			svg.setAttribute("viewBox", "0 0 24 24");
 			svg.setAttribute("aria-hidden", "true");
 			svg.classList.add("internal-icon");
 			const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-			path.setAttribute("d", shortcut.url.startsWith("skeld://games") ? GAMEPAD_ICON : FILM_ICON);
+			path.setAttribute(
+				"d",
+				shortcut.url.startsWith("skeld://games")
+					? GAMEPAD_ICON
+					: shortcut.url.startsWith("skeld://music")
+						? MUSIC_ICON
+						: FILM_ICON
+			);
 			svg.append(path);
 			return svg;
 		}

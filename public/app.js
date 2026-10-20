@@ -332,12 +332,22 @@ function isMovies(url) {
 	}
 }
 // What the address bar shows for `url`.
+// Music is Ripple (GalaxyV7's music app), shown as skeld://music the same way.
+const MUSIC_URL = "https://galxy.it.com/ripple/";
+function isMusic(url) {
+	try {
+		const u = new URL(url);
+		return u.hostname === "galxy.it.com" && u.pathname.startsWith("/ripple");
+	} catch {
+		return false;
+	}
+}
 function shownUrl(url) {
-	return isMovies(url) ? "skeld://movies" : url;
+	return isMovies(url) ? "skeld://movies" : isMusic(url) ? "skeld://music" : url;
 }
 
 function setBarIcon(url) {
-	const name = !url || isMovies(url) ? "home" : url.startsWith("https:") ? "lock" : "globe";
+	const name = !url || isMovies(url) || isMusic(url) ? "home" : url.startsWith("https:") ? "lock" : "globe";
 	els.barIcon.firstElementChild.setAttribute("d", BAR_ICONS[name]);
 	els.barIcon.classList.toggle("secure", name === "lock");
 }
@@ -438,6 +448,8 @@ async function main() {
 				? "New tab"
 				: isMovies(tab.url)
 					? "Movies"
+					: isMusic(tab.url)
+						? "Music"
 					: tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
 		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
@@ -535,6 +547,7 @@ async function main() {
 		if (page) {
 			const os = document.body.dataset.mode === "os";
 			if (page === "movies") return os ? launch("movies") : navigate(MOVIES_URL, tab);
+			if (page === "music") return os ? launch("music") : navigate(MUSIC_URL, tab);
 			if (page === "history") openHistory();
 			else if (PAGES.includes(page)) openPage(page, tab);
 			else goHome(tab);
@@ -580,7 +593,7 @@ async function main() {
 			tab.url = url;
 			if (url !== tab.recordedUrl) {
 				tab.recordedUrl = url;
-				browsingHistory.add(shownUrl(url), isMovies(url) ? "Movies" : title);
+				browsingHistory.add(shownUrl(url), isMovies(url) ? "Movies" : isMusic(url) ? "Music" : title);
 			} else {
 				browsingHistory.setTitle(url, title);
 			}
@@ -959,6 +972,7 @@ async function main() {
 		if (document.body.dataset.view === "desktop") current = "desktop";
 		else if (!activeTab?.url) current = "browser";
 		else if (isMovies(activeTab.url)) current = "movies";
+		else if (isMusic(activeTab.url)) current = "music";
 		else if (GAME_SITES.some((site) => hostOf(activeTab.url).endsWith(hostOf(site.url).replace(/^www\./, "")))) {
 			current = "games";
 		}
@@ -970,6 +984,7 @@ async function main() {
 		const windowFor = {
 			browser: osWindow.hidden ? [] : [osWindow],
 			movies: openApps.filter((w) => w.dataset.app === "movies"),
+			music: openApps.filter((w) => w.dataset.app === "music"),
 		};
 		for (const button of dockButtons) {
 			const wins = windowFor[button.dataset.dock] ?? [];
@@ -993,6 +1008,8 @@ async function main() {
 			openPage(target);
 		} else if (target === "movies" && os) {
 			toggleWindow(appWindows.get("movies")?.win, () => openAppWindow("movies", "Movies", MOVIES_URL));
+		} else if (target === "music" && os) {
+			toggleWindow(appWindows.get("music")?.win, () => openAppWindow("music", "Music", MUSIC_URL));
 		} else if (target === "browser" && os) {
 			toggleWindow(osWindow.hidden ? null : osWindow, () => {
 				setView("browser");
@@ -1004,6 +1021,7 @@ async function main() {
 		else if (target === "desktop") setView("desktop");
 		else if (target === "browser") setView("browser");
 		else if (target === "movies") navigate(MOVIES_URL).catch(() => {});
+		else if (target === "music") navigate(MUSIC_URL).catch(() => {});
 		updateDock();
 	}
 
