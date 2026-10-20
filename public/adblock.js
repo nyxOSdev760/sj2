@@ -2,10 +2,11 @@
 /* filler: c__o__d__e */
 // Ad and tracker blocking through AdGuard DNS (94.140.14.14 / 94.140.15.15).
 //
-// AdGuard DNS answers 0.0.0.0 for ad and tracker domains. Before the proxy opens a
-// request or WebSocket, the hostname is looked up over DNS-over-HTTPS (sent through the
-// proxy's own transport, so it works on static hosts with any Wisp server), and the
-// connection is refused when AdGuard blocks it. Answers are cached per hostname.
+// AdGuard DNS answers 0.0.0.0 for ad and tracker domains. Each hostname is looked up over
+// DNS-over-HTTPS (sent through the proxy's own transport, so it works on static hosts with
+// any Wisp server), and requests and WebSockets to blocked hosts are refused. The biggest ad
+// networks are blocked without a lookup, answers are kept in this browser for 12 hours, and
+// a page load to a new host goes out alongside its lookup instead of waiting for it.
 // The Node server additionally resolves every Wisp connection through AdGuard (src/index.js).
 self.AdGuardDNS = (() => {
 	// dns.adguard-dns.com is AdGuard's DoH endpoint on 94.140.14.14 and 94.140.15.15.
@@ -15,7 +16,72 @@ self.AdGuardDNS = (() => {
 	const ERROR_CACHE_MS = 30 * 1000;
 	const CACHE_LIMIT = 5000;
 
-	const cache = new Map(); // hostname -> { expires, blocked: Promise<boolean> }
+	const cache = new Map(); // hostname -> { expires, blocked: Promise<boolean>, value? }
+
+	// The biggest ad, tracker and pop-up networks, blocked straight away without asking
+	// AdGuard (it blocks them too, except the pop-up networks at the end).
+	const KNOWN_ADS = [
+		"doubleclick.net", "googlesyndication.com", "googleadservices.com", "google-analytics.com",
+		"googletagmanager.com", "googletagservices.com", "adservice.google.com", "adnxs.com",
+		"adsrvr.org", "amazon-adsystem.com", "criteo.com", "criteo.net", "taboola.com",
+		"outbrain.com", "pubmatic.com", "rubiconproject.com", "openx.net", "casalemedia.com",
+		"scorecardresearch.com", "quantserve.com", "moatads.com", "adsafeprotected.com",
+		"doubleverify.com", "3lift.com", "sharethrough.com", "smartadserver.com", "teads.tv",
+		"bidswitch.net", "indexww.com", "media.net", "contextweb.com", "yieldmo.com",
+		"advertising.com", "hotjar.com", "bat.bing.com", "ads-twitter.com", "ads.linkedin.com",
+		"analytics.tiktok.com", "adform.net", "mathtag.com", "everesttech.net", "demdex.net",
+		"popads.net", "popcash.net", "propellerads.com", "onclickads.net", "exoclick.com",
+		"juicyads.com", "adcash.com", "a-ads.com", "adsterra.com", "profitableratecpmnetwork.com",
+	];
+	function listed(hostname) {
+		return KNOWN_ADS.some((domain) => hostname === domain || hostname.endsWith("." + domain));
+	}
+
+	// AdGuard's answers are kept for a while in this browser, so a reload doesn't ask again.
+	const SAVED_KEY = "sj2:dns";
+	const SAVED_MS = 12 * 60 * 60 * 1000;
+	const SAVED_LIMIT = 3000;
+	let saved = {};
+	try {
+		saved = JSON.parse(localStorage.getItem(SAVED_KEY)) || {};
+	} catch {
+		saved = {};
+	}
+	let saveTimer = 0;
+	function remember(hostname, blocked) {
+		saved[hostname] = [blocked ? 1 : 0, Date.now() + SAVED_MS];
+		clearTimeout(saveTimer);
+		saveTimer = setTimeout(() => {
+			const now = Date.now();
+			const entries = Object.entries(saved).filter(([, [, expires]]) => expires > now);
+			saved = Object.fromEntries(entries.slice(-SAVED_LIMIT));
+			try {
+				localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+			} catch {
+				// storage full or unavailable; answers just aren't kept
+			}
+		}, 3000);
+	}
+
+	// What's already known about `hostname`: true (blocked), false, or undefined.
+	function verdict(hostname) {
+		hostname = hostname.toLowerCase().replace(/\.$/, "");
+		if (!hostname || hostname === DOH_HOST || isIpLiteral(hostname)) return false;
+		if (listed(hostname)) return true;
+		const entry = cache.get(hostname);
+		if (entry && entry.expires > Date.now() && "value" in entry) return entry.value;
+		const kept = saved[hostname];
+		if (kept && kept[1] > Date.now()) return kept[0] === 1;
+		return undefined;
+	}
+
+	function discard(response) {
+		try {
+			response?.body?.cancel?.()?.catch?.(() => {});
+		} catch {
+			// not a stream
+		}
+	}
 
 	function isIpLiteral(host) {
 		return host.startsWith("[") || /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
@@ -92,9 +158,8 @@ self.AdGuardDNS = (() => {
 /* filler: c__o__d__e */
 	function isBlocked(transport, hostname) {
 		hostname = hostname.toLowerCase().replace(/\.$/, "");
-		if (!hostname || hostname === DOH_HOST || isIpLiteral(hostname)) {
-			return Promise.resolve(false);
-		}
+		const known = verdict(hostname);
+		if (known !== undefined) return Promise.resolve(known);
 
 		const now = Date.now();
 		const cached = cache.get(hostname);
@@ -108,11 +173,18 @@ self.AdGuardDNS = (() => {
 
 		const entry = { expires: now + CACHE_MS, blocked: null };
 		// Fail open: if AdGuard can't be reached, browsing keeps working unfiltered.
-		entry.blocked = lookupBlocked(transport, hostname).catch((err) => {
-			console.warn(`AdGuard DNS lookup for ${hostname} failed:`, err);
-			entry.expires = Date.now() + ERROR_CACHE_MS;
-			return false;
-		});
+		entry.blocked = lookupBlocked(transport, hostname).then(
+			(blocked) => {
+				entry.value = blocked;
+				remember(hostname, blocked);
+				return blocked;
+			},
+			(err) => {
+				console.warn(`AdGuard DNS lookup for ${hostname} failed:`, err);
+				entry.expires = Date.now() + ERROR_CACHE_MS;
+				return false;
+			}
+		);
 		cache.delete(hostname);
 		cache.set(hostname, entry);
 		return entry.blocked;
@@ -150,9 +222,26 @@ self.AdGuardDNS = (() => {
 		}
 
 		async request(remote, method, body, headers, signal) {
-			if (await isBlocked(this.inner, remote.hostname)) {
+			const host = remote.hostname;
+			if (verdict(host) === undefined && body == null && (method === "GET" || method === "HEAD")) {
+				// A host not seen before: ask AdGuard while the request is already on its way,
+				// so pages don't wait for the lookup. If AdGuard blocks it, the answer is dropped.
+				const controller = new AbortController();
+				if (signal?.aborted) controller.abort(signal.reason);
+				else signal?.addEventListener("abort", () => controller.abort(signal.reason), { once: true });
+				const sent = this.inner.request(remote, method, body, headers, controller.signal);
+				sent.catch(() => {}); // a failure is the caller's, below
+				if (await isBlocked(this.inner, host)) {
+					controller.abort();
+					sent.then(discard, () => {});
+					api.blockedCount++;
+					return blockedResponse(host);
+				}
+				return sent;
+			}
+			if (await isBlocked(this.inner, host)) {
 				api.blockedCount++;
-				return blockedResponse(remote.hostname);
+				return blockedResponse(host);
 			}
 			return this.inner.request(remote, method, body, headers, signal);
 		}

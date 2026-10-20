@@ -1,7 +1,7 @@
 # Arc4dia
 
-A web proxy built on [Scramjet](https://github.com/MercuryWorkshop/scramjet) 2, the
-service-worker-based interception proxy from Mercury Workshop.
+A web proxy built on **servy2**, our fork of [Scramjet](https://github.com/MercuryWorkshop/scramjet)
+2, the service-worker-based interception proxy from Mercury Workshop.
 
 ## Run it
 
@@ -57,8 +57,31 @@ those names.
 YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
 videos for traffic from datacenter IPs, which every Wisp server (Render included) uses.
 
-`npm install` runs `scripts/patch-scramjet.js`, which fixes a Scramjet bug where
-`history.replaceState(state, "")` sent single-page sites to `/undefined`.
+## servy2
+
+`npm install` (and `npm run build`) runs `scripts/servy2.js`, which builds servy2 into
+`servy2/dist/` from the pinned Scramjet and controller packages: the files are renamed and
+these Scramjet bugs fixed.
+
+- `history.replaceState(state, "")` sent single-page sites (YouTube) to `/undefined`.
+- Reading a `<script>`'s `textContent` or `innerText` gave `undefined` and setting it did
+  nothing, so `JSON.parse(script.textContent)` threw on Instagram, GitHub and every Next.js
+  site, and scripts built at runtime came out empty.
+- Traps on inherited properties (`Attr.nodeValue`) had no getter or setter to call.
+- A synchronous `XMLHttpRequest` threw `e.getFlag is not a function` (blank Amazon).
+- `localStorage.key(i)` returned a value instead of a key; `length` and `clear()` matched
+  other sites' keys.
+- Source maps were built for every rewritten script; servy2 skips them, which makes
+  script-heavy sites load 20-60% faster (a page's own functions' `toString()` then shows the
+  rewritten code).
+
+Each fix has to match its exact spot in the pinned upstream build, and every file has to
+still parse afterwards, or the build stops. Scramjet's notice and license terms are in
+`servy2/NOTICE`.
+
+Around servy2, the site also races every Wisp route per site and keeps the fastest
+(`public/wisp.js`), caches images and fonts in the service worker for up to 7 days
+(`public/servy.js`), and blocks the biggest ad networks without waiting on a DNS lookup.
 
 ## Server (Rust)
 
@@ -160,12 +183,11 @@ as the backup.
 | Shortcuts, the constellation background, welcome tour | `public/home.js`, `public/tour.js` |
 | AdGuard DNS filter wrapped around the transport | `public/adblock.js` |
 | Wisp server picking and failover | `public/wisp.js` |
-| Scramjet 2 runtime + wasm rewriter | `/scramjet/` → `@mercuryworkshop/scramjet` |
-| Scramjet 2 controller (page API, inject script, SW router) | `/controller/` → `@mercuryworkshop/scramjet-controller` |
+| servy2 runtime, wasm rewriter and controller (built from Scramjet 2) | `/servy2/` → `servy2/dist/` |
 | Transports (encrypted end-to-end over Wisp) | `/libcurl/`, `/epoxy/` |
 | Wisp server (TCP over WebSocket) | `/wisp/` → `@mercuryworkshop/wisp-js` (Node server only) |
 
-1. `public/app.js` registers the service worker `servy.js`, loads Scramjet and the controller, and creates a
+1. `public/app.js` registers the service worker `servy.js`, loads servy2, and creates a
    transport (libcurl by default, epoxy selectable under *Settings*).
 2. A `Controller` is created and attached to the page's `<iframe>`; `frame.go(url)` navigates it.
 3. Requests from the iframe hit the service worker, which hands them to the controller to be
@@ -177,7 +199,7 @@ can't be used to reach the host's own network.
 
 ## Credits
 
-Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
+Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on servy2, our fork of
 [Scramjet](https://github.com/MercuryWorkshop/scramjet) by Mercury Workshop, with
 [AdGuard DNS](https://adguard-dns.io), the Outfit font and
 [Simple Icons](https://simpleicons.org).
@@ -186,7 +208,8 @@ Made by **Wilbert** and **Claude** (☰ → Credits in the app). Built on
 
 - Scramjet 2 is still published as an alpha (`2.0.67-alpha.2`); the controller
   (`0.0.14`) checks the Scramjet version at runtime, so the two are pinned exactly in
-  `package.json`. Upgrade them together.
-- Licensed AGPL-3.0, matching the Scramjet 2 packages it serves.
+  `package.json`. Upgrade them together, then update the fixes in `scripts/servy2.js`.
+- Licensed AGPL-3.0, matching the Scramjet 2 packages servy2 is built from; ☰ → Credits
+  links to the source.
 - The logo font is [Outfit](https://github.com/Outfitio/Outfit-Fonts), served from
   `public/fonts/` under the SIL Open Font License (`public/fonts/outfit-OFL.txt`).

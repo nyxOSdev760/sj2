@@ -53,8 +53,7 @@ async fn main() {
 		.unwrap_or_else(|_| std::env::current_dir().expect("current directory"));
 	let modules = root.join("node_modules").join("@mercuryworkshop");
 	let mounts = vec![
-		("/scramjet/", modules.join("scramjet").join("dist")),
-		("/controller/", modules.join("scramjet-controller").join("dist")),
+		("/servy2/", root.join("servy2").join("dist")),
 		("/libcurl/", modules.join("libcurl-transport").join("dist")),
 		("/epoxy/", modules.join("epoxy-transport").join("dist")),
 		("/", root.join("public")),

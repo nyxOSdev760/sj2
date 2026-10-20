@@ -1,6 +1,6 @@
 # Skeld with the Rust server (server/). Render: runtime "docker" (see render.yaml).
 
-# 1. The proxy builds from npm (Scramjet, transports); postinstall patches Scramjet.
+# 1. The proxy builds from npm (transports, and Scramjet, which postinstall turns into servy2).
 FROM node:22-bookworm-slim AS site
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -18,8 +18,7 @@ RUN touch src/main.rs && cargo build --release --locked
 # 3. What runs: the server binary, public/ and the proxy builds it serves.
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=site /app/node_modules/@mercuryworkshop/scramjet/dist node_modules/@mercuryworkshop/scramjet/dist
-COPY --from=site /app/node_modules/@mercuryworkshop/scramjet-controller/dist node_modules/@mercuryworkshop/scramjet-controller/dist
+COPY --from=site /app/servy2/dist servy2/dist
 COPY --from=site /app/node_modules/@mercuryworkshop/libcurl-transport/dist node_modules/@mercuryworkshop/libcurl-transport/dist
 COPY --from=site /app/node_modules/@mercuryworkshop/epoxy-transport/dist node_modules/@mercuryworkshop/epoxy-transport/dist
 COPY public ./public

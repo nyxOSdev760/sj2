@@ -1,0 +1,8 @@
+servy2 is Arc4dia's web engine: a modified version of Scramjet 2.0.67-alpha.2 and
+scramjet-controller 0.0.14 by Mercury Workshop
+(https://github.com/MercuryWorkshop/scramjet), which are licensed under the GNU Affero
+General Public License, version 3 only (AGPL-3.0-only).
+
+servy2 is distributed under the same license. It is built from the published npm packages
+by scripts/servy2.js, which renames the files and applies the fixes it lists; the result
+goes to servy2/dist/. The complete source is this repository plus those packages.

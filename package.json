@@ -2,14 +2,14 @@
   "name": "sj2",
   "version": "1.0.0",
   "private": true,
-  "description": "A web proxy built on Scramjet 2",
+  "description": "A web proxy built on servy2, a fork of Scramjet 2",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "server": "cargo run --release --manifest-path server/Cargo.toml",
-    "build": "node scripts/build.js",
-    "postinstall": "node scripts/patch-scramjet.js"
+    "build": "node scripts/servy2.js && node scripts/build.js",
+    "postinstall": "node scripts/servy2.js"
   },
   "license": "AGPL-3.0-only",
   "dependencies": {

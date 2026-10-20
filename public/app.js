@@ -8,10 +8,11 @@ const path = (p) => new URL(p, BASE).pathname;
 const PATHS = {
 	sw: path("servy.js"),
 	prefix: path("~/sj/"),
-	scramjet: path("scramjet/scramjet.js"),
-	wasm: path("scramjet/scramjet.wasm"),
-	controllerApi: path("controller/controller.api.js"),
-	controllerInject: path("controller/controller.inject.js"),
+	// servy2: Arc4dia's engine, a fork of Scramjet (built by scripts/servy2.js).
+	scramjet: path("servy2/servy2.js"),
+	wasm: path("servy2/servy2.wasm"),
+	controllerApi: path("servy2/servy2.api.js"),
+	controllerInject: path("servy2/servy2.inject.js"),
 	libcurl: path("libcurl/index.js"),
 	epoxy: path("epoxy/index.js"),
 };
@@ -404,9 +405,9 @@ function shownUrl(url) {
 
 // The loading screen over a proxied page: an animated Arc4dia mark, the site, a progress
 // bar and an assets count. Progress comes from the page itself (document state, files
-// fetched, images finished); the page stays hidden until its images are in, then fades
-// in. Links clicked inside the page start it too. A page that never finishes is shown
-// after 20 seconds anyway.
+// fetched, images finished); the page stays hidden until it's usable and the images in
+// view are in, then fades in. Links clicked inside the page start it too. A page that
+// never finishes is shown after 12 seconds anyway.
 class PageLoader {
 	constructor(container, iframe) {
 		this.iframe = iframe;
@@ -436,6 +437,10 @@ class PageLoader {
 	}
 	start(label) {
 		this.label = label;
+		// A page that leaves again right after showing (bot checks reload themselves) keeps
+		// showing instead of going back under the loading screen.
+		this.quick = !this.loading && performance.now() - (this.shownAt ?? -1e9) < 2500 ? (this.quick ?? 0) + 1 : 0;
+		if (this.quick >= 2) return;
 		this.site.textContent = label ? `Loading ${label}` : "Loading…";
 		if (!this.loading) {
 			this.p = 0;
@@ -482,13 +487,18 @@ class PageLoader {
 		else if (state === "interactive") target = 50 + (total ? (35 * done) / total : 25);
 		else target = 88 + (total ? (12 * done) / total : 12);
 		this.p += (Math.min(target, 99.5) - this.p) * 0.3;
-		if (state === "complete" && (done >= total || elapsed > 9000)) this.p = 100;
+		// Shown once the page is usable and the pictures in view are in; the rest of the page
+		// (below the fold, trackers, late scripts) keeps loading behind it.
+		const imagesIn = done >= total;
+		if ((state === "complete" && (imagesIn || elapsed > 5000)) || (state === "interactive" && imagesIn && elapsed > 600)) {
+			this.p = 100;
+		}
 		this.meta.textContent =
 			state === "loading" && !files
 				? "Connecting…"
 				: `${Math.round(this.p)}%  ·  ${total ? `${done} of ${total} images` : `${files} files`}`;
 		this.render();
-		if (this.p >= 100 || elapsed > 20000) this.finish();
+		if (this.p >= 100 || elapsed > 12000) this.finish();
 	}
 	render() {
 		this.bar.style.width = this.p + "%";
@@ -497,6 +507,7 @@ class PageLoader {
 		if (!this.loading) return;
 		clearInterval(this.timer);
 		this.loading = false;
+		this.shownAt = performance.now();
 		this.p = 100;
 		this.render();
 		this.iframe.classList.remove("page-hidden");

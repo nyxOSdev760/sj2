@@ -7,8 +7,7 @@ const modules = join(root, "node_modules", "@mercuryworkshop");
 // URL prefix -> directory on disk. Shared by the Node server and the static build.
 // First match wins, so "/" must stay last.
 export const mounts = [
-	["/scramjet/", join(modules, "scramjet", "dist")],
-	["/controller/", join(modules, "scramjet-controller", "dist")],
+	["/servy2/", join(root, "servy2", "dist")], // built by scripts/servy2.js
 	["/libcurl/", join(modules, "libcurl-transport", "dist")],
 	["/epoxy/", join(modules, "epoxy-transport", "dist")],
 	["/", join(root, "public")],
