@@ -2863,6 +2863,8 @@ body:not([data-mode="os"]) #tabbar .tab.active {
 /* Inside the OS-mode browser window the pages are black like the rest of OS mode. */
 body[data-mode="os"] .os-window .internal-page {
 	--panel: #0b0b0d;
+	--raised: #111114;
+	--surface: #0c0c0e;
 	--border: rgb(255 255 255 / 0.1);
 	--text: #f2f2f4;
 	--body-text: #d4d4da;
