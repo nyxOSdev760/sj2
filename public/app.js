@@ -975,13 +975,13 @@ async function main() {
 		target.title = "";
 		target.recordedUrl = null;
 		target.page = name;
+		if (name === "games") self.Games?.show();
 		updateTabLabel(target);
 		selectTab(target);
 	}
 
-	// The games catalog on arc4dia://games is built by the ugs-singlefiles bundle (loaded
-	// in index.html): it fills #sidebar and #sections-container on load and opens each game
-	// in its own window.
+	// The games catalog on arc4dia://games is handled by games.js (self.Games), loaded the
+	// first time the tab is opened.
 
 
 	// The bottom bar. The highlighted button follows what's on screen.

@@ -21,9 +21,8 @@
 		<script src="wisp.js"></script>
 		<script src="home.js"></script>
 		<script src="tour.js"></script>
+		<script src="games.js" defer></script>
 		<script src="app.js" defer></script>
-		<!-- Unblocked-games catalog (ugs-singlefiles): populates #sidebar and #sections-container on load. -->
-		<script src="https://cdn.jsdelivr.net/npm/ugs-singlefiles@1.0.6/games.min.js" defer></script>
 	</head>
 	<body>
 		<section id="browser" class="browser" aria-label="Browser">
@@ -207,10 +206,9 @@
 
 				<section id="page-games" class="internal-page" aria-labelledby="page-games-title" hidden>
 					<h1 id="page-games-title" class="internal-title">Games</h1>
-					<div class="games-layout">
-						<nav id="sidebar" class="games-sidebar" aria-label="Jump to letter"></nav>
-						<div id="sections-container" class="games-sections"></div>
-					</div>
+					<input id="games-search" class="games-search" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off" />
+					<p id="games-status" class="internal-empty">Loading games…</p>
+					<div id="games-grid" class="games-grid"></div>
 				</section>
 
 				<div id="frames"></div>
