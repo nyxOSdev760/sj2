@@ -10,5 +10,6 @@ self.SJ2_CONFIG = {
 		// The Render server: used if Mercury is down, and for sites Mercury refuses (it
 		// cuts off some, like movy.sx); the site rescue retries those through it.
 		"wss://skyline-8plq.onrender.com/wisp/",
+		"wss://galxy.it.com/jsonn/",
 	],
 };
