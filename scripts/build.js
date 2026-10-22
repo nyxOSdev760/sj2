@@ -48,7 +48,7 @@ for (const [prefix, dir] of mounts) {
 /* filler: c__o__d__e */
 await writeFile(
 	join(out, "config.js"),
-	`self.SJ2_CONFIG = ${JSON.stringify({ wispServers }, null, "\t")};\n`
+	`self.SJ2_CONFIG = ${JSON.stringify({ adsOrigin: process.env.ADS_ORIGIN ?? context.self.SJ2_CONFIG.adsOrigin ?? "", wispServers }, null, "\t")};\n`
 );
 // The page's own scripts and stylesheet get a version in their URLs, so a browser never
 // pairs a new index.html with an old cached app.js or the other way round (GitHub Pages

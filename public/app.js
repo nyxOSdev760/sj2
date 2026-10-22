@@ -1340,6 +1340,23 @@ async function main() {
 	// Settings saved by the old OS mode (window places, mode, wallpaper) aren't used any more.
 	for (const key of ["mode", "window", "win:movies", "win:music"]) settings.remove(key);
 
+	// Ads, when config.js names an ad origin: each slot is a sandboxed frame of that other
+	// origin's ad page, so the ad scripts can't reach Arc4dia's data or navigate the tab.
+	const adsOrigin = self.SJ2_CONFIG?.adsOrigin;
+	if (adsOrigin && new URL(adsOrigin, location.href).origin !== location.origin) {
+		for (const slot of document.querySelectorAll(".ad-slot")) {
+			const frame = el("iframe");
+			frame.src = new URL("?slot=" + slot.dataset.slot, adsOrigin).href;
+			frame.title = "Advertisement";
+			frame.loading = "lazy";
+			frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox");
+			frame.referrerPolicy = "no-referrer";
+			slot.append(frame);
+			slot.hidden = false;
+		}
+		$("sponsored").hidden = false;
+	}
+
 	createTab();
 	Tour.openIfNew();
 }

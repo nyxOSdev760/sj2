@@ -380,7 +380,8 @@ input::placeholder {
 	}
 }
 
-.menu button {
+.menu button,
+.menu a {
 	display: flex;
 	align-items: center;
 	gap: 14px;
@@ -394,6 +395,7 @@ input::placeholder {
 	cursor: pointer;
 }
 
+.menu a:hover,
 .menu button:hover:not(:disabled),
 .menu button:focus-visible {
 	background: var(--hover);
@@ -1813,4 +1815,54 @@ iframe.page-reveal {
 	iframe.page-reveal {
 		animation: none;
 	}
+}
+
+/* ---- Ad slots (only shown when config.js sets adsOrigin) ---- */
+.ad-slot {
+	display: grid;
+	place-items: center;
+	margin-inline: auto;
+}
+
+.ad-slot iframe {
+	display: block;
+	border: 0;
+	background: transparent;
+}
+
+.ad-slot[data-slot="728x90"] iframe { width: 728px; height: 90px; }
+.ad-slot[data-slot="468x60"] iframe { width: 468px; height: 60px; }
+.ad-slot[data-slot="300x250"] iframe { width: 300px; height: 250px; }
+.ad-slot[data-slot="160x600"] iframe { width: 160px; height: 600px; }
+.ad-slot[data-slot="160x300"] iframe { width: 160px; height: 300px; }
+.ad-slot[data-slot="native"] iframe { width: min(760px, 100%); height: 280px; }
+
+.internal-page .ad-slot {
+	margin-top: 24px;
+}
+
+/* Skyscrapers beside the home screen, on screens wide enough to fit them. */
+.ad-side {
+	position: absolute;
+	top: 50%;
+	z-index: 1;
+	transform: translateY(-50%);
+}
+
+.ad-left {
+	left: 24px;
+}
+
+.ad-right {
+	right: 24px;
+}
+
+@media (max-width: 1180px) {
+	.ad-side {
+		display: none !important;
+	}
+}
+
+.menu a {
+	text-decoration: none;
 }
