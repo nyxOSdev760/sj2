@@ -1744,6 +1744,8 @@ iframe.page-reveal {
 	display: block;
 	border: 0;
 	background: transparent;
+	/* Match the ad page's light color scheme, or Chrome paints a white box behind it. */
+	color-scheme: normal;
 }
 
 .ad-slot[data-slot="728x90"] iframe { width: 728px; height: 90px; }
