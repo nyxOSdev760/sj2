@@ -650,10 +650,37 @@ async function main() {
 					: tab.title || hostOf(tab.url);
 		tab.label.textContent = text;
 		tab.el.title = tab.url ? `${text}\n${shownUrl(tab.url)}` : text;
-		const key = tab.page || (tab.url ? hostOf(tab.url) : "home");
+		const favicon = tab.page || !tab.url ? null : faviconOf(tab);
+		const key = (tab.page || (tab.url ? hostOf(tab.url) : "home")) + "|" + (favicon ?? "");
 		if (tab.iconKey !== key) {
 			tab.iconKey = key;
-			tab.icon.replaceChildren(tabIcon(tab));
+			const fallback = tabIcon(tab);
+			if (!favicon) tab.icon.replaceChildren(fallback);
+			else {
+				// The site's own icon, loaded through the proxy; the line icon until it's in.
+				const img = el("img");
+				img.alt = "";
+				img.onload = () => tab.iconKey === key && tab.icon.replaceChildren(img);
+				img.src = favicon;
+				if (!tab.icon.firstChild) tab.icon.replaceChildren(fallback);
+			}
+		}
+	}
+
+	// The proxied address of the page's icon: its <link rel="icon">, or /favicon.ico.
+	function faviconOf(tab) {
+		if (isMovies(tab.url) || isMusic(tab.url)) return null; // shown as Arc4dia apps
+		try {
+			const win = tab.iframe.contentWindow;
+			const at = win.location.href.indexOf("/~/sj/");
+			if (at < 0) return null;
+			const prefix = win.location.href.slice(0, at + 6).concat(win.location.href.slice(at + 6).split("/").slice(0, 2).join("/"), "/");
+			const links = [...win.document.querySelectorAll('link[rel~="icon" i]')];
+			const best = links.find((l) => /\b(32|48|64)\b/.test(l.sizes?.value ?? "")) || links[0];
+			const url = best?.href || new URL("/favicon.ico", tab.url).href;
+			return /^https?:/.test(url) ? prefix + encodeURIComponent(url) : null;
+		} catch {
+			return null;
 		}
 	}
 
@@ -707,6 +734,7 @@ async function main() {
 		setBarIcon(tab.url);
 		updateDock();
 		updateNavButtons();
+		$("fullscreen").disabled = !tab.url;
 		tab.el.scrollIntoView({ block: "nearest", inline: "nearest" });
 		if (!tab.url && !tab.page) {
 			els.search.value = "";
@@ -768,6 +796,33 @@ async function main() {
 		}
 	}
 
+	// Links a page opens in a new tab (target=_blank, Ctrl/Cmd-click, middle-click) open in a
+	// new Arc4dia tab instead of a browser tab pointing at the proxy.
+	function watchLinks(tab) {
+		try {
+			const doc = tab.iframe.contentDocument;
+			if (!doc || doc.__arcLinks) return;
+			doc.__arcLinks = true;
+			const open = (e) => {
+				const link = e.target.closest?.("a[href]");
+				if (!link) return;
+				const newTab = e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey || /^_blank$/i.test(link.target);
+				const url = link.href;
+				if (!newTab || !/^https?:/.test(url) || (e.type === "click" && e.button !== 0)) return;
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				const opened = createTab({ activate: !(e.ctrlKey || e.metaKey || e.button === 1) });
+				navigate(url, opened).catch(() => {});
+			};
+			doc.addEventListener("click", open, true);
+			doc.addEventListener("auxclick", open, true);
+			// Esc inside the page leaves full screen too.
+			doc.addEventListener("keydown", (e) => e.key === "Escape" && document.body.classList.remove("fullpage"));
+		} catch {
+			// not a proxied page
+		}
+	}
+
 	function goHome(tab, { replace = false } = {}) {
 		if (!replace) record(tab, HOME_URL);
 		tab.loader?.cancel();
@@ -792,7 +847,9 @@ async function main() {
 		tab.iframe.addEventListener("load", () => {
 			tab.pending = false;
 			watchReplace(tab);
+			watchLinks(tab);
 			syncTab(tab);
+			updateTabLabel(tab); // the page's icon is known now
 		});
 	}
 
@@ -961,6 +1018,18 @@ async function main() {
 	$("reload").addEventListener("click", () => activeTab.url && activeTab.frame?.reload());
 	$("home").addEventListener("click", () => goHome(activeTab));
 	$("history-button").addEventListener("click", () => openHistory());
+	// Full screen: just the page, no bars. Esc (or leaving full screen) brings them back.
+	$("fullscreen").addEventListener("click", () => {
+		if (!activeTab.url) return;
+		document.body.classList.add("fullpage");
+		document.documentElement.requestFullscreen?.().catch(() => {});
+	});
+	document.addEventListener("fullscreenchange", () => {
+		if (!document.fullscreenElement) document.body.classList.remove("fullpage");
+	});
+	addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && document.body.classList.contains("fullpage")) document.body.classList.remove("fullpage");
+	});
 
 	// Built-in pages (arc4dia://settings, arc4dia://games): shown in a tab like any site. One
 	// opens in the tab it's asked for if that's a new tab, in the tab already showing it,
