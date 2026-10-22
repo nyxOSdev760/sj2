@@ -628,6 +628,23 @@ input::placeholder {
 		var(--bg);
 }
 
+/* A photo wallpaper: covers the home screen, dimmed a little so the search stays readable. */
+#home-screen.photo {
+	background-position: center;
+	background-size: cover;
+}
+
+#home-screen.photo::before {
+	position: absolute;
+	inset: 0;
+	background: rgb(0 0 0 / 0.25);
+	content: "";
+}
+
+#home-screen.photo .home-wordmark {
+	text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
+}
+
 .stars {
 	position: absolute;
 	inset: 0;
