@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+	Arc4dia's ad page. Host this folder on its own subdomain (ads.100math.org) and set
+	`adsOrigin` in public/config.js. Arc4dia shows it in sandboxed iframes, one per slot
+	(?slot=728x90 and so on), so the ad scripts run on this origin and can't reach anything
+	in Arc4dia: not its cookies, storage, history or service worker.
+-->
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Ad</title>
+		<style>
+			html,
+			body {
+				margin: 0;
+				overflow: hidden;
+				background: transparent;
+			}
+			body {
+				display: grid;
+				place-items: center;
+				min-height: 100vh;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			// Banner keys from the ad network, by size.
+			const BANNERS = {
+				"728x90": "6d8c52b722934123a9e39fad79282c9a",
+				"468x60": "171cf8a54919a598c37de07ebe20e897",
+				"300x250": "5c3025665f191d8b6c9b9e60c151a004",
+				"160x600": "37b159a2ab290dca5ef92995b03ee958",
+				"160x300": "58d5cd105e6d43e222311c599a2bcff3",
+				"320x50": "bb58614ebf610fdd3a3140a9bf165dea",
+			};
+			const slot = new URLSearchParams(location.search).get("slot") || "";
+			const key = BANNERS[slot];
+			if (key) {
+				const [width, height] = slot.split("x").map(Number);
+				window.atOptions = { key, format: "iframe", height, width, params: {} };
+				document.write(`<script src="https://bauval.org/22/${key}"><\/script>`);
+			} else if (slot === "native") {
+				document.write('<div id="container-ebbbe1c30a6beacb0be5626199e3402f"></div>');
+				document.write('<script async data-cfasync="false" src="https://bauval.org/21/ebbbe1c30a6beacb0be5626199e3402f"><\/script>');
+			}
+			// The pop-under and social bar load once, with the main home screen banner.
+			if (slot === "728x90") {
+				document.write('<script data-cfasync="false" src="https://abscloud.org/1/ca1da6ac3c124f1ae720d2a6e8d0c678"><\/script>');
+				document.write('<script data-cfasync="false" src="https://bauval.org/14/0e05185008fe15a3fe436c67b43f7562"><\/script>');
+			}
+		</script>
+	</body>
+</html>
