@@ -484,6 +484,18 @@ input::placeholder {
 	flex: none;
 }
 
+.tab-icon img {
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	object-fit: contain;
+}
+
+/* Full screen: only the page. */
+body.fullpage :is(#toolbar, #tabbar, .dock) {
+	display: none;
+}
+
 .tab-icon svg {
 	width: 20px;
 	height: 20px;
