@@ -1293,6 +1293,22 @@ async function main() {
 		settings.set("theme", els.theme.value);
 		applyTheme(els.theme.value);
 	});
+	// The home screen's wallpaper: the animated stars, or a photo (public/wallpapers/).
+	const WALLPAPERS = ["stars", "bliss-cat", "night-room", "skylight"];
+	function applyWallpaper(name) {
+		if (!WALLPAPERS.includes(name)) name = "stars";
+		$("wallpaper").value = name;
+		const photo = name !== "stars";
+		els.home.classList.toggle("photo", photo);
+		els.home.style.backgroundImage = photo ? `url("wallpapers/${name}.jpg")` : "";
+		$("stars").hidden = photo;
+	}
+	$("wallpaper").addEventListener("change", () => {
+		settings.set("wallpaper", $("wallpaper").value);
+		applyWallpaper($("wallpaper").value);
+	});
+	applyWallpaper(settings.get("wallpaper", "stars"));
+
 	// Themes from before the redesign start over on AMOLED black.
 	if (settings.get("themeV", "") !== "2") {
 		settings.set("theme", "dark");
@@ -1301,7 +1317,7 @@ async function main() {
 	applyTheme(settings.get("theme", "dark"));
 
 	// Settings saved by the old OS mode (window places, mode, wallpaper) aren't used any more.
-	for (const key of ["mode", "wallpaper", "window", "win:movies", "win:music"]) settings.remove(key);
+	for (const key of ["mode", "window", "win:movies", "win:music"]) settings.remove(key);
 
 	createTab();
 	Tour.openIfNew();
