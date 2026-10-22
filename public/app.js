@@ -1245,7 +1245,7 @@ async function main() {
 		settings.set("theme", els.theme.value);
 		applyTheme(els.theme.value);
 	});
-	// The home screen's wallpaper: the animated stars, or a photo (public/wallpapers/).
+	// The home screen's wallpaper: a photo (public/wallpapers/, Night room by default) or the animated stars.
 	const WALLPAPERS = ["stars", "bliss-cat", "night-room", "skylight"];
 	function applyWallpaper(name) {
 		if (!WALLPAPERS.includes(name)) name = "stars";
@@ -1259,7 +1259,7 @@ async function main() {
 		settings.set("wallpaper", $("wallpaper").value);
 		applyWallpaper($("wallpaper").value);
 	});
-	applyWallpaper(settings.get("wallpaper", "stars"));
+	applyWallpaper(settings.get("wallpaper", "night-room"));
 
 	// Themes from before the redesign start over on AMOLED black.
 	if (settings.get("themeV", "") !== "2") {
