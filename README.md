@@ -25,37 +25,12 @@ Service workers only run in secure contexts, so when you deploy it anywhere othe
 `localhost` it must be served over **HTTPS** (put it behind a reverse proxy such as Caddy or
 nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
-## Tabs and history
+## The page
 
-Open as many tabs as you like with **+** next to the tabs (middle-click a tab to close it).
-Each tab is its own proxied frame with its own Back and Forward. Visited pages are saved to
-**History** (the pill at the top right), which you can search, open in the current tab
-(Ctrl/Cmd- or middle-click opens a new tab), prune or clear. History is stored only in your
-browser's `localStorage` and can be turned off under *Settings → Save history*.
-
-The home screen is the Arc4dia wordmark over an animated constellation, a search bar, and a
-launcher: round buttons for your sites (YouTube, TikTok, Discord and Twitch to start), then
-Games, Movies, Music, History and a pencil that edits your shortcuts (Add, or the trash can in
-Edit). **☰ → Bookmark this page** pins the site you're on. Shortcuts are saved in your browser;
-*Settings → Home shortcuts → Reset to defaults* brings the originals back. Brand icons are from
-[Simple Icons](https://simpleicons.org) (CC0); other sites get a letter tile.
-
-Every theme is dark: **AMOLED black** (the default), Midnight, Ocean, Lavender, Sunset, Rose
-and Mono, under *Settings → Theme*. The constellation pauses while a page is open or
-the tab is hidden, and stays still for people who prefer reduced motion.
-
-The **☰ menu** has Bookmark this page, Edit shortcuts, Credits and Take the tour. The address
-bar shows `arc4dia://home` on the home screen; `arc4dia://history` and `arc4dia://settings`
-open those. A five-step welcome tour shows on the first visit.
-
-The bottom bar holds Movies, Music, Games, Shortcuts, History and Settings. **Games** opens
-`arc4dia://games` (itch.io free web games and Armor Games) and **Settings** opens
-`arc4dia://settings`, both as pages in a tab. **Movies** (`arc4dia://movies`) opens movy.sx
-and **Music** (`arc4dia://music`) opens Ripple; the address bar, tab and history show them by
-those names.
-
-YouTube pages load, but YouTube asks "Sign in to confirm you're not a bot" before playing
-videos for traffic from datacenter IPs, which every Wisp server (Render included) uses.
+The site is a single page, **Astra**: a top bar (wordmark, search, menu, Browser and
+Full version) over a centered list of apps. Search filters the list as you type; hovering a
+row shows **Open**. The list lives in `public/astra.js` (`APPS`: a name and an optional URL;
+entries without a URL open a web search for the name).
 
 ## servy2
 
