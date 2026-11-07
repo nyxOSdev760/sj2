@@ -1,5 +1,5 @@
 "use strict";
-// Mango X: games from two collections, listed in ugs-files.js (bubbls/ugs-singlefile) and
+// Wilbert X: games from two collections, listed in ugs-files.js (bubbls/ugs-singlefile) and
 // gn-files.js (Gn-Math). Each game is one HTML file; opening one fetches it and runs it in a
 // new about:blank tab.
 const SOURCES = {

@@ -23,18 +23,18 @@ a {
 .glass {
 	position: relative;
 	background:
-		radial-gradient(120% 140% at 15% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
-		rgba(255, 255, 255, 0.07);
-	backdrop-filter: blur(22px) saturate(200%) brightness(1.25);
-	-webkit-backdrop-filter: blur(22px) saturate(200%) brightness(1.25);
+		radial-gradient(120% 140% at 15% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+		rgba(255, 255, 255, 0.055);
+	backdrop-filter: blur(18px) saturate(190%) brightness(1.15);
+	-webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.15);
 	border: 1px solid transparent;
 	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.55),
-		inset 1px 0 0 rgba(255, 255, 255, 0.25),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-		inset 0 0 24px rgba(255, 255, 255, 0.08),
-		inset 0 -10px 20px rgba(0, 0, 0, 0.25),
-		0 12px 40px rgba(0, 0, 0, 0.7),
+		inset 0 1px 0 rgba(255, 255, 255, 0.4),
+		inset 1px 0 0 rgba(255, 255, 255, 0.15),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+		inset 0 0 20px rgba(255, 255, 255, 0.05),
+		inset 0 -8px 16px rgba(0, 0, 0, 0.18),
+		0 10px 36px rgba(0, 0, 0, 0.6),
 		0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
@@ -43,14 +43,14 @@ a {
 	content: "";
 	position: absolute;
 	inset: -1px;
-	padding: 1.5px;
+	padding: 1px;
 	border-radius: inherit;
 	background: linear-gradient(135deg,
-		rgba(255, 255, 255, 0.75) 0%,
-		rgba(255, 255, 255, 0.12) 25%,
-		rgba(255, 255, 255, 0.04) 50%,
-		rgba(255, 255, 255, 0.12) 75%,
-		rgba(255, 255, 255, 0.5) 100%);
+		rgba(255, 255, 255, 0.45) 0%,
+		rgba(255, 255, 255, 0.08) 25%,
+		rgba(255, 255, 255, 0.03) 50%,
+		rgba(255, 255, 255, 0.08) 75%,
+		rgba(255, 255, 255, 0.28) 100%);
 	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
 	-webkit-mask-composite: xor;
 	mask-composite: exclude;
@@ -63,7 +63,7 @@ a {
 	position: absolute;
 	inset: 1px;
 	border-radius: inherit;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.03) 50%, transparent 51%);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 50%, transparent 51%);
 	pointer-events: none;
 }
 
@@ -102,8 +102,8 @@ a {
 	padding: 0 14px;
 	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 11px;
-	background: rgba(0, 0, 0, 0.45);
-	box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.18);
+	background: rgba(0, 0, 0, 0.4);
+	box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.12);
 	color: #e8e9ec;
 	font: inherit;
 	font-size: 14px;
@@ -153,16 +153,16 @@ a {
 
 .item:hover,
 .item:focus-visible {
-	border-color: rgba(255, 255, 255, 0.16);
+	border-color: rgba(255, 255, 255, 0.12);
 	background:
-		linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 51%, rgba(255, 255, 255, 0.06)),
-		radial-gradient(80% 160% at 10% 0%, rgba(255, 255, 255, 0.12), transparent 60%);
+		linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.015) 51%, rgba(255, 255, 255, 0.04)),
+		radial-gradient(80% 160% at 10% 0%, rgba(255, 255, 255, 0.07), transparent 60%);
 	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.5),
-		inset 1px 0 0 rgba(255, 255, 255, 0.2),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-		inset 0 -8px 16px rgba(0, 0, 0, 0.25),
-		0 8px 24px rgba(0, 0, 0, 0.6);
+		inset 0 1px 0 rgba(255, 255, 255, 0.35),
+		inset 1px 0 0 rgba(255, 255, 255, 0.12),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+		inset 0 -6px 12px rgba(0, 0, 0, 0.18),
+		0 6px 20px rgba(0, 0, 0, 0.55);
 	outline: none;
 }
 
