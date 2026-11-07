@@ -27,8 +27,7 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **Astra**: a top bar (wordmark, search, menu, Browser and
-Full version) over a centered list of apps. Search filters the list as you type; hovering a
+The site is a single page, **CloudGames**: a top bar (wordmark, search and menu) over a centered list of apps. Search filters the list as you type; hovering a
 row shows **Open**. The list lives in `public/astra.js` (`APPS`: a name and an optional URL;
 entries without a URL open a web search for the name).
 

@@ -90,25 +90,10 @@ a {
 	stroke-linecap: round;
 }
 
-.links {
-	flex: none;
-	display: flex;
-	gap: 10px;
-	font-size: 13px;
-}
-
-.links a {
-	color: #8b8e98;
-}
-
-.links a:hover {
-	color: #e8e9ec;
-}
-
 .menu {
 	position: absolute;
 	top: 46px;
-	right: 150px;
+	right: 16px;
 	min-width: 160px;
 	padding: 4px;
 	border: 1px solid #1e2027;

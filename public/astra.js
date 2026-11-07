@@ -1,5 +1,5 @@
 "use strict";
-// Astra: a searchable list of apps. Each entry is a name and, optionally, the page it opens;
+// CloudGames: a searchable list of apps. Each entry is a name and, optionally, the page it opens;
 // entries without a URL open a web search for the name.
 const APPS = [
 	["Stumble Guys"],
@@ -116,12 +116,5 @@ document.addEventListener("click", () => {
 	menu.hidden = true;
 	menuButton.setAttribute("aria-expanded", "false");
 });
-
-$("full-link").addEventListener("click", (e) => {
-	e.preventDefault();
-	if (document.fullscreenElement) document.exitFullscreen();
-	else document.documentElement.requestFullscreen?.();
-});
-$("browser-link").addEventListener("click", (e) => e.preventDefault());
 
 render();
