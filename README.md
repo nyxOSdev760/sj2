@@ -41,8 +41,10 @@ The games come from two collections:
   [Lumi-f3m/Gn-Math](https://github.com/Lumi-f3m/Gn-Math) loads (from
   `sealiee11/gnmath`'s `practice.html`); the game files are in `freebuisness/html`.
 
-Games in both collections were each loaded in a headless browser; where one copy rendered and
-the other didn't, the broken copy was dropped.
+Games that were in both collections (or twice in one) were checked: each copy's HTML and the
+game files it loads (scripts, WebAssembly, game data, ROMs). Where one copy was missing files
+and the other wasn't, the broken copy was dropped; otherwise one copy was kept, so every name
+appears once.
 
 ## servy2
 
