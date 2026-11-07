@@ -96,6 +96,10 @@ a {
 }
 
 .item {
+	width: 100%;
+	background: none;
+	font: inherit;
+	text-align: left;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;

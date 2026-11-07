@@ -28,8 +28,12 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 ## The page
 
 The site is a single page, **CloudGames**: a top bar (cloud logo and search) over a centered
-list of games. Search filters the list as you type; hovering a row shows **Open**. Add games
-to `GAMES` in `public/cloudgames.js` as `["Name", "https://..."]`; each opens in a new tab.
+list of games. Search filters the list as you type; hovering a row shows **Open**.
+
+The games are every file in the `UGS-Files/` folder of
+[bubbls/ugs-singlefile](https://github.com/bubbls/ugs-singlefile), listed in
+`public/ugs-files.js`. Opening one fetches its HTML from jsDelivr (or raw GitHub if that
+fails) and writes it into a new tab, the same way the original site does.
 
 ## servy2
 
