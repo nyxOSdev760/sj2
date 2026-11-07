@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#07080c" />
+		<meta name="theme-color" content="#1a0d05" />
 		<title>Mango X</title>
 		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 		<link rel="stylesheet" href="style.css" />
@@ -12,14 +12,10 @@
 		<script src="mangox.js" defer></script>
 	</head>
 	<body>
+		<div class="backdrop" aria-hidden="true"></div>
 		<header class="top">
-			<a class="brand" href="./">
-				<span class="logo-mark" aria-hidden="true">
-					<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.75 4.75 0 0 1-.5 9.5z" /></svg>
-				</span>
-				Mango X
-			</a>
-			<input id="search" class="search" type="text" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false" />
+			<a class="brand" href="./">Mango <span class="brand-x">X</span></a>
+			<input id="search" class="search" type="search" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false" />
 		</header>
 
 		<main class="list-wrap">
