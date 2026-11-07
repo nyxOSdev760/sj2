@@ -72,10 +72,7 @@ function row(game) {
 	button.className = "item";
 	const title = document.createElement("span");
 	title.textContent = game.name;
-	const open = document.createElement("span");
-	open.className = "open";
-	open.textContent = "Open";
-	button.append(title, open);
+	button.append(title);
 	button.addEventListener("click", () => openGame(game));
 	li.append(button);
 	return li;

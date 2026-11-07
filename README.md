@@ -28,7 +28,7 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 ## The page
 
 The site is a single page, **Mango X**: a top bar (logo and search) over a centered list of
-games. Search filters the list as you type; hovering a row shows **Open**. Opening a game
+games. Search filters the list as you type; clicking a game
 fetches its HTML from jsDelivr (or raw GitHub if that fails) and runs it full-window in a new
 `about:blank` tab.
 
