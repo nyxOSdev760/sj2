@@ -27,10 +27,15 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **Wilbert X**: a top bar (logo and search) over a centered list of
-games. Search filters the list as you type; clicking a game
-fetches its HTML from jsDelivr (or raw GitHub if that fails) and runs it full-window in a new
-`about:blank` tab.
+The site is a single page, **WX**: a sidebar (Games, Favorites, Recently played), a header
+with search (press `/` to jump to it), tabs for each collection with game counts, and a grid
+of game cards with cover art. The star on a card adds it to Favorites; favorites and recently
+played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
+GitHub if that fails) and runs it full-window in a new `about:blank` tab.
+
+Gn-Math games use the covers from its catalog. UGS games use an image found in the game's own
+files (an icon, splash screen or title art at least 96px); games without one get a colored
+tile with their name.
 
 The games come from two collections:
 

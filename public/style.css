@@ -2,124 +2,162 @@
 	box-sizing: border-box;
 }
 
+:root {
+	--bg: #120d1d;
+	--panel: #1a1428;
+	--panel-hover: #221a35;
+	--line: rgba(255, 255, 255, 0.07);
+	--line-strong: rgba(255, 255, 255, 0.13);
+	--text: #ece8f7;
+	--muted: #9d8fbf;
+	--accent: #a855f7;
+	--accent-light: #c87cff;
+	--side: 68px;
+}
+
 html {
-	/* Midnight blue, a little lighter at the top, with two faint glows for the glass to catch. */
+	/* Dark plum with soft purple and blue light, after the WX logo. */
 	background:
-		radial-gradient(60vw 50vh at 15% -10%, rgba(80, 110, 255, 0.18), transparent 70%),
-		radial-gradient(50vw 50vh at 100% 0%, rgba(140, 90, 255, 0.12), transparent 70%),
-		linear-gradient(180deg, #111934 0%, #0a0f1e 60%, #080c18 100%);
+		radial-gradient(70vw 60vh at 10% -10%, rgba(140, 70, 230, 0.22), transparent 70%),
+		radial-gradient(60vw 60vh at 110% 110%, rgba(60, 90, 170, 0.18), transparent 70%),
+		var(--bg);
 	background-attachment: fixed;
 }
 
-html,
 body {
 	margin: 0;
-	min-height: 100%;
-	color: #e6eaf5;
+	min-height: 100vh;
+	color: var(--text);
 	font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
 
-a {
-	color: inherit;
-	text-decoration: none;
+svg {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
 }
 
-/* ---- liquid glass ---- */
-/* A clear pane: a light blur of what's behind, a bright rim along the top-left edge, a
-   faint one bottom-right, and a soft sheen across the upper half. */
-.glass {
-	position: relative;
-	background:
-		radial-gradient(120% 140% at 15% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
-		rgba(255, 255, 255, 0.055);
-	backdrop-filter: blur(18px) saturate(190%) brightness(1.15);
-	-webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.15);
-	border: 1px solid transparent;
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.4),
-		inset 1px 0 0 rgba(255, 255, 255, 0.15),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-		inset 0 0 20px rgba(255, 255, 255, 0.05),
-		inset 0 -8px 16px rgba(0, 0, 0, 0.18),
-		0 10px 36px rgba(0, 0, 0, 0.6),
-		0 0 0 0.5px rgba(255, 255, 255, 0.08);
+/* ---- sidebar ---- */
+
+.side {
+	position: fixed;
+	inset: 0 auto 0 0;
+	z-index: 20;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	width: var(--side);
+	padding: 14px 0;
+	border-right: 1px solid var(--line);
+	background: rgba(13, 9, 21, 0.85);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
 }
 
-/* Bright rim: a gradient border, strongest at the top-left and bottom-right corners. */
-.glass::after {
-	content: "";
-	position: absolute;
-	inset: -1px;
-	padding: 1px;
-	border-radius: inherit;
-	background: linear-gradient(135deg,
-		rgba(255, 255, 255, 0.45) 0%,
-		rgba(255, 255, 255, 0.08) 25%,
-		rgba(255, 255, 255, 0.03) 50%,
-		rgba(255, 255, 255, 0.08) 75%,
-		rgba(255, 255, 255, 0.28) 100%);
-	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-	-webkit-mask-composite: xor;
-	mask-composite: exclude;
-	pointer-events: none;
+.side-logo {
+	display: block;
+	width: 42px;
+	height: 42px;
+	margin-bottom: 14px;
+	border-radius: 11px;
+	overflow: hidden;
+	box-shadow: 0 4px 14px rgba(120, 40, 200, 0.45);
 }
 
-/* Sheen across the upper half. */
-.glass::before {
-	content: "";
-	position: absolute;
-	inset: 1px;
-	border-radius: inherit;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 50%, transparent 51%);
-	pointer-events: none;
+.side-logo img {
+	display: block;
+	width: 100%;
+	height: 100%;
 }
 
-.glass > * {
-	position: relative;
-	z-index: 1;
+.side-btn {
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 12px;
+	background: none;
+	color: var(--muted);
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
 }
 
-/* ---- top bar ---- */
+.side-btn svg {
+	width: 22px;
+	height: 22px;
+}
+
+.side-btn:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--text);
+}
+
+.side-btn.active {
+	background: rgba(168, 85, 247, 0.18);
+	color: var(--accent-light);
+}
+
+/* ---- header ---- */
+
+.main {
+	margin-left: var(--side);
+	min-width: 0;
+}
 
 .top {
 	position: sticky;
-	top: 10px;
+	top: 0;
 	z-index: 10;
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	height: 54px;
-	margin: 10px 10px 0;
-	padding: 0 10px 0 18px;
-	border-radius: 18px;
+	gap: 20px;
+	height: 64px;
+	padding: 0 28px;
+	border-bottom: 1px solid var(--line);
+	background: rgba(18, 13, 29, 0.75);
+	backdrop-filter: blur(18px) saturate(150%);
+	-webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
-.brand {
-	flex: none;
-	font-size: 15px;
+.title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-size: 21px;
 	font-weight: 700;
 	letter-spacing: -0.01em;
-	color: #fff;
+}
+
+.title svg {
+	width: 22px;
+	height: 22px;
+	color: var(--accent-light);
 }
 
 .search {
-	flex: 1;
-	min-width: 0;
-	height: 36px;
-	padding: 0 14px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 11px;
-	background: rgba(0, 0, 0, 0.4);
-	box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.12);
-	color: #e6eaf5;
+	width: min(400px, 40vw);
+	height: 40px;
+	margin-left: auto;
+	padding: 0 16px;
+	border: 1px solid var(--line-strong);
+	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--text);
 	font: inherit;
-	font-size: 14px;
+	font-size: 14.5px;
 	outline: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .search::placeholder {
-	color: #6f7a9c;
+	color: var(--muted);
 }
 
 .search::-webkit-search-cancel-button {
@@ -127,62 +165,187 @@ a {
 }
 
 .search:focus {
-	border-color: rgba(255, 255, 255, 0.2);
+	border-color: rgba(168, 85, 247, 0.7);
+	box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
 }
 
-/* ---- list: full width ---- */
+/* ---- collection chips ---- */
 
-.list-wrap {
-	padding: 14px 10px 16px;
-}
-
-.list {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.item {
-	position: relative;
+.chips {
 	display: flex;
-	align-items: center;
-	width: 100%;
-	height: 45px;
-	padding: 0 12px;
-	border: 1px solid transparent;
-	border-radius: 12px;
-	background: none;
-	color: #e6eaf5;
-	font: inherit;
-	font-size: 14.5px;
-	text-align: left;
-	cursor: pointer;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 18px 28px 6px;
 }
 
-.item:hover,
-.item:focus-visible {
-	border-color: rgba(255, 255, 255, 0.12);
-	background:
-		linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.015) 51%, rgba(255, 255, 255, 0.04)),
-		radial-gradient(80% 160% at 10% 0%, rgba(255, 255, 255, 0.07), transparent 60%);
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.35),
-		inset 1px 0 0 rgba(255, 255, 255, 0.12),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-		inset 0 -6px 12px rgba(0, 0, 0, 0.18),
-		0 6px 20px rgba(0, 0, 0, 0.55);
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 36px;
+	padding: 0 16px;
+	border: 1px solid var(--line-strong);
+	border-radius: 9px;
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--text);
+	font: inherit;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.chip:hover {
+	background: rgba(255, 255, 255, 0.07);
+}
+
+.chip-n {
+	color: var(--muted);
+	font-size: 13px;
+}
+
+.chip.active {
+	border-color: transparent;
+	background: linear-gradient(135deg, #9333ea, #b45cf7);
+	color: #fff;
+	box-shadow: 0 4px 16px rgba(147, 51, 234, 0.35);
+}
+
+.chip.active .chip-n {
+	color: rgba(255, 255, 255, 0.8);
+}
+
+/* ---- game grid ---- */
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 16px;
+	padding: 16px 28px 40px;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 10px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: var(--panel);
+	cursor: pointer;
+	transition: transform 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.card[hidden] {
+	display: none;
+}
+
+.card:hover,
+.card:focus-visible {
+	transform: translateY(-3px);
+	border-color: rgba(168, 85, 247, 0.5);
+	background: var(--panel-hover);
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(168, 85, 247, 0.15);
 	outline: none;
+}
+
+.cover {
+	position: relative;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: 10px;
+	background: #0e0a17;
+}
+
+.cover img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.25s;
+}
+
+.card:hover .cover img {
+	transform: scale(1.05);
+}
+
+/* Games without a cover: a colored tile with the name. */
+.tile {
+	display: grid;
+	place-items: center;
+	width: 100%;
+	height: 100%;
+	padding: 14px;
+	text-align: center;
+}
+
+.tile-name {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	color: #fff;
+	font-size: 19px;
+	font-weight: 800;
+	line-height: 1.15;
+	text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+	word-break: break-word;
+}
+
+.fav {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 9px;
+	background: rgba(15, 10, 25, 0.6);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: #fff;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.15s, background 0.15s;
+}
+
+.fav svg {
+	width: 17px;
+	height: 17px;
+}
+
+.card:hover .fav,
+.card:focus-within .fav,
+.fav.on {
+	opacity: 1;
+}
+
+.fav:hover {
+	background: rgba(15, 10, 25, 0.85);
+}
+
+.fav.on {
+	color: #fbbf24;
+}
+
+.fav.on svg {
+	fill: currentColor;
+}
+
+.card-name {
+	overflow: hidden;
+	padding: 0 4px 2px;
+	font-size: 14.5px;
+	font-weight: 500;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .empty {
 	margin: 0;
-	padding: 0 12px;
-	color: #7c86a6;
-	font-size: 14px;
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.glass {
-		background: rgba(18, 25, 50, 0.92);
-	}
+	padding: 24px 28px;
+	color: var(--muted);
+	font-size: 15px;
 }
