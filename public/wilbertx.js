@@ -45,7 +45,7 @@ async function openGame(game) {
 	if (!win) return;
 	const doc = win.document;
 	doc.title = game.name;
-	doc.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#07080c;color:#8b8e98;font:14px system-ui,sans-serif";
+	doc.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#0a0f1e;color:#7c86a6;font:14px system-ui,sans-serif";
 	const note = doc.createElement("div");
 	note.style.cssText = "display:grid;place-items:center;height:100%";
 	note.textContent = "Loading " + game.name + "…";

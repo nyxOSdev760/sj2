@@ -2,12 +2,20 @@
 	box-sizing: border-box;
 }
 
+html {
+	/* Midnight blue, a little lighter at the top, with two faint glows for the glass to catch. */
+	background:
+		radial-gradient(60vw 50vh at 15% -10%, rgba(80, 110, 255, 0.18), transparent 70%),
+		radial-gradient(50vw 50vh at 100% 0%, rgba(140, 90, 255, 0.12), transparent 70%),
+		linear-gradient(180deg, #111934 0%, #0a0f1e 60%, #080c18 100%);
+	background-attachment: fixed;
+}
+
 html,
 body {
 	margin: 0;
 	min-height: 100%;
-	background: #07080c;
-	color: #e8e9ec;
+	color: #e6eaf5;
 	font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
@@ -104,14 +112,14 @@ a {
 	border-radius: 11px;
 	background: rgba(0, 0, 0, 0.4);
 	box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.12);
-	color: #e8e9ec;
+	color: #e6eaf5;
 	font: inherit;
 	font-size: 14px;
 	outline: none;
 }
 
 .search::placeholder {
-	color: #5d606b;
+	color: #6f7a9c;
 }
 
 .search::-webkit-search-cancel-button {
@@ -144,7 +152,7 @@ a {
 	border: 1px solid transparent;
 	border-radius: 12px;
 	background: none;
-	color: #e8e9ec;
+	color: #e6eaf5;
 	font: inherit;
 	font-size: 14.5px;
 	text-align: left;
@@ -169,12 +177,12 @@ a {
 .empty {
 	margin: 0;
 	padding: 0 12px;
-	color: #6c6f7a;
+	color: #7c86a6;
 	font-size: 14px;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.glass {
-		background: rgba(20, 21, 26, 0.92);
+		background: rgba(18, 25, 50, 0.92);
 	}
 }
