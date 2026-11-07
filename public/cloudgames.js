@@ -1,16 +1,14 @@
 "use strict";
 // CloudGames: the games from bubbls/ugs-singlefile (list in ugs-files.js). Each game is one
-// HTML file; opening one fetches it and writes it into a new tab, as the original site does.
+// HTML file; opening one fetches it and runs it in a new about:blank tab.
 const SOURCES = [
 	"https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/UGS-Files/",
 	"https://raw.githubusercontent.com/bubbls/ugs-singlefile/main/UGS-Files/",
 ];
 
-// "clA Walk in The Forest (v10).html" -> "A Walk in The Forest (v10)"
-const GAMES = (self.UGS_FILES || []).map((file) => ({
-	file,
-	name: file.replace(/^cl/, "").replace(/\.html?$/i, ""),
-}));
+const GAMES = (self.UGS_FILES || [])
+	.map(([file, name]) => ({ file, name }))
+	.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
 
 const $ = (id) => document.getElementById(id);
 const list = $("list");
@@ -31,20 +29,31 @@ async function fetchGame(file) {
 	throw lastError;
 }
 
+// The game runs in a full-window frame inside a new about:blank tab, so the tab's address
+// stays about:blank.
 async function openGame(game) {
 	// Open the tab right away (inside the click) so pop-up blockers allow it.
 	const win = window.open("about:blank", "_blank");
 	if (!win) return;
-	win.document.title = game.name;
-	win.document.body.style.cssText = "margin:0;background:#07080c;color:#8b8e98;font:14px system-ui,sans-serif;display:grid;place-items:center;height:100vh";
-	win.document.body.textContent = "Loading " + game.name + "…";
+	const doc = win.document;
+	doc.title = game.name;
+	doc.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#07080c;color:#8b8e98;font:14px system-ui,sans-serif";
+	const note = doc.createElement("div");
+	note.style.cssText = "display:grid;place-items:center;height:100%";
+	note.textContent = "Loading " + game.name + "…";
+	doc.body.append(note);
 	try {
 		const html = await fetchGame(game.file);
-		win.document.open();
-		win.document.write(html);
-		win.document.close();
+		const frame = doc.createElement("iframe");
+		frame.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff";
+		frame.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";
+		frame.allowFullscreen = true;
+		frame.srcdoc = html;
+		note.remove();
+		doc.body.append(frame);
+		frame.focus();
 	} catch {
-		win.document.body.textContent = "Couldn't load " + game.name + ". Try again.";
+		note.textContent = "Couldn't load " + game.name + ". Try again.";
 	}
 }
 

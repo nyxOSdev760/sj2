@@ -32,8 +32,9 @@ list of games. Search filters the list as you type; hovering a row shows **Open*
 
 The games are every file in the `UGS-Files/` folder of
 [bubbls/ugs-singlefile](https://github.com/bubbls/ugs-singlefile), listed in
-`public/ugs-files.js`. Opening one fetches its HTML from jsDelivr (or raw GitHub if that
-fails) and writes it into a new tab, the same way the original site does.
+`public/ugs-files.js` with readable names (the file names split into words). Opening one
+fetches its HTML from jsDelivr (or raw GitHub if that fails) and runs it full-window in a new
+`about:blank` tab.
 
 ## servy2
 
