@@ -1,25 +1,33 @@
 "use strict";
-// CloudGames: the games from bubbls/ugs-singlefile (list in ugs-files.js). Each game is one
-// HTML file; opening one fetches it and runs it in a new about:blank tab.
-const SOURCES = [
-	"https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/UGS-Files/",
-	"https://raw.githubusercontent.com/bubbls/ugs-singlefile/main/UGS-Files/",
-];
+// Mango X: games from two collections, listed in ugs-files.js (bubbls/ugs-singlefile) and
+// gn-files.js (Gn-Math). Each game is one HTML file; opening one fetches it and runs it in a
+// new about:blank tab.
+const SOURCES = {
+	ugs: [
+		"https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/UGS-Files/",
+		"https://raw.githubusercontent.com/bubbls/ugs-singlefile/main/UGS-Files/",
+	],
+	gn: [
+		"https://cdn.jsdelivr.net/gh/freebuisness/html@main/",
+		"https://raw.githubusercontent.com/freebuisness/html/main/",
+	],
+};
 
-const GAMES = (self.UGS_FILES || [])
-	.map(([file, name]) => ({ file, name }))
-	.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+const GAMES = [
+	...(self.UGS_FILES || []).map(([file, name]) => ({ source: "ugs", file, name })),
+	...(self.GN_FILES || []).map(([file, name]) => ({ source: "gn", file, name })),
+].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
 
 const $ = (id) => document.getElementById(id);
 const list = $("list");
 const empty = $("empty");
 const search = $("search");
 
-async function fetchGame(file) {
+async function fetchGame(game) {
 	let lastError;
-	for (const base of SOURCES) {
+	for (const base of SOURCES[game.source]) {
 		try {
-			const res = await fetch(base + encodeURIComponent(file));
+			const res = await fetch(base + encodeURIComponent(game.file));
 			if (res.ok) return await res.text();
 			lastError = new Error("HTTP " + res.status);
 		} catch (err) {
@@ -43,7 +51,7 @@ async function openGame(game) {
 	note.textContent = "Loading " + game.name + "…";
 	doc.body.append(note);
 	try {
-		const html = await fetchGame(game.file);
+		const html = await fetchGame(game);
 		const frame = doc.createElement("iframe");
 		frame.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff";
 		frame.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";

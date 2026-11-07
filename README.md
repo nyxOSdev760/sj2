@@ -27,14 +27,22 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **CloudGames**: a top bar (cloud logo and search) over a centered
-list of games. Search filters the list as you type; hovering a row shows **Open**.
-
-The games are every file in the `UGS-Files/` folder of
-[bubbls/ugs-singlefile](https://github.com/bubbls/ugs-singlefile), listed in
-`public/ugs-files.js` with readable names (the file names split into words). Opening one
+The site is a single page, **Mango X**: a top bar (logo and search) over a centered list of
+games. Search filters the list as you type; hovering a row shows **Open**. Opening a game
 fetches its HTML from jsDelivr (or raw GitHub if that fails) and runs it full-window in a new
 `about:blank` tab.
+
+The games come from two collections:
+
+- `public/ugs-files.js`: the `UGS-Files/` folder of
+  [bubbls/ugs-singlefile](https://github.com/bubbls/ugs-singlefile), with readable names
+  (the file names split into words).
+- `public/gn-files.js`: the Gn-Math catalog that
+  [Lumi-f3m/Gn-Math](https://github.com/Lumi-f3m/Gn-Math) loads (from
+  `sealiee11/gnmath`'s `practice.html`); the game files are in `freebuisness/html`.
+
+Games in both collections were each loaded in a headless browser; where one copy rendered and
+the other didn't, the broken copy was dropped.
 
 ## servy2
 
