@@ -16,9 +16,6 @@ html {
 	background: #1a0d05;
 }
 
-body {
-	padding-top: 12px;
-}
 
 html,
 body {
@@ -40,40 +37,34 @@ a {
 	inset: 0;
 	z-index: -1;
 	background:
-		radial-gradient(40vw 40vw at 12% 8%, rgba(255, 196, 46, 0.55), transparent 70%),
-		radial-gradient(45vw 45vw at 92% 18%, rgba(255, 110, 40, 0.5), transparent 70%),
-		radial-gradient(50vw 40vw at 75% 95%, rgba(255, 70, 60, 0.35), transparent 70%),
-		radial-gradient(40vw 35vw at 8% 85%, rgba(120, 200, 80, 0.3), transparent 70%),
-		linear-gradient(160deg, #2a1206, #160a05 60%, #1d0c06);
+		radial-gradient(70vw 60vh at 0% 0%, rgba(255, 190, 50, 0.32), transparent 70%),
+		radial-gradient(70vw 60vh at 100% 10%, rgba(255, 105, 40, 0.3), transparent 70%),
+		radial-gradient(80vw 60vh at 70% 100%, rgba(255, 70, 60, 0.22), transparent 70%),
+		radial-gradient(50vw 50vh at 0% 100%, rgba(120, 190, 80, 0.16), transparent 70%),
+		linear-gradient(160deg, #241006, #150904 55%, #1c0b05);
 }
 
-/* ---- top bar: a floating glass pill ---- */
+/* ---- top bar: full width glass ---- */
 
 .top {
 	position: sticky;
-	top: 12px;
+	top: 0;
 	z-index: 10;
 	display: flex;
 	align-items: center;
-	gap: 14px;
-	max-width: 960px;
-	height: 56px;
-	margin: 0 auto;
-	padding: 0 10px 0 22px;
-	border: 1px solid var(--edge);
-	border-radius: 999px;
-	background: var(--glass);
-	backdrop-filter: blur(28px) saturate(170%);
-	-webkit-backdrop-filter: blur(28px) saturate(170%);
-	box-shadow:
-		inset 0 1px 0 var(--shine),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-		0 10px 40px rgba(0, 0, 0, 0.35);
+	gap: 20px;
+	height: 64px;
+	padding: 0 24px;
+	border-bottom: 1px solid var(--edge);
+	background: rgba(30, 14, 6, 0.45);
+	backdrop-filter: blur(30px) saturate(170%);
+	-webkit-backdrop-filter: blur(30px) saturate(170%);
+	box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04), 0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
 .brand {
 	flex: none;
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 800;
 	letter-spacing: -0.02em;
 }
@@ -88,17 +79,17 @@ a {
 .search {
 	flex: 1;
 	min-width: 0;
-	height: 38px;
-	padding: 0 16px;
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-radius: 999px;
-	background: rgba(0, 0, 0, 0.18);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+	height: 40px;
+	padding: 0 18px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.07);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 	color: var(--text);
 	font: inherit;
-	font-size: 14.5px;
+	font-size: 15px;
 	outline: none;
-	transition: border-color 0.2s, background 0.2s;
+	transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
 .search::placeholder {
@@ -110,26 +101,21 @@ a {
 }
 
 .search:focus {
-	border-color: rgba(255, 190, 80, 0.6);
-	background: rgba(0, 0, 0, 0.26);
+	border-color: rgba(255, 180, 60, 0.7);
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 0 0 4px rgba(255, 150, 40, 0.15);
 }
 
-/* ---- list: one glass sheet ---- */
+/* ---- games: fill the screen ---- */
 
 .list-wrap {
-	width: calc(100% - 24px);
-	max-width: 700px;
-	margin: 22px auto 40px;
-	padding: 8px;
-	border: 1px solid var(--edge);
-	border-radius: 26px;
-	background: rgba(255, 255, 255, 0.06);
-	box-shadow:
-		inset 0 1px 0 var(--shine),
-		0 20px 60px rgba(0, 0, 0, 0.35);
+	padding: 20px 24px 40px;
 }
 
 .list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 8px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -139,35 +125,50 @@ a {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 10px;
 	width: 100%;
-	height: 46px;
+	height: 48px;
 	padding: 0 8px 0 16px;
-	border: 1px solid transparent;
-	border-radius: 16px;
-	background: none;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.05);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 	color: var(--text);
 	font: inherit;
-	font-size: 14.5px;
+	font-size: 14px;
 	text-align: left;
+	position: relative;
 	cursor: pointer;
 	transition: background 0.15s, border-color 0.15s;
 }
 
+.list > li {
+	min-width: 0;
+}
+
+.item > span:first-child {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 .item:hover,
 .item:focus-visible {
-	border-color: rgba(255, 255, 255, 0.16);
-	background: var(--glass-strong);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+	border-color: rgba(255, 190, 80, 0.45);
+	background: rgba(255, 170, 60, 0.14);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 20px rgba(255, 120, 30, 0.15);
 	outline: none;
 }
 
 .item .open {
-	padding: 5px 14px;
-	border-radius: 999px;
+	position: absolute;
+	right: 8px;
+	padding: 5px 12px;
+	border-radius: 8px;
 	background: var(--mango);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 10px rgba(255, 120, 30, 0.35);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	color: #3a1600;
-	font-size: 12.5px;
+	font-size: 12px;
 	font-weight: 700;
 	opacity: 0;
 	transition: opacity 0.15s;
@@ -180,21 +181,25 @@ a {
 
 .empty {
 	margin: 0;
-	padding: 14px 16px;
 	color: var(--muted);
-	font-size: 14px;
+	font-size: 15px;
 }
 
-/* Browsers without backdrop blur get a solid enough bar to read. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.top {
-		background: rgba(40, 20, 8, 0.92);
+		background: rgba(40, 20, 8, 0.95);
 	}
 }
 
 @media (max-width: 560px) {
 	.top {
-		margin: 0 8px;
-		padding-left: 16px;
+		gap: 12px;
+		padding: 0 14px;
+	}
+	.list-wrap {
+		padding: 14px;
+	}
+	.list {
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
