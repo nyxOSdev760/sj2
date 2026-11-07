@@ -27,10 +27,9 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **CloudGames**: a logo and game count, a hero with a search box
-(press `/` to jump to it), and a grid of game cards. Add games to `GAMES` in
-`public/cloudgames.js` as `["Name", "https://..."]`; each card gets a colored tile with the
-name's first letter and opens its URL in a new tab. With no games it shows "No games yet".
+The site is a single page, **CloudGames**: a top bar (cloud logo and search) over a centered
+list of games. Search filters the list as you type; hovering a row shows **Open**. Add games
+to `GAMES` in `public/cloudgames.js` as `["Name", "https://..."]`; each opens in a new tab.
 
 ## servy2
 

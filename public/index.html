@@ -3,46 +3,26 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#0b0d1a" />
+		<meta name="theme-color" content="#07080c" />
 		<title>CloudGames</title>
 		<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 		<link rel="stylesheet" href="style.css" />
 		<script src="cloudgames.js" defer></script>
 	</head>
 	<body>
-		<div class="glow" aria-hidden="true"></div>
-
-		<header class="nav">
-			<a class="logo" href="./">
+		<header class="top">
+			<a class="brand" href="./">
 				<span class="logo-mark" aria-hidden="true">
 					<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.75 4.75 0 0 1-.5 9.5z" /></svg>
 				</span>
 				CloudGames
 			</a>
-			<span id="count" class="count-pill"></span>
+			<input id="search" class="search" type="text" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false" />
 		</header>
 
-		<main class="page">
-			<section class="hero">
-				<h1>Play anything,<br /><span class="accent">right in your browser.</span></h1>
-				<p class="sub">No downloads, no installs. Pick a game and jump in.</p>
-				<label class="search">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-					<input id="search" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off" spellcheck="false" />
-					<kbd>/</kbd>
-				</label>
-			</section>
-
-			<section class="library" aria-label="Games">
-				<div id="grid" class="grid"></div>
-				<div id="empty" class="empty" hidden>
-					<span class="empty-icon" aria-hidden="true">
-						<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.75 4.75 0 0 1-.5 9.5z" /></svg>
-					</span>
-					<p id="empty-title" class="empty-title">No games yet</p>
-					<p id="empty-text" class="empty-text">New games are on the way. Check back soon.</p>
-				</div>
-			</section>
+		<main class="list-wrap">
+			<ul id="list" class="list"></ul>
+			<p id="empty" class="empty" hidden>No games yet</p>
 		</main>
 	</body>
 </html>
