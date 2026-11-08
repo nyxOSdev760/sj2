@@ -33,7 +33,8 @@ of game cards with cover art. The star on a card adds it to Favorites; favorites
 played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
 GitHub if that fails) and runs it full-window in a new `about:blank` tab.
 
-**Settings** has a *panic key*: pick a key, and pressing it anywhere covers the whole site
+**Settings** has a *tab cloak* (disguise the browser tab's name and icon as Google
+Classroom, Gmail, Clever, Canvas and other sites, saved in the browser) and a *panic key*: pick a key, and pressing it anywhere covers the whole site
 with Clever (its login page, which can be changed under *Panic site*); pressing it again goes
 back. The chosen key and site are saved in the browser.
 

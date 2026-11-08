@@ -482,3 +482,59 @@ svg {
 .settings[hidden] {
 	display: none;
 }
+
+/* ---- tab-cloak presets ---- */
+
+.setting-stack {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 16px;
+}
+
+.cloak-presets {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+	gap: 10px;
+}
+
+.preset {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 14px;
+	border: 1px solid var(--line-strong);
+	border-radius: 11px;
+	background: rgba(0, 0, 0, 0.22);
+	color: var(--text);
+	font: inherit;
+	font-size: 14px;
+	text-align: left;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.preset:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: var(--line-strong);
+}
+
+.preset.on {
+	border-color: var(--accent);
+	background: rgba(168, 85, 247, 0.16);
+}
+
+.preset-icon {
+	flex: none;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	object-fit: contain;
+	background: #fff;
+	padding: 2px;
+}
+
+.preset-name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}

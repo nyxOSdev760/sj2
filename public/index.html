@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#120d1d" />
 		<title>WX</title>
-		<link rel="icon" href="favicon.png" type="image/png" />
+		<link id="favicon" rel="icon" href="favicon.png" type="image/png" />
 		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 		<link rel="stylesheet" href="style.css" />
 		<script src="ugs-files.js" defer></script>
@@ -48,6 +48,13 @@
 			<p id="empty" class="empty" hidden></p>
 
 			<section id="settings" class="settings" hidden aria-label="Settings">
+				<div class="setting setting-stack">
+					<div class="setting-info">
+						<h2>Tab cloak</h2>
+						<p>Disguise this browser tab's name and icon so a glance at the tab bar won't give it away. Pick a site below.</p>
+					</div>
+					<div id="cloak-presets" class="cloak-presets"></div>
+				</div>
 				<div class="setting">
 					<div class="setting-info">
 						<h2>Panic key</h2>

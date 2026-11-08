@@ -273,6 +273,63 @@ document.addEventListener("keydown", (e) => {
 
 grid.append(...GAMES.map(card));
 
+// ---- tab cloak: disguise this tab's name and icon ----
+
+// slug -> { name (shown in settings), title (the tab title), icon (file in cloak/) }
+const CLOAKS = [
+	{ slug: "", name: "WX (default)", title: "WX", icon: "favicon.png" },
+	{ slug: "classroom", name: "Google Classroom", title: "Classes", icon: "cloak/classroom.png" },
+	{ slug: "docs", name: "Google Docs", title: "Untitled document - Google Docs", icon: "cloak/docs.png" },
+	{ slug: "slides", name: "Google Slides", title: "Untitled presentation - Google Slides", icon: "cloak/slides.png" },
+	{ slug: "drive", name: "Google Drive", title: "My Drive - Google Drive", icon: "cloak/drive.png" },
+	{ slug: "gmail", name: "Gmail", title: "Inbox - Gmail", icon: "cloak/gmail.png" },
+	{ slug: "google", name: "Google", title: "Google", icon: "cloak/google.png" },
+	{ slug: "clever", name: "Clever", title: "Clever | Portal", icon: "cloak/clever.png" },
+	{ slug: "canvas", name: "Canvas", title: "Dashboard", icon: "cloak/canvas.png" },
+	{ slug: "khan", name: "Khan Academy", title: "Khan Academy | Free Online Courses", icon: "cloak/khan.png" },
+	{ slug: "desmos", name: "Desmos", title: "Desmos | Graphing Calculator", icon: "cloak/desmos.png" },
+	{ slug: "quizlet", name: "Quizlet", title: "Quizlet", icon: "cloak/quizlet.png" },
+	{ slug: "wikipedia", name: "Wikipedia", title: "Wikipedia, the free encyclopedia", icon: "cloak/wikipedia.png" },
+];
+const faviconEl = $("favicon");
+let cloakSlug = store.get("wx:cloak", "");
+
+function activeCloak() {
+	return CLOAKS.find((c) => c.slug === cloakSlug) || CLOAKS[0];
+}
+
+// Apply the chosen disguise to the tab title and favicon (unless the panic page is showing,
+// which sets its own title).
+function applyCloak() {
+	const c = activeCloak();
+	if ($("cloak").hidden) document.title = c.title;
+	faviconEl.href = c.icon;
+}
+
+function selectCloak(slug) {
+	cloakSlug = slug;
+	store.set("wx:cloak", slug);
+	applyCloak();
+	for (const btn of cloakPresets.children) btn.classList.toggle("on", btn.dataset.slug === slug);
+}
+
+const cloakPresets = $("cloak-presets");
+for (const c of CLOAKS) {
+	const btn = el("button", "preset");
+	btn.type = "button";
+	btn.dataset.slug = c.slug;
+	if (c.slug === cloakSlug) btn.classList.add("on");
+	const img = el("img", "preset-icon");
+	img.src = c.icon;
+	img.alt = "";
+	img.width = 28;
+	img.height = 28;
+	btn.append(img, el("span", "preset-name", c.name));
+	btn.addEventListener("click", () => selectCloak(c.slug));
+	cloakPresets.append(btn);
+}
+applyCloak();
+
 // ---- panic key: cover the whole site with another page ----
 
 const DEFAULT_PANIC_URL = "https://clever.com/login";
@@ -316,7 +373,7 @@ function showCloak() {
 function hideCloak() {
 	cloak.hidden = true;
 	document.body.style.overflow = "";
-	document.title = "WX";
+	applyCloak(); // restore the tab-cloak disguise (or "WX")
 }
 
 panicKeyBtn.addEventListener("click", () => {
