@@ -349,3 +349,136 @@ svg {
 	color: var(--muted);
 	font-size: 15px;
 }
+
+/* ---- sidebar: push Settings to the bottom ---- */
+
+.side-btn-bottom {
+	margin-top: auto;
+}
+
+/* ---- settings ---- */
+
+.settings {
+	max-width: 760px;
+	padding: 24px 28px 40px;
+}
+
+.setting {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.setting-info {
+	min-width: 0;
+}
+
+.setting-info h2 {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.setting-info p {
+	margin: 0;
+	max-width: 420px;
+	color: var(--muted);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.setting-control {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.key-field {
+	min-width: 120px;
+	height: 40px;
+	padding: 0 16px;
+	border: 1px solid var(--line-strong);
+	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--text);
+	font: inherit;
+	font-size: 14.5px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+}
+
+.key-field:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.key-field.listening {
+	border-color: var(--accent);
+	background: rgba(168, 85, 247, 0.15);
+	color: var(--accent-light);
+}
+
+.text-input {
+	width: 280px;
+	max-width: 48vw;
+	height: 40px;
+	padding: 0 14px;
+	border: 1px solid var(--line-strong);
+	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--text);
+	font: inherit;
+	font-size: 14px;
+	outline: none;
+}
+
+.text-input:focus {
+	border-color: rgba(168, 85, 247, 0.7);
+}
+
+.text-btn {
+	height: 40px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: 10px;
+	background: none;
+	color: var(--muted);
+	font: inherit;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.text-btn:hover {
+	color: var(--text);
+}
+
+/* ---- panic cloak: a full-screen iframe over everything ---- */
+
+.cloak {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	background: #fff;
+}
+
+.cloak[hidden] {
+	display: none;
+}
+
+.cloak iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+/* The hidden attribute must win over the grid/flex display above. */
+.grid[hidden],
+.chips[hidden],
+.settings[hidden] {
+	display: none;
+}

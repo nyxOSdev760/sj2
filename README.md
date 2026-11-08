@@ -33,6 +33,10 @@ of game cards with cover art. The star on a card adds it to Favorites; favorites
 played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
 GitHub if that fails) and runs it full-window in a new `about:blank` tab.
 
+**Settings** has a *panic key*: pick a key, and pressing it anywhere covers the whole site
+with Clever (its login page, which can be changed under *Panic site*); pressing it again goes
+back. The chosen key and site are saved in the browser.
+
 Gn-Math games use the covers from its catalog. UGS games use an image found in the game's own
 files (an icon, splash screen or title art at least 96px); games without one get a colored
 tile with their name.

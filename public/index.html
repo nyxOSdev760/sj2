@@ -24,6 +24,9 @@
 			<button class="side-btn" type="button" data-view="recent" title="Recently played" aria-label="Recently played">
 				<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3" /></svg>
 			</button>
+			<button class="side-btn side-btn-bottom" type="button" data-view="settings" title="Settings" aria-label="Settings">
+				<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
+			</button>
 		</nav>
 
 		<div class="main">
@@ -43,6 +46,32 @@
 
 			<main id="grid" class="grid" aria-label="Games"></main>
 			<p id="empty" class="empty" hidden></p>
+
+			<section id="settings" class="settings" hidden aria-label="Settings">
+				<div class="setting">
+					<div class="setting-info">
+						<h2>Panic key</h2>
+						<p>Press this key anywhere to instantly cover the whole site with Clever. Press it again to go back. Handy if someone walks by.</p>
+					</div>
+					<div class="setting-control">
+						<button id="panic-key" class="key-field" type="button">Not set</button>
+						<button id="panic-clear" class="text-btn" type="button" hidden>Clear</button>
+					</div>
+				</div>
+				<div class="setting">
+					<div class="setting-info">
+						<h2>Panic site</h2>
+						<p>The page the panic key opens.</p>
+					</div>
+					<div class="setting-control">
+						<input id="panic-url" class="text-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://clever.com/login" />
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<div id="cloak" class="cloak" hidden>
+			<iframe id="cloak-frame" title="Clever"></iframe>
 		</div>
 	</body>
 </html>

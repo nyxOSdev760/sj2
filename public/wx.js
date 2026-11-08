@@ -191,10 +191,23 @@ function markFav(game) {
 
 // ---- filtering ----
 
-const TITLES = { all: "Games", favorites: "Favorites", recent: "Recently played" };
+const TITLES = { all: "Games", favorites: "Favorites", recent: "Recently played", settings: "Settings" };
+const chips = document.querySelector(".chips");
+const settingsPanel = $("settings");
 
 // Every card is built once; switching views and searching only shows, hides and orders them.
 function apply() {
+	$("title-text").textContent = TITLES[view];
+	// The Settings view replaces the game grid with the settings panel.
+	const isSettings = view === "settings";
+	settingsPanel.hidden = !isSettings;
+	chips.hidden = isSettings;
+	grid.hidden = isSettings;
+	search.style.visibility = isSettings ? "hidden" : "";
+	if (isSettings) {
+		empty.hidden = true;
+		return;
+	}
 	const q = search.value.trim().toLowerCase();
 	const recentRank = new Map(recents.map((id, i) => [id, i]));
 	const inView = (g) => view === "all" || (view === "favorites" ? favs.has(g.id) : recentRank.has(g.id));
@@ -214,7 +227,6 @@ function apply() {
 	for (const chip of document.querySelectorAll(".chip")) {
 		chip.querySelector(".chip-n").textContent = counts[chip.dataset.source];
 	}
-	$("title-text").textContent = TITLES[view];
 	empty.hidden = shown > 0;
 	empty.textContent = q
 		? `No games match "${search.value.trim()}".`
@@ -260,4 +272,97 @@ document.addEventListener("keydown", (e) => {
 });
 
 grid.append(...GAMES.map(card));
+
+// ---- panic key: cover the whole site with another page ----
+
+const DEFAULT_PANIC_URL = "https://clever.com/login";
+let panicKey = store.get("wx:panicKey", null); // a KeyboardEvent.code, e.g. "Backquote"
+let panicUrl = store.get("wx:panicUrl", DEFAULT_PANIC_URL);
+let listening = false; // true while waiting for the user to press a key to bind
+
+const cloak = $("cloak");
+const cloakFrame = $("cloak-frame");
+const panicKeyBtn = $("panic-key");
+const panicClearBtn = $("panic-clear");
+const panicUrlInput = $("panic-url");
+
+// Turn a KeyboardEvent.code into something readable, e.g. "Backquote" -> "` (Backquote)".
+function keyLabel(code) {
+	if (!code) return "Not set";
+	const map = { Backquote: "`", Escape: "Esc", Space: "Space", Backslash: "\\", BracketLeft: "[", BracketRight: "]", Semicolon: ";", Quote: "'", Comma: ",", Period: ".", Slash: "/", Minus: "-", Equal: "=" };
+	let name = code;
+	if (code.startsWith("Key")) name = code.slice(3);
+	else if (code.startsWith("Digit")) name = code.slice(5);
+	else if (code.startsWith("Arrow")) name = code.slice(5) + " arrow";
+	else if (map[code]) name = map[code];
+	return name;
+}
+
+function refreshPanicUI() {
+	panicKeyBtn.textContent = listening ? "Press a key…" : keyLabel(panicKey);
+	panicKeyBtn.classList.toggle("listening", listening);
+	panicClearBtn.hidden = !panicKey || listening;
+	panicUrlInput.value = panicUrl;
+}
+
+function showCloak() {
+	// Load the page only when first needed, then keep it so toggling is instant.
+	if (cloakFrame.src !== panicUrl) cloakFrame.src = panicUrl;
+	cloak.hidden = false;
+	document.body.style.overflow = "hidden";
+	document.title = "Clever | Log in";
+}
+
+function hideCloak() {
+	cloak.hidden = true;
+	document.body.style.overflow = "";
+	document.title = "WX";
+}
+
+panicKeyBtn.addEventListener("click", () => {
+	listening = true;
+	refreshPanicUI();
+});
+
+panicClearBtn.addEventListener("click", () => {
+	panicKey = null;
+	store.set("wx:panicKey", null);
+	refreshPanicUI();
+});
+
+panicUrlInput.addEventListener("change", () => {
+	let v = panicUrlInput.value.trim();
+	if (v && !/^https?:\/\//i.test(v)) v = "https://" + v;
+	panicUrl = v || DEFAULT_PANIC_URL;
+	store.set("wx:panicUrl", panicUrl);
+	cloakFrame.src = ""; // reload with the new URL next time
+	panicUrlInput.value = panicUrl;
+});
+
+// Binding and triggering both happen on keydown, before anything else.
+document.addEventListener(
+	"keydown",
+	(e) => {
+		if (listening) {
+			e.preventDefault();
+			// Esc cancels binding instead of setting Esc as the key.
+			if (e.code !== "Escape") {
+				panicKey = e.code;
+				store.set("wx:panicKey", panicKey);
+			}
+			listening = false;
+			refreshPanicUI();
+			return;
+		}
+		if (!panicKey || e.code !== panicKey) return;
+		// Don't fire while typing in the search box or a settings field.
+		const t = e.target;
+		if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+		e.preventDefault();
+		cloak.hidden ? showCloak() : hideCloak();
+	},
+	true
+);
+
+refreshPanicUI();
 apply();
