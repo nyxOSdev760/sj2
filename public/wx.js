@@ -310,25 +310,57 @@ function selectCloak(slug) {
 	cloakSlug = slug;
 	store.set("wx:cloak", slug);
 	applyCloak();
-	for (const btn of cloakPresets.children) btn.classList.toggle("on", btn.dataset.slug === slug);
 }
 
-const cloakPresets = $("cloak-presets");
+// A custom dropdown (so each option can show the site's favicon).
+const ddBtn = $("cloak-dd-btn");
+const ddMenu = $("cloak-dd-menu");
+const ddIcon = ddBtn.querySelector(".dd-icon");
+const ddLabel = ddBtn.querySelector(".dd-label");
+
+function syncDd() {
+	const c = activeCloak();
+	ddIcon.src = c.icon;
+	ddLabel.textContent = c.name;
+	for (const opt of ddMenu.children) opt.classList.toggle("on", opt.dataset.slug === cloakSlug);
+}
+
+function openDd(open) {
+	ddMenu.hidden = !open;
+	ddBtn.setAttribute("aria-expanded", String(open));
+}
+
 for (const c of CLOAKS) {
-	const btn = el("button", "preset");
-	btn.type = "button";
-	btn.dataset.slug = c.slug;
-	if (c.slug === cloakSlug) btn.classList.add("on");
-	const img = el("img", "preset-icon");
+	const opt = el("li", "dd-opt");
+	opt.dataset.slug = c.slug;
+	opt.setAttribute("role", "option");
+	const img = el("img", "dd-icon");
 	img.src = c.icon;
 	img.alt = "";
-	img.width = 28;
-	img.height = 28;
-	btn.append(img, el("span", "preset-name", c.name));
-	btn.addEventListener("click", () => selectCloak(c.slug));
-	cloakPresets.append(btn);
+	img.width = 22;
+	img.height = 22;
+	opt.append(img, el("span", "dd-opt-name", c.name));
+	const check = el("span", "dd-check");
+	check.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>';
+	opt.append(check);
+	opt.addEventListener("click", () => {
+		selectCloak(c.slug);
+		syncDd();
+		openDd(false);
+	});
+	ddMenu.append(opt);
 }
+
+ddBtn.addEventListener("click", (e) => {
+	e.stopPropagation();
+	openDd(ddMenu.hidden);
+});
+document.addEventListener("click", (e) => {
+	if (!$("cloak-dd").contains(e.target)) openDd(false);
+});
+
 applyCloak();
+syncDd();
 
 // ---- panic key: cover the whole site with another page ----
 

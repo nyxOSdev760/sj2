@@ -483,58 +483,155 @@ svg {
 	display: none;
 }
 
-/* ---- tab-cloak presets ---- */
+/* ---- settings: stacked rows, no subtext ---- */
 
-.setting-stack {
-	flex-direction: column;
-	align-items: stretch;
-	gap: 16px;
+.group-label {
+	margin: 4px 0 2px;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
-.cloak-presets {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+.setting {
+	display: block;
+	padding: 18px 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.setting h2 {
+	margin: 0 0 12px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.setting-control {
+	display: flex;
+	align-items: center;
 	gap: 10px;
 }
 
-.preset {
+/* ---- custom dropdown (tab cloak) ---- */
+
+.dropdown {
+	position: relative;
+	max-width: 360px;
+}
+
+.dd-btn {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	padding: 10px 14px;
+	width: 100%;
+	height: 48px;
+	padding: 0 14px;
 	border: 1px solid var(--line-strong);
-	border-radius: 11px;
-	background: rgba(0, 0, 0, 0.22);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.04);
 	color: var(--text);
 	font: inherit;
-	font-size: 14px;
-	text-align: left;
+	font-size: 15px;
 	cursor: pointer;
 	transition: background 0.15s, border-color 0.15s;
 }
 
-.preset:hover {
-	background: rgba(255, 255, 255, 0.05);
-	border-color: var(--line-strong);
+.dd-btn:hover {
+	background: rgba(255, 255, 255, 0.07);
 }
 
-.preset.on {
-	border-color: var(--accent);
+.dd-icon {
+	flex: none;
+	width: 22px;
+	height: 22px;
+	border-radius: 5px;
+	object-fit: contain;
+	background: #fff;
+	padding: 1px;
+}
+
+.dd-label {
+	flex: 1;
+	overflow: hidden;
+	text-align: left;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.dd-caret {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--muted);
+}
+
+.dd-btn[aria-expanded="true"] .dd-caret {
+	transform: rotate(180deg);
+}
+
+.dd-menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 0;
+	right: 0;
+	z-index: 30;
+	max-height: 320px;
+	margin: 0;
+	padding: 6px;
+	overflow-y: auto;
+	list-style: none;
+	border: 1px solid var(--line-strong);
+	border-radius: 14px;
+	background: #1d1630;
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dd-menu[hidden] {
+	display: none;
+}
+
+.dd-opt {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	height: 48px;
+	padding: 0 12px;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: background 0.12s;
+}
+
+.dd-opt:hover {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.dd-opt.on {
 	background: rgba(168, 85, 247, 0.16);
 }
 
-.preset-icon {
-	flex: none;
-	width: 28px;
-	height: 28px;
-	border-radius: 6px;
-	object-fit: contain;
-	background: #fff;
-	padding: 2px;
-}
-
-.preset-name {
+.dd-opt-name {
+	flex: 1;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	font-size: 15px;
+}
+
+.dd-check {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	color: var(--accent-light);
+	opacity: 0;
+}
+
+.dd-check svg {
+	width: 18px;
+	height: 18px;
+	stroke-width: 2.4;
+}
+
+.dd-opt.on .dd-check {
+	opacity: 1;
 }

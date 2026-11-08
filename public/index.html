@@ -48,31 +48,28 @@
 			<p id="empty" class="empty" hidden></p>
 
 			<section id="settings" class="settings" hidden aria-label="Settings">
-				<div class="setting setting-stack">
-					<div class="setting-info">
-						<h2>Tab cloak</h2>
-						<p>Disguise this browser tab's name and icon so a glance at the tab bar won't give it away. Pick a site below.</p>
+				<p class="group-label">Cloaking</p>
+				<div class="setting">
+					<h2>Tab cloak</h2>
+					<div id="cloak-dd" class="dropdown">
+						<button id="cloak-dd-btn" class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+							<img class="dd-icon" alt="" width="22" height="22" />
+							<span class="dd-label"></span>
+							<svg class="dd-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+						</button>
+						<ul id="cloak-dd-menu" class="dd-menu" role="listbox" hidden></ul>
 					</div>
-					<div id="cloak-presets" class="cloak-presets"></div>
 				</div>
 				<div class="setting">
-					<div class="setting-info">
-						<h2>Panic key</h2>
-						<p>Press this key anywhere to instantly cover the whole site with Clever. Press it again to go back. Handy if someone walks by.</p>
-					</div>
+					<h2>Panic key</h2>
 					<div class="setting-control">
 						<button id="panic-key" class="key-field" type="button">Not set</button>
 						<button id="panic-clear" class="text-btn" type="button" hidden>Clear</button>
 					</div>
 				</div>
 				<div class="setting">
-					<div class="setting-info">
-						<h2>Panic site</h2>
-						<p>The page the panic key opens.</p>
-					</div>
-					<div class="setting-control">
-						<input id="panic-url" class="text-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://clever.com/login" />
-					</div>
+					<h2>Panic site</h2>
+					<input id="panic-url" class="text-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://clever.com/login" />
 				</div>
 			</section>
 		</div>
