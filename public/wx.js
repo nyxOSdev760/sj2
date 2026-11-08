@@ -298,12 +298,40 @@ function activeCloak() {
 	return CLOAKS.find((c) => c.slug === cloakSlug) || CLOAKS[0];
 }
 
+// When WX runs inside the about:blank tab's frame, the browser tab belongs to that outer
+// page, so its title and icon are the ones to change.
+function tabDoc() {
+	try {
+		if (window.top !== window.self && window.top.document) return window.top.document;
+	} catch {}
+	return document;
+}
+
+function setTabTitle(title) {
+	document.title = title;
+	const d = tabDoc();
+	if (d !== document) d.title = title;
+}
+
+function setTabIcon(href) {
+	faviconEl.href = href;
+	const d = tabDoc();
+	if (d === document) return;
+	let link = d.querySelector("link[rel~='icon']");
+	if (!link) {
+		link = d.createElement("link");
+		link.rel = "icon";
+		d.head.appendChild(link);
+	}
+	link.href = new URL(href, location.href).href;
+}
+
 // Apply the chosen disguise to the tab title and favicon (unless the panic page is showing,
 // which sets its own title).
 function applyCloak() {
 	const c = activeCloak();
-	if ($("cloak").hidden) document.title = c.title;
-	faviconEl.href = c.icon;
+	if ($("cloak").hidden) setTabTitle(c.title);
+	setTabIcon(c.icon);
 }
 
 function selectCloak(slug) {
@@ -399,7 +427,7 @@ function showCloak() {
 	if (cloakFrame.src !== panicUrl) cloakFrame.src = panicUrl;
 	cloak.hidden = false;
 	document.body.style.overflow = "hidden";
-	document.title = "Clever | Log in";
+	setTabTitle("Clever | Log in");
 }
 
 function hideCloak() {
@@ -454,4 +482,31 @@ document.addEventListener(
 );
 
 refreshPanicUI();
+
+// ---- auto about:blank (the opening itself happens in index.html, before anything loads) ----
+
+const autoBlankBtn = $("auto-blank");
+function refreshAutoBlank() {
+	const on = store.get("wx:autoBlank", true) !== false;
+	autoBlankBtn.setAttribute("aria-checked", String(on));
+	autoBlankBtn.classList.toggle("on", on);
+}
+autoBlankBtn.addEventListener("click", () => {
+	store.set("wx:autoBlank", store.get("wx:autoBlank", true) === false);
+	refreshAutoBlank();
+});
+refreshAutoBlank();
+
+// The popup was blocked on load: offer to open it with a click, which browsers allow.
+if (window.wxBlankBlocked) {
+	const prompt = $("blank-prompt");
+	prompt.hidden = false;
+	$("blank-open").addEventListener("click", () => {
+		if (window.wxOpenBlank()) prompt.hidden = true;
+	});
+	$("blank-stay").addEventListener("click", () => {
+		prompt.hidden = true;
+	});
+}
+
 apply();

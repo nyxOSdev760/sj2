@@ -8,6 +8,39 @@
 		<link id="favicon" rel="icon" href="favicon.png" type="image/png" />
 		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 		<link rel="stylesheet" href="style.css" />
+		<script>
+			// Auto about:blank: reopen this site inside a new about:blank tab (so its address and
+			// history don't show the site) and send this tab to Google. Skipped when already
+			// running inside that tab's frame, or when turned off in Settings. If the popup is
+			// blocked, wx.js shows a button to open it with a click instead.
+			(function () {
+				var off = false;
+				try {
+					if (window.top !== window.self) return;
+					off = localStorage.getItem("wx:autoBlank") === "false";
+				} catch (e) {}
+				if (off) return;
+				window.wxOpenBlank = function () {
+					var w = window.open("about:blank", "_blank");
+					if (!w || w.closed) return false;
+					var d = w.document;
+					d.title = document.title;
+					var icon = d.createElement("link");
+					icon.rel = "icon";
+					icon.href = new URL("favicon.png", location.href).href;
+					d.head.appendChild(icon);
+					d.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#120d1d";
+					var f = d.createElement("iframe");
+					f.src = location.href;
+					f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0";
+					f.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";
+					d.body.appendChild(f);
+					location.replace("https://www.google.com");
+					return true;
+				};
+				if (!window.wxOpenBlank()) window.wxBlankBlocked = true;
+			})();
+		</script>
 		<script src="ugs-files.js" defer></script>
 		<script src="gn-files.js" defer></script>
 		<script src="wx.js" defer></script>
@@ -60,6 +93,10 @@
 						<ul id="cloak-dd-menu" class="dd-menu" role="listbox" hidden></ul>
 					</div>
 				</div>
+				<div class="setting setting-row">
+					<h2>Auto about:blank</h2>
+					<button id="auto-blank" class="switch" type="button" role="switch" aria-checked="true" aria-label="Auto about:blank"><span></span></button>
+				</div>
 				<div class="setting">
 					<h2>Panic key</h2>
 					<div class="setting-control">
@@ -72,6 +109,14 @@
 					<input id="panic-url" class="text-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://clever.com/login" />
 				</div>
 			</section>
+		</div>
+
+		<div id="blank-prompt" class="blank-prompt" hidden>
+			<div class="blank-card">
+				<h2>Open in about:blank</h2>
+				<button id="blank-open" class="blank-btn" type="button">Open</button>
+				<button id="blank-stay" class="text-btn" type="button">Stay here</button>
+			</div>
 		</div>
 
 		<div id="cloak" class="cloak" hidden>
