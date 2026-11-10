@@ -1,5 +1,5 @@
 "use strict";
-// WX: the game library. Games come from two collections, listed in ugs-files.js
+// wilbert.: the game library. Games come from two collections, listed in ugs-files.js
 // (bubbls/ugs-singlefile) and gn-files.js (Gn-Math): [file, name, cover?]. Each game is one
 // HTML file; opening one fetches it and runs it in a new about:blank tab. Favorites and
 // recently played games are kept in this browser's localStorage.
@@ -72,7 +72,7 @@ async function fetchGame(game) {
 	throw lastError;
 }
 
-// Games play inside WX, in a full-screen player with a bar on top (back, full screen, CLOAK).
+// Games play inside the site, in a full-screen player with a bar on top (back, full screen, CLOAK).
 
 // Added to the start of every game page: it keeps a list of the game's Web Audio contexts so
 // CLOAK can silence the game and bring the sound back afterwards.
@@ -132,7 +132,7 @@ async function openGame(game) {
 	frame.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";
 	frame.allowFullscreen = true;
 	frame.srcdoc = withAudioHook(html);
-	// The game page shares WX's origin, so the panic key keeps working while it has focus.
+	// The game page shares the site's origin, so the panic key keeps working while it has focus.
 	frame.addEventListener("load", () => {
 		try {
 			frame.contentWindow.addEventListener("keydown", onKeyDown, true);
@@ -269,6 +269,7 @@ const settingsPanel = $("settings");
 function apply() {
 	$("title-text").textContent = TITLES[view];
 	// The Settings view replaces the game grid with the settings panel.
+	$("hero").hidden = view !== "all";
 	const isSettings = view === "settings";
 	settingsPanel.hidden = !isSettings;
 	chips.hidden = isSettings;
@@ -347,7 +348,7 @@ grid.append(...GAMES.map(card));
 
 // slug -> { name (shown in settings), title (the tab title), icon (file in cloak/) }
 const CLOAKS = [
-	{ slug: "", name: "WX (default)", title: "WX", icon: "favicon.png" },
+	{ slug: "", name: "wilbert. (default)", title: "wilbert.", icon: "favicon.png" },
 	{ slug: "classroom", name: "Google Classroom", title: "Classes", icon: "cloak/classroom.png" },
 	{ slug: "docs", name: "Google Docs", title: "Untitled document - Google Docs", icon: "cloak/docs.png" },
 	{ slug: "slides", name: "Google Slides", title: "Untitled presentation - Google Slides", icon: "cloak/slides.png" },
@@ -368,7 +369,7 @@ function activeCloak() {
 	return CLOAKS.find((c) => c.slug === cloakSlug) || CLOAKS[0];
 }
 
-// When WX runs inside the about:blank tab's frame, the browser tab belongs to that outer
+// When the site runs inside the about:blank tab's frame, the browser tab belongs to that outer
 // page, so its title and icon are the ones to change.
 function tabDoc() {
 	try {
@@ -518,12 +519,41 @@ function showCloak() {
 function hideCloak() {
 	cloak.hidden = true;
 	document.body.style.overflow = player.hidden ? "" : "hidden";
-	applyCloak(); // restore the tab-cloak disguise (or "WX")
+	applyCloak(); // restore the tab-cloak disguise (or the default)
 	setGameMuted(false);
 	if (!player.hidden) gameFrame?.focus();
 }
 
-for (const b of document.querySelectorAll("[data-cloak]")) b.addEventListener("click", showCloak);
+// ---- CLOAK tutorial: shown the first time CLOAK is pressed, and from Settings ----
+
+const tut = $("tut");
+let tutThenCloak = false;
+
+function showTutorial(thenCloak) {
+	tutThenCloak = thenCloak;
+	exitFullscreen(); // so the tutorial isn't hidden behind a full-screen game
+	$("tut-key").textContent = panicKey ? "(" + keyLabel(panicKey) + ")" : "(set one in Settings)";
+	$("tut-go").textContent = thenCloak ? "Got it, cloak now" : "Got it";
+	tut.hidden = false;
+	$("tut-go").focus();
+}
+
+function closeTutorial(cloakNow) {
+	tut.hidden = true;
+	store.set("wx:tutSeen", true);
+	if (cloakNow) showCloak();
+}
+
+function requestCloak() {
+	if (!store.get("wx:tutSeen", false)) showTutorial(true);
+	else showCloak();
+}
+
+$("tut-go").addEventListener("click", () => closeTutorial(tutThenCloak));
+$("tut-close").addEventListener("click", () => closeTutorial(false));
+$("tut-show").addEventListener("click", () => showTutorial(false));
+
+for (const b of document.querySelectorAll("[data-cloak]")) b.addEventListener("click", requestCloak);
 $("cloak-exit").addEventListener("dblclick", hideCloak);
 
 panicKeyBtn.addEventListener("click", () => {

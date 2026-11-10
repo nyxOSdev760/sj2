@@ -4,7 +4,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#120d1d" />
-		<title>WX</title>
+		<title>wilbert.</title>
 		<link id="favicon" rel="icon" href="favicon.png" type="image/png" />
 		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 		<link rel="stylesheet" href="style.css" />
@@ -47,7 +47,7 @@
 	</head>
 	<body>
 		<nav class="side" aria-label="Sections">
-			<a class="side-logo" href="./" title="WX"><img src="apple-touch-icon.png" alt="WX" /></a>
+			<a class="side-logo" href="./" title="wilbert."><img src="apple-touch-icon.png" alt="wilbert." /></a>
 			<button class="side-btn active" type="button" data-view="all" title="Games" aria-label="Games">
 				<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" /></svg>
 			</button>
@@ -71,6 +71,11 @@
 				<input id="search" class="search" type="search" placeholder="Search…" aria-label="Search games" autocomplete="off" spellcheck="false" />
 				<button class="cloak-btn" type="button" data-cloak title="Cover the screen with Clever and disguise the tab">CLOAK</button>
 			</header>
+
+			<div id="hero" class="hero">
+				<img class="hero-homer" src="homer.webp" alt="" width="200" height="416" />
+				<img class="hero-word" src="wilbert.webp" alt="wilbert." width="1000" height="191" />
+			</div>
 
 			<div class="chips" role="tablist" aria-label="Collections">
 				<button class="chip active" type="button" role="tab" data-source="all">All <span class="chip-n"></span></button>
@@ -97,6 +102,10 @@
 				<div class="setting setting-row">
 					<h2>Auto about:blank</h2>
 					<button id="auto-blank" class="switch" type="button" role="switch" aria-checked="true" aria-label="Auto about:blank"><span></span></button>
+				</div>
+				<div class="setting setting-row">
+					<h2>CLOAK tutorial</h2>
+					<button id="tut-show" class="key-field" type="button">Show</button>
 				</div>
 				<div class="setting">
 					<h2>Panic key</h2>
@@ -132,6 +141,22 @@
 				<button class="cloak-btn" type="button" data-cloak title="Cover the screen with Clever and disguise the tab">CLOAK</button>
 			</div>
 			<div id="player-stage" class="player-stage"></div>
+		</div>
+
+		<div id="tut" class="tut" hidden role="dialog" aria-modal="true" aria-labelledby="tut-title">
+			<div class="tut-card">
+				<h2 id="tut-title">How CLOAK works</h2>
+				<p class="tut-lead"><b>CLOAK</b> covers the screen with Clever, turns the tab into Clever and mutes your game.</p>
+				<p class="tut-sub">To get back, do any of these:</p>
+				<ol class="tut-steps">
+					<li><span class="tut-n">1</span><span>Press <kbd>Esc</kbd></span></li>
+					<li><span class="tut-n">2</span><span>Press your panic key <span id="tut-key" class="tut-key"></span></span></li>
+					<li><span class="tut-n">3</span><span>Double-click the <b>top-left corner</b> of the screen <span class="tut-corner" aria-hidden="true"><i></i></span></span></li>
+				</ol>
+				<p class="tut-note">Clicked into the Clever page? Keys stop working there, so use the top-left corner.</p>
+				<button id="tut-go" class="blank-btn" type="button">Got it, cloak now</button>
+				<button id="tut-close" class="text-btn" type="button">Close</button>
+			</div>
 		</div>
 
 		<div id="cloak" class="cloak" tabindex="-1" hidden>

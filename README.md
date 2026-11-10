@@ -27,11 +27,11 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **WX**: a sidebar (Games, Favorites, Recently played), a header
+The site is a single page, **wilbert.**: a sidebar (Games, Favorites, Recently played), a header
 with search (press `/` to jump to it), tabs for each collection with game counts, and a grid
 of game cards with cover art. The star on a card adds it to Favorites; favorites and recently
 played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
-GitHub if that fails) and plays it inside WX, full screen, under a bar with Back, Full screen
+GitHub if that fails) and plays it inside the site, full screen, under a bar with Back, Full screen
 and **CLOAK**. CLOAK (also in the header) covers the screen with the panic site (Clever by
 default), disguises the tab as it and silences the game; Esc, the panic key, or a
 double-click on the top-left corner brings everything back.
