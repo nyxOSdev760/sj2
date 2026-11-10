@@ -27,25 +27,31 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page in a bright cartoon style after Homer: a sidebar (Games, Favorites, Recently played), a header
-with search (press `/` to jump to it), tabs for each collection with game counts, and a grid
-of game cards with cover art. The star on a card adds it to Favorites; favorites and recently
-played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
-GitHub if that fails) and plays it inside the site, full screen, under a bar with Back, Full screen
-and **CLOAK**. CLOAK (also in the header) covers the screen with the panic site (Clever by
-default), disguises the tab as it and silences the game; Esc, the panic key, or a
-double-click on the top-left corner brings everything back.
+The site is a single page: a dark glass launcher with Homer as its mascot.
+
+- **Sidebar**: Home, Games, Favorites, Recently played, Random game and Settings.
+- **Top bar**: where you are (`homer://games`) and the **CLOAK** button.
+- **Home**: Homer, a search box (typing carries on in the Games search), round shortcuts,
+  a "Jump back in" row of recent games and a Top Games row.
+- **Games**: search, a random-game button, category chips (Racing, Sports, Shooting, Puzzle,
+  Platformers, Pokémon, FNF, Retro; worked out from the game names), swipeable rows per
+  category, and the full grid. The star on a card adds it to Favorites; favorites and
+  recently played games are saved in the browser.
+
+Clicking a game fetches its HTML from jsDelivr (or raw GitHub if that fails) and plays it
+inside the site, full screen, under a bar with Back, Full screen and **CLOAK**. CLOAK covers
+the screen with the panic site (Clever by default), disguises the tab as it and silences the
+game; Esc, the panic key, or a double-tap/double-click on the top-left corner brings
+everything back. The first CLOAK press shows a short tutorial.
 
 When the site opens it reopens itself inside a new `about:blank` tab and sends the original
-tab to Google (*auto about:blank*, on by default; if the browser blocks the popup, a button
-opens it with a click). **Settings** has a switch to turn that off, a *tab cloak* (disguise the browser tab's name and icon as Google
-Classroom, Gmail, Clever, Canvas and other sites, saved in the browser) and a *panic key*: pick a key, and pressing it anywhere covers the whole site
-with Clever (its login page, which can be changed under *Panic site*); pressing it again goes
-back. The chosen key and site are saved in the browser.
+tab to Google (on by default; if the browser blocks the popup, a button opens it with a
+click). **Settings** has a switch for that, a *tab cloak* (disguise the tab's name and icon as
+Google Classroom, Gmail, Clever, Canvas and other sites), the panic key and the panic site.
 
 Gn-Math games use the covers from its catalog. UGS games use an image found in the game's own
-files (an icon, splash screen or title art at least 96px); games without one get a colored
-tile with their name.
+files or matched by name in other catalogs, Wikipedia or Steam; games without one get a dark
+tile with their first letter.
 
 The games come from two collections:
 

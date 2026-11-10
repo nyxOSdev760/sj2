@@ -1,7 +1,7 @@
 "use strict";
 // The game library. Games come from two collections, listed in ugs-files.js
 // (bubbls/ugs-singlefile) and gn-files.js (Gn-Math): [file, name, cover?]. Each game is one
-// HTML file; opening one fetches it and runs it in a new about:blank tab. Favorites and
+// HTML file; opening one fetches it and plays it in the built-in player. Favorites and
 // recently played games are kept in this browser's localStorage.
 const SOURCES = {
 	ugs: [
@@ -48,8 +48,8 @@ const favs = new Set(store.get("wx:favs", []).filter((id) => byId.has(id)));
 let recents = store.get("wx:recents", []).filter((id) => byId.has(id));
 const RECENTS_MAX = 40;
 
-let view = "all"; // all | favorites | recent
-let source = "all"; // all | gn | ugs
+let view = "home"; // home | all | favorites | recent | settings
+let cat = "all"; // "all" or a category id (see CATS)
 
 const $ = (id) => document.getElementById(id);
 const grid = $("grid");
@@ -109,7 +109,7 @@ function exitFullscreen() {
 async function openGame(game) {
 	recents = [game.id, ...recents.filter((id) => id !== game.id)].slice(0, RECENTS_MAX);
 	store.set("wx:recents", recents);
-	if (view === "recent") apply();
+	onRecentsChanged();
 
 	const token = ++openToken;
 	$("player-title").textContent = game.name;
@@ -176,16 +176,6 @@ $("player-fs").addEventListener("click", () => {
 
 // ---- cards ----
 
-// Games without a cover get a tile in one of these colors, picked from the name.
-const TILE_COLORS = [
-	["#ffe14d", "#ffc400"],
-	["#9fd8ff", "#59aef0"],
-	["#ffa8cf", "#ff6fae"],
-	["#ffbf7a", "#ff8f40"],
-	["#b4ec88", "#72c84e"],
-	["#d2bfff", "#a283ff"],
-];
-
 function el(tag, cls, text) {
 	const node = document.createElement(tag);
 	if (cls) node.className = cls;
@@ -193,36 +183,40 @@ function el(tag, cls, text) {
 	return node;
 }
 
-function placeholder(game) {
+// Games without a cover get a dark tile in one of these hues (picked from the name) with
+// the name's first letter as a watermark.
+const TILE_HUES = [218, 236, 262, 198, 288, 332, 172];
+
+function tile(game) {
 	let h = 0;
 	for (const ch of game.name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
-	const [a, b] = TILE_COLORS[h % TILE_COLORS.length];
-	const tile = el("div", "tile");
-	tile.style.background = `linear-gradient(135deg, ${a}, ${b})`;
-	tile.append(el("span", "tile-name", game.name));
-	return tile;
+	const node = el("div", "tile");
+	node.style.setProperty("--h", TILE_HUES[h % TILE_HUES.length]);
+	node.append(el("span", "tile-letter", (game.name.match(/[\p{L}\p{N}]/u) || ["?"])[0].toUpperCase()));
+	return node;
 }
 
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z" /></svg>';
 
-function card(game) {
+// A game can have several cards (the grid, the rows, the home page); they share its state.
+function makeCard(game, badge) {
 	const node = el("div", "card");
 	node.tabIndex = 0;
 	node.setAttribute("role", "button");
 	node.title = game.name;
 
-	const cover = el("div", "cover");
 	if (game.cover) {
-		const img = el("img");
+		const img = el("img", "card-img");
 		img.loading = "lazy";
 		img.decoding = "async";
 		img.alt = "";
 		img.src = game.cover;
-		img.addEventListener("error", () => img.replaceWith(placeholder(game)), { once: true });
-		cover.append(img);
+		img.addEventListener("error", () => img.replaceWith(tile(game)), { once: true });
+		node.append(img);
 	} else {
-		cover.append(placeholder(game));
+		node.append(tile(game));
 	}
+	if (badge) node.append(el("span", "badge", "★ Top"));
 
 	const fav = el("button", "fav");
 	fav.type = "button";
@@ -235,9 +229,8 @@ function card(game) {
 		markFav(game);
 		if (view === "favorites") apply();
 	});
-	cover.append(fav);
+	node.append(fav, el("div", "card-name", game.name));
 
-	node.append(cover, el("div", "card-name", game.name));
 	node.addEventListener("click", () => openGame(game));
 	node.addEventListener("keydown", (e) => {
 		if (e.target === node && (e.key === "Enter" || e.key === " ")) {
@@ -245,59 +238,135 @@ function card(game) {
 			openGame(game);
 		}
 	});
-	game.el = node;
-	game.favEl = fav;
+	(game.favBtns ||= []).push(fav);
 	markFav(game);
 	return node;
 }
 
 function markFav(game) {
 	const on = favs.has(game.id);
-	game.favEl.classList.toggle("on", on);
-	game.favEl.setAttribute("aria-pressed", String(on));
-	game.favEl.setAttribute("aria-label", (on ? "Remove " : "Add ") + game.name + (on ? " from favorites" : " to favorites"));
-	game.favEl.title = on ? "Remove from favorites" : "Add to favorites";
+	for (const btn of game.favBtns || []) {
+		btn.classList.toggle("on", on);
+		btn.setAttribute("aria-pressed", String(on));
+		btn.setAttribute("aria-label", (on ? "Remove " : "Add ") + game.name + (on ? " from favorites" : " to favorites"));
+	}
 }
 
-// ---- filtering ----
+// ---- categories (worked out from the game names) and the Top list ----
 
-const TITLES = { all: "Games", favorites: "Favorites", recent: "Recently played", settings: "Settings" };
-const chips = document.querySelector(".chips");
-const settingsPanel = $("settings");
+const CATS = [
+	{ id: "racing", name: "Racing", re: /\b(rac(e|ing|er|ers)|drift|kart|moto|driv(e|ing|er)|cars?|truck|rally|bikes?|traffic|parking|nitro|highway|x3m)\b/ },
+	{ id: "sports", name: "Sports", re: /(soccer|football|basket|tennis|golf|bowling|baseball|hockey|boxing|volley|8 ball|\bpool\b|fifa|\bnba\b|madden|wrestl|skate|snowboard|penalty|cricket|ping pong|retro bowl|\bdunk|\bufc\b|olympic)/ },
+	{ id: "shooting", name: "Shooting", re: /(shoot|\bguns?\b|sniper|\bdoom\b|strike|\btanks?\b|zombi|bullet|combat|army|\bquake\b|duke nukem|1v1|\bwar\b|warfare|mayhem|superhot|metal slug|contra)/ },
+	{ id: "puzzle", name: "Puzzle", re: /(2048|puzzle|sudoku|tetris|chess|solitaire|minesweeper|wordle|\bmatch|bloxorz|cut the rope|mahjong|checkers|\bmaze|quiz|riddle|escape|alchemy|factory balls|unblock|\bblocks?\b|bubble)/ },
+	{ id: "platformer", name: "Platformers", re: /(mario|sonic|kirby|mega ?man|\brun\b|jump|\bvex\b|\bovo\b|parkour|\bdash\b|fancy pants|celeste|geometry|fireboy|red ball|super meat|castlevania|metroid|donkey kong|rayman|\bobby)/ },
+	{ id: "pokemon", name: "Pokémon", re: /(pok[eé]mon|\bpoke\b)/ },
+	{ id: "fnf", name: "FNF", re: /(\bfnf\b|friday night)/ },
+	{ id: "retro", name: "Retro", re: /(\bnes\b|\bsnes\b|\bgba\b|\bgbc\b|\bn64\b|\bnds\b|\bds\b|sega|genesis|zelda|final fantasy|pac ?man|street fighter|mortal kombat|galaga|tetris|\b64\b)/ },
+];
+for (const g of GAMES) g.cats = CATS.filter((c) => c.re.test(g.key)).map((c) => c.id);
 
-// Every card is built once; switching views and searching only shows, hides and orders them.
-function apply() {
-	$("title-text").textContent = TITLES[view];
-	// The Settings view replaces the game grid with the settings panel.
-	$("hero").hidden = view !== "all";
-	const isSettings = view === "settings";
-	settingsPanel.hidden = !isSettings;
-	chips.hidden = isSettings;
-	grid.hidden = isSettings;
-	search.style.visibility = isSettings ? "hidden" : "";
-	if (isSettings) {
-		empty.hidden = true;
-		return;
+const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+const coverFirst = (list) => [...list].sort((a, b) => (b.cover ? 1 : 0) - (a.cover ? 1 : 0));
+
+const TOP_NAMES = [
+	"Slope", "Retro Bowl", "1v1.LoL", "Subway Surfers", "Cookie Clicker", "BitLife", "Run 3", "Geometry Dash",
+	"Tomb of the Mask", "Drive Mad", "Moto X3M", "Basket Random", "Among Us", "Fruit Ninja", "Crossy Road",
+	"Temple Run 2", "Happy Wheels", "Papa's Pizzeria", "Super Mario 64", "Tunnel Rush", "Doodle Jump",
+	"Baldi's Basics", "Vex 7", "OvO", "Snow Rider 3D", "Paper.io 2", "Polytrack", "Drift Hunters", "Basket Bros",
+	"Stickman Hook", "Jetpack Joyride", "Angry Birds", "Plants vs Zombies", "Granny", "2048", "Duck Life 4",
+	"Bloons TD 5", "Minecraft 1.8.8", "FNAF", "Bad Time Simulator", "Bowmasters", "Gladihoppers",
+].map(norm);
+const TOP = (() => {
+	const byName = new Map();
+	for (const g of coverFirst(GAMES)) if (!byName.has(norm(g.name))) byName.set(norm(g.name), g);
+	return TOP_NAMES.map((n) => byName.get(n)).filter((g) => g && g.cover).slice(0, 18);
+})();
+
+// ---- rows: a heading and a strip of cards you can swipe or page with the arrows ----
+
+const CHEVRON_L = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>';
+const CHEVRON_R = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>';
+
+function row(title, games, opts = {}) {
+	const node = el("section", "row");
+	const head = el("div", "row-head");
+	head.append(el("h3", "row-title", title));
+	if (opts.onMore) {
+		const more = el("button", "row-more", opts.count + " ›");
+		more.type = "button";
+		more.title = "See all " + title;
+		more.addEventListener("click", opts.onMore);
+		head.append(more);
+	} else {
+		head.append(el("span", "row-count", String(games.length)));
 	}
+	const wrap = el("div", "rail-wrap");
+	const rail = el("div", "rail");
+	rail.append(...games.map((g) => makeCard(g, opts.badge)));
+	const page = (dir) => rail.scrollBy({ left: dir * rail.clientWidth * 0.85, behavior: "smooth" });
+	const prev = el("button", "rail-arrow rail-prev");
+	prev.type = "button";
+	prev.innerHTML = CHEVRON_L;
+	prev.setAttribute("aria-label", "Scroll left");
+	prev.addEventListener("click", () => page(-1));
+	const next = el("button", "rail-arrow rail-next");
+	next.type = "button";
+	next.innerHTML = CHEVRON_R;
+	next.setAttribute("aria-label", "Scroll right");
+	next.addEventListener("click", () => page(1));
+	// An arrow only shows while there is more to see in its direction.
+	const sync = () => {
+		prev.hidden = rail.scrollLeft < 8;
+		next.hidden = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 8;
+	};
+	rail.addEventListener("scroll", sync, { passive: true });
+	new ResizeObserver(sync).observe(rail);
+	prev.hidden = true;
+	wrap.append(prev, rail, next);
+	node.append(head, wrap);
+	return node;
+}
+
+// ---- views ----
+
+const LOC = { home: "home", all: "games", favorites: "favorites", recent: "recent", settings: "settings" };
+const viewHome = $("view-home");
+const viewGames = $("view-games");
+const settingsPanel = $("settings");
+const chipsEl = $("chips");
+const rowsEl = $("rows");
+const homeRecent = el("div");
+
+function catName(id) {
+	return CATS.find((c) => c.id === id)?.name || "All games";
+}
+
+// The grid's cards are built once; views, categories and search only show, hide and order them.
+function apply() {
+	$("loc-text").textContent = "homer://" + LOC[view];
+	for (const b of document.querySelectorAll(".side-btn[data-view]")) b.classList.toggle("active", b.dataset.view === view);
+	const gamesLike = view === "all" || view === "favorites" || view === "recent";
+	viewHome.hidden = view !== "home";
+	viewGames.hidden = !gamesLike;
+	settingsPanel.hidden = view !== "settings";
+	if (!gamesLike) return;
+
 	const q = search.value.trim().toLowerCase();
+	const browsing = view === "all" && cat === "all" && !q;
+	rowsEl.hidden = !browsing;
+	chipsEl.hidden = view !== "all";
 	const recentRank = new Map(recents.map((id, i) => [id, i]));
-	const inView = (g) => view === "all" || (view === "favorites" ? favs.has(g.id) : recentRank.has(g.id));
-	const counts = { all: 0, gn: 0, ugs: 0 };
 	let shown = 0;
 	for (const g of GAMES) {
-		const match = inView(g) && (!q || g.key.includes(q));
-		if (match) {
-			counts.all++;
-			counts[g.source]++;
-		}
-		const visible = match && (source === "all" || g.source === source);
+		const inView = view === "all" ? cat === "all" || g.cats.includes(cat) : view === "favorites" ? favs.has(g.id) : recentRank.has(g.id);
+		const visible = inView && (!q || g.key.includes(q));
 		g.el.hidden = !visible;
 		g.el.style.order = view === "recent" && visible ? recentRank.get(g.id) : "";
 		if (visible) shown++;
 	}
-	for (const chip of document.querySelectorAll(".chip")) {
-		chip.querySelector(".chip-n").textContent = counts[chip.dataset.source];
-	}
+	$("grid-title").textContent = view === "favorites" ? "Favorites" : view === "recent" ? "Recently played" : q ? "Results" : catName(cat);
+	$("grid-count").textContent = shown.toLocaleString();
 	empty.hidden = shown > 0;
 	empty.textContent = q
 		? `No games match "${search.value.trim()}".`
@@ -308,24 +377,63 @@ function apply() {
 				: "No games.";
 }
 
-for (const btn of document.querySelectorAll(".side-btn")) {
-	btn.addEventListener("click", () => {
-		view = btn.dataset.view;
-		for (const b of document.querySelectorAll(".side-btn")) b.classList.toggle("active", b === btn);
-		apply();
-		window.scrollTo(0, 0);
-	});
+function setView(v) {
+	view = v;
+	apply();
+	window.scrollTo(0, 0);
 }
-for (const chip of document.querySelectorAll(".chip")) {
-	chip.addEventListener("click", () => {
-		source = chip.dataset.source;
-		for (const c of document.querySelectorAll(".chip")) {
-			c.classList.toggle("active", c === chip);
-			c.setAttribute("aria-selected", String(c === chip));
-		}
-		apply();
-	});
+
+function selectCat(id) {
+	cat = id;
+	for (const c of chipsEl.children) {
+		c.classList.toggle("active", c.dataset.cat === id);
+		c.setAttribute("aria-selected", String(c.dataset.cat === id));
+	}
+	apply();
+	window.scrollTo(0, 0);
 }
+
+// The "Jump back in" row on the home page follows the recently played list.
+function onRecentsChanged() {
+	const list = recents.slice(0, 18).map((id) => byId.get(id)).filter(Boolean);
+	homeRecent.replaceChildren(...(list.length ? [row("Jump back in", list)] : []));
+	if (view === "recent") apply();
+}
+
+function randomGame() {
+	const gamesLike = !viewGames.hidden;
+	const pool = gamesLike ? GAMES.filter((g) => !g.el.hidden) : GAMES;
+	if (pool.length) openGame(pool[Math.floor(Math.random() * pool.length)]);
+}
+
+for (const b of document.querySelectorAll("[data-view]")) b.addEventListener("click", () => setView(b.dataset.view));
+for (const b of document.querySelectorAll("[data-random]")) b.addEventListener("click", randomGame);
+
+// chips
+for (const c of [{ id: "all", name: "All" }, ...CATS]) {
+	const chip = el("button", "chip" + (c.id === "all" ? " active" : ""), c.name);
+	chip.type = "button";
+	chip.dataset.cat = c.id;
+	chip.setAttribute("role", "tab");
+	chip.addEventListener("click", () => selectCat(c.id));
+	chipsEl.append(chip);
+}
+
+// rows on the games page and the home page
+rowsEl.append(
+	row("Top Games", TOP, { badge: true }),
+	...CATS.map((c) => {
+		const all = GAMES.filter((g) => g.cats.includes(c.id));
+		return row(c.name, coverFirst(all).slice(0, 18), { count: all.length, onMore: () => selectCat(c.id) });
+	})
+);
+$("home-rows").append(homeRecent, row("Top Games", TOP, { badge: true }));
+onRecentsChanged();
+
+// the full grid
+for (const g of GAMES) g.el = makeCard(g);
+grid.append(...GAMES.map((g) => g.el));
+
 search.addEventListener("input", apply);
 search.addEventListener("keydown", (e) => {
 	if (e.key === "Enter") GAMES.find((g) => !g.el.hidden)?.el.click();
@@ -334,15 +442,82 @@ search.addEventListener("keydown", (e) => {
 		apply();
 	}
 });
+// Typing on the home page carries on in the games page's search box.
+const homeSearch = $("home-search");
+homeSearch.placeholder = `Search ${GAMES.length.toLocaleString()} games`;
+homeSearch.addEventListener("input", () => {
+	if (!homeSearch.value) return;
+	search.value = homeSearch.value;
+	homeSearch.value = "";
+	cat = "all";
+	for (const c of chipsEl.children) c.classList.toggle("active", c.dataset.cat === "all");
+	setView("all");
+	search.focus();
+});
 // "/" jumps to the search box.
 document.addEventListener("keydown", (e) => {
-	if (e.key === "/" && document.activeElement !== search && !e.ctrlKey && !e.metaKey) {
-		e.preventDefault();
-		search.focus();
-	}
+	if (e.key !== "/" || e.ctrlKey || e.metaKey) return;
+	const t = document.activeElement;
+	if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+	e.preventDefault();
+	(view === "home" ? homeSearch : (viewGames.hidden && setView("all"), search)).focus();
 });
 
-grid.append(...GAMES.map(card));
+// ---- background: slow, soft lights drifting in the dark ----
+
+(() => {
+	const canvas = $("bg");
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+	const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+	let w = 0;
+	let h = 0;
+	const dots = Array.from({ length: 34 }, (_, i) => ({
+		x: Math.random(),
+		y: Math.random(),
+		r: 30 + Math.random() * 110,
+		vx: (Math.random() - 0.5) * 0.00012,
+		vy: (Math.random() - 0.5) * 0.00009,
+		a: 0.035 + Math.random() * 0.075,
+		hue: i % 9 === 0 ? 48 : 205 + Math.random() * 30, // mostly blue, a few Homer-yellow
+	}));
+	function size() {
+		w = canvas.width = innerWidth;
+		h = canvas.height = innerHeight;
+		draw(0);
+	}
+	function draw(dt) {
+		ctx.clearRect(0, 0, w, h);
+		for (const d of dots) {
+			d.x = (d.x + d.vx * dt + 1.2) % 1.2;
+			d.y = (d.y + d.vy * dt + 1.2) % 1.2;
+			const x = (d.x - 0.1) * w;
+			const y = (d.y - 0.1) * h;
+			const g = ctx.createRadialGradient(x, y, 0, x, y, d.r);
+			g.addColorStop(0, `hsla(${d.hue}, 90%, 65%, ${d.a})`);
+			g.addColorStop(1, `hsla(${d.hue}, 90%, 65%, 0)`);
+			ctx.fillStyle = g;
+			ctx.fillRect(x - d.r, y - d.r, d.r * 2, d.r * 2);
+		}
+	}
+	let last = 0;
+	function tick(t) {
+		// about 30 frames a second is plenty for something this slow
+		if (t - last > 32) {
+			draw(Math.min(t - last, 100));
+			last = t;
+		}
+		if (!document.hidden) requestAnimationFrame(tick);
+	}
+	size();
+	addEventListener("resize", size);
+	if (!still) {
+		requestAnimationFrame(tick);
+		document.addEventListener("visibilitychange", () => {
+			if (!document.hidden) requestAnimationFrame(tick);
+		});
+	}
+})();
 
 // ---- tab cloak: disguise this tab's name and icon ----
 
@@ -555,6 +730,14 @@ $("tut-show").addEventListener("click", () => showTutorial(false));
 
 for (const b of document.querySelectorAll("[data-cloak]")) b.addEventListener("click", requestCloak);
 $("cloak-exit").addEventListener("dblclick", hideCloak);
+// Phones don't always send a double-click, so two quick taps count as well.
+let lastCornerTap = 0;
+$("cloak-exit").addEventListener("pointerup", (e) => {
+	if (e.pointerType === "mouse") return;
+	const now = Date.now();
+	if (now - lastCornerTap < 450) hideCloak();
+	lastCornerTap = now;
+});
 
 panicKeyBtn.addEventListener("click", () => {
 	listening = true;
