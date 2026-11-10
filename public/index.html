@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#120d1d" />
-		<title>wilbert.</title>
+		<meta name="theme-color" content="#5fb6ef" />
+		<title>Mmm… games.</title>
 		<link id="favicon" rel="icon" href="favicon.png" type="image/png" />
 		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 		<link rel="stylesheet" href="style.css" />
@@ -29,7 +29,7 @@
 					icon.rel = "icon";
 					icon.href = new URL("favicon.png", location.href).href;
 					d.head.appendChild(icon);
-					d.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#120d1d";
+					d.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#5fb6ef";
 					var f = d.createElement("iframe");
 					f.src = location.href;
 					f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0";
@@ -47,7 +47,7 @@
 	</head>
 	<body>
 		<nav class="side" aria-label="Sections">
-			<a class="side-logo" href="./" title="wilbert."><img src="apple-touch-icon.png" alt="wilbert." /></a>
+			<a class="side-logo" href="./" title="Home"><img src="apple-touch-icon.png" alt="Home" /></a>
 			<button class="side-btn active" type="button" data-view="all" title="Games" aria-label="Games">
 				<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.96 3.43l-.9 6.32a2.5 2.5 0 0 0 4.5 1.85L8 15h8l1.66 1.6a2.5 2.5 0 0 0 4.5-1.85l-.9-6.32A4 4 0 0 0 17.3 5z" /></svg>
 			</button>
@@ -74,7 +74,21 @@
 
 			<div id="hero" class="hero">
 				<img class="hero-homer" src="homer.webp" alt="" width="200" height="416" />
-				<img class="hero-word" src="wilbert.webp" alt="wilbert." width="1000" height="191" />
+				<h2 class="hero-title">Mmm… games.</h2>
+				<svg class="hero-donut" viewBox="0 0 120 120" aria-hidden="true">
+					<path d="M60 6a54 54 0 1 1 0 108A54 54 0 1 1 60 6zm0 36a18 18 0 1 0 0 36a18 18 0 1 0 0-36z" fill="#e9a35e" fill-rule="evenodd" stroke="#1f1a17" stroke-width="4" />
+					<path d="M60 14c8 0 12 4 18 4s10 6 14 11 2 10 6 16-2 11-1 17-4 10-8 14-10 4-15 7-12 2-18 1-10-5-15-8-8-8-10-13 0-10-2-16 2-11 5-16 8-6 13-9 7-8 13-8zm0 28a18 18 0 1 0 0 36a18 18 0 1 0 0-36z" fill="#ff6fae" fill-rule="evenodd" stroke="#1f1a17" stroke-width="3.5" stroke-linejoin="round" />
+					<g stroke="#1f1a17" stroke-width="1.5">
+						<rect x="38" y="26" width="10" height="4" rx="2" fill="#fff" transform="rotate(-30 43 28)" />
+						<rect x="66" y="22" width="10" height="4" rx="2" fill="#8fd0ff" transform="rotate(20 71 24)" />
+						<rect x="84" y="40" width="10" height="4" rx="2" fill="#ffd90f" transform="rotate(70 89 42)" />
+						<rect x="88" y="66" width="10" height="4" rx="2" fill="#a8e57a" transform="rotate(-40 93 68)" />
+						<rect x="70" y="86" width="10" height="4" rx="2" fill="#fff" transform="rotate(30 75 88)" />
+						<rect x="40" y="88" width="10" height="4" rx="2" fill="#ffd90f" transform="rotate(-20 45 90)" />
+						<rect x="22" y="64" width="10" height="4" rx="2" fill="#8fd0ff" transform="rotate(60 27 66)" />
+						<rect x="24" y="42" width="10" height="4" rx="2" fill="#a8e57a" transform="rotate(-70 29 44)" />
+					</g>
+				</svg>
 			</div>
 
 			<div class="chips" role="tablist" aria-label="Collections">

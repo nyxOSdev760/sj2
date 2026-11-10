@@ -1,5 +1,5 @@
 "use strict";
-// wilbert.: the game library. Games come from two collections, listed in ugs-files.js
+// The game library. Games come from two collections, listed in ugs-files.js
 // (bubbls/ugs-singlefile) and gn-files.js (Gn-Math): [file, name, cover?]. Each game is one
 // HTML file; opening one fetches it and runs it in a new about:blank tab. Favorites and
 // recently played games are kept in this browser's localStorage.
@@ -178,12 +178,12 @@ $("player-fs").addEventListener("click", () => {
 
 // Games without a cover get a tile in one of these colors, picked from the name.
 const TILE_COLORS = [
-	["#7c3aed", "#c026d3"],
-	["#6d28d9", "#2563eb"],
-	["#9333ea", "#db2777"],
-	["#4f46e5", "#7c3aed"],
-	["#a21caf", "#7c3aed"],
-	["#5b21b6", "#0891b2"],
+	["#ffe14d", "#ffc400"],
+	["#9fd8ff", "#59aef0"],
+	["#ffa8cf", "#ff6fae"],
+	["#ffbf7a", "#ff8f40"],
+	["#b4ec88", "#72c84e"],
+	["#d2bfff", "#a283ff"],
 ];
 
 function el(tag, cls, text) {
@@ -348,7 +348,7 @@ grid.append(...GAMES.map(card));
 
 // slug -> { name (shown in settings), title (the tab title), icon (file in cloak/) }
 const CLOAKS = [
-	{ slug: "", name: "wilbert. (default)", title: "wilbert.", icon: "favicon.png" },
+	{ slug: "", name: "Default", title: "Mmm… games.", icon: "favicon.png" },
 	{ slug: "classroom", name: "Google Classroom", title: "Classes", icon: "cloak/classroom.png" },
 	{ slug: "docs", name: "Google Docs", title: "Untitled document - Google Docs", icon: "cloak/docs.png" },
 	{ slug: "slides", name: "Google Slides", title: "Untitled presentation - Google Slides", icon: "cloak/slides.png" },

@@ -27,7 +27,7 @@ nginx, and make sure WebSocket upgrades on `/wisp/` are forwarded).
 
 ## The page
 
-The site is a single page, **wilbert.**: a sidebar (Games, Favorites, Recently played), a header
+The site is a single page in a bright cartoon style after Homer: a sidebar (Games, Favorites, Recently played), a header
 with search (press `/` to jump to it), tabs for each collection with game counts, and a grid
 of game cards with cover art. The star on a card adds it to Favorites; favorites and recently
 played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
