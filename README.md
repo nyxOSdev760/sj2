@@ -31,7 +31,10 @@ The site is a single page, **WX**: a sidebar (Games, Favorites, Recently played)
 with search (press `/` to jump to it), tabs for each collection with game counts, and a grid
 of game cards with cover art. The star on a card adds it to Favorites; favorites and recently
 played games are saved in the browser. Clicking a game fetches its HTML from jsDelivr (or raw
-GitHub if that fails) and runs it full-window in a new `about:blank` tab.
+GitHub if that fails) and plays it inside WX, full screen, under a bar with Back, Full screen
+and **CLOAK**. CLOAK (also in the header) covers the screen with the panic site (Clever by
+default), disguises the tab as it and silences the game; Esc, the panic key, or a
+double-click on the top-left corner brings everything back.
 
 When the site opens it reopens itself inside a new `about:blank` tab and sends the original
 tab to Google (*auto about:blank*, on by default; if the browser blocks the popup, a button

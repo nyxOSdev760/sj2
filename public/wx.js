@@ -72,37 +72,107 @@ async function fetchGame(game) {
 	throw lastError;
 }
 
-// The game runs in a full-window frame inside a new about:blank tab, so the tab's address
-// stays about:blank.
+// Games play inside WX, in a full-screen player with a bar on top (back, full screen, CLOAK).
+
+// Added to the start of every game page: it keeps a list of the game's Web Audio contexts so
+// CLOAK can silence the game and bring the sound back afterwards.
+const AUDIO_HOOK =
+	"<script>(function(){var A=window.AudioContext||window.webkitAudioContext;if(!A)return;" +
+	"var l=window.__wxAudio=[];function W(){var c=Reflect.construct(A,arguments,W);l.push(c);return c}" +
+	"W.prototype=A.prototype;Object.setPrototypeOf(W,A);window.AudioContext=W;" +
+	"if(window.webkitAudioContext)window.webkitAudioContext=W;})()<\/script>";
+
+function withAudioHook(html) {
+	const head = html.match(/<head[^>]*>/i);
+	if (head) return html.replace(head[0], head[0] + AUDIO_HOOK);
+	const doctype = html.match(/<!doctype[^>]*>/i);
+	if (doctype) return html.replace(doctype[0], doctype[0] + AUDIO_HOOK);
+	return AUDIO_HOOK + html;
+}
+
+const player = $("player");
+const stage = $("player-stage");
+let gameFrame = null;
+let openToken = 0;
+
+function enterFullscreen() {
+	const req = player.requestFullscreen || player.webkitRequestFullscreen;
+	if (req) Promise.resolve(req.call(player)).catch(() => {});
+}
+
+function exitFullscreen() {
+	const fs = document.fullscreenElement || document.webkitFullscreenElement;
+	const exit = document.exitFullscreen || document.webkitExitFullscreen;
+	if (fs && exit) Promise.resolve(exit.call(document)).catch(() => {});
+}
+
 async function openGame(game) {
-	// Open the tab right away (inside the click) so pop-up blockers allow it.
-	const win = window.open("about:blank", "_blank");
-	if (!win) return;
 	recents = [game.id, ...recents.filter((id) => id !== game.id)].slice(0, RECENTS_MAX);
 	store.set("wx:recents", recents);
 	if (view === "recent") apply();
 
-	const doc = win.document;
-	doc.title = game.name;
-	doc.body.style.cssText = "margin:0;height:100vh;overflow:hidden;background:#120d1d;color:#9d8fbf;font:14px system-ui,sans-serif";
-	const note = doc.createElement("div");
-	note.style.cssText = "display:grid;place-items:center;height:100%";
-	note.textContent = "Loading " + game.name + "…";
-	doc.body.append(note);
+	const token = ++openToken;
+	$("player-title").textContent = game.name;
+	stage.replaceChildren(el("div", "player-note", "Loading " + game.name + "…"));
+	player.hidden = false;
+	document.body.style.overflow = "hidden";
+	enterFullscreen(); // must happen inside the click, before anything async
+
+	let html;
 	try {
-		const html = await fetchGame(game);
-		const frame = doc.createElement("iframe");
-		frame.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff";
-		frame.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";
-		frame.allowFullscreen = true;
-		frame.srcdoc = html;
-		note.remove();
-		doc.body.append(frame);
-		frame.focus();
+		html = await fetchGame(game);
 	} catch {
-		note.textContent = "Couldn't load " + game.name + ". Try again.";
+		if (token === openToken) stage.replaceChildren(el("div", "player-note", "Couldn't load " + game.name + ". Try again."));
+		return;
 	}
+	if (token !== openToken) return; // closed or another game opened meanwhile
+
+	const frame = el("iframe", "player-frame");
+	frame.title = game.name;
+	frame.allow = "fullscreen; autoplay; gamepad; clipboard-write; pointer-lock";
+	frame.allowFullscreen = true;
+	frame.srcdoc = withAudioHook(html);
+	// The game page shares WX's origin, so the panic key keeps working while it has focus.
+	frame.addEventListener("load", () => {
+		try {
+			frame.contentWindow.addEventListener("keydown", onKeyDown, true);
+		} catch {}
+	});
+	gameFrame = frame;
+	stage.replaceChildren(frame);
+	frame.focus();
 }
+
+function closeGame() {
+	openToken++;
+	exitFullscreen();
+	gameFrame = null;
+	stage.replaceChildren(); // removing the frame stops the game and its sound
+	player.hidden = true;
+	document.body.style.overflow = "";
+}
+
+// Silence (or bring back) the running game's sound.
+function setGameMuted(muted) {
+	const w = gameFrame?.contentWindow;
+	if (!w) return;
+	try {
+		for (const ctx of w.__wxAudio || []) muted ? ctx.suspend() : ctx.resume();
+		for (const m of w.document.querySelectorAll("audio, video")) {
+			if (muted) {
+				m.dataset.wxWasMuted = m.muted ? "1" : "";
+				m.muted = true;
+			} else if (!m.dataset.wxWasMuted) {
+				m.muted = false;
+			}
+		}
+	} catch {}
+}
+
+$("player-back").addEventListener("click", closeGame);
+$("player-fs").addEventListener("click", () => {
+	document.fullscreenElement || document.webkitFullscreenElement ? exitFullscreen() : enterFullscreen();
+});
 
 // ---- cards ----
 
@@ -422,19 +492,39 @@ function refreshPanicUI() {
 	panicUrlInput.value = panicUrl;
 }
 
+// CLOAK: cover the screen with the panic site AND disguise the tab as it, all at once.
+function panicDisguise() {
+	let host = "";
+	try {
+		host = new URL(panicUrl).hostname.replace(/^www\./, "");
+	} catch {}
+	if (/(^|\.)clever\.com$/.test(host)) return { title: "Clever | Log in", icon: "cloak/clever.png" };
+	return { title: host || "New Tab", icon: "https://www.google.com/s2/favicons?sz=64&domain=" + encodeURIComponent(host) };
+}
+
 function showCloak() {
+	exitFullscreen(); // the cover has to be visible, and a full-screen game would sit on top
+	setGameMuted(true);
 	// Load the page only when first needed, then keep it so toggling is instant.
 	if (cloakFrame.src !== panicUrl) cloakFrame.src = panicUrl;
 	cloak.hidden = false;
 	document.body.style.overflow = "hidden";
-	setTabTitle("Clever | Log in");
+	const d = panicDisguise();
+	setTabTitle(d.title);
+	setTabIcon(d.icon);
+	cloak.focus?.();
 }
 
 function hideCloak() {
 	cloak.hidden = true;
-	document.body.style.overflow = "";
+	document.body.style.overflow = player.hidden ? "" : "hidden";
 	applyCloak(); // restore the tab-cloak disguise (or "WX")
+	setGameMuted(false);
+	if (!player.hidden) gameFrame?.focus();
 }
+
+for (const b of document.querySelectorAll("[data-cloak]")) b.addEventListener("click", showCloak);
+$("cloak-exit").addEventListener("dblclick", hideCloak);
 
 panicKeyBtn.addEventListener("click", () => {
 	listening = true;
@@ -456,30 +546,34 @@ panicUrlInput.addEventListener("change", () => {
 	panicUrlInput.value = panicUrl;
 });
 
-// Binding and triggering both happen on keydown, before anything else.
-document.addEventListener(
-	"keydown",
-	(e) => {
-		if (listening) {
-			e.preventDefault();
-			// Esc cancels binding instead of setting Esc as the key.
-			if (e.code !== "Escape") {
-				panicKey = e.code;
-				store.set("wx:panicKey", panicKey);
-			}
-			listening = false;
-			refreshPanicUI();
-			return;
-		}
-		if (!panicKey || e.code !== panicKey) return;
-		// Don't fire while typing in the search box or a settings field.
-		const t = e.target;
-		if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+// Binding and triggering both happen on keydown, before anything else. Also attached to the
+// game frame while a game is open.
+function onKeyDown(e) {
+	if (listening) {
 		e.preventDefault();
-		cloak.hidden ? showCloak() : hideCloak();
-	},
-	true
-);
+		// Esc cancels binding instead of setting Esc as the key.
+		if (e.code !== "Escape") {
+			panicKey = e.code;
+			store.set("wx:panicKey", panicKey);
+		}
+		listening = false;
+		refreshPanicUI();
+		return;
+	}
+	// Esc also takes the cover away.
+	if (!cloak.hidden && e.key === "Escape") {
+		e.preventDefault();
+		hideCloak();
+		return;
+	}
+	if (!panicKey || e.code !== panicKey) return;
+	// Don't fire while typing in the search box or a settings field.
+	const t = e.target;
+	if (t && t.ownerDocument === document && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+	e.preventDefault();
+	cloak.hidden ? showCloak() : hideCloak();
+}
+document.addEventListener("keydown", onKeyDown, true);
 
 refreshPanicUI();
 

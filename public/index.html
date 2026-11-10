@@ -69,6 +69,7 @@
 					<span id="title-text">Games</span>
 				</h1>
 				<input id="search" class="search" type="search" placeholder="Search…" aria-label="Search games" autocomplete="off" spellcheck="false" />
+				<button class="cloak-btn" type="button" data-cloak title="Cover the screen with Clever and disguise the tab">CLOAK</button>
 			</header>
 
 			<div class="chips" role="tablist" aria-label="Collections">
@@ -119,8 +120,24 @@
 			</div>
 		</div>
 
-		<div id="cloak" class="cloak" hidden>
+		<div id="player" class="player" hidden>
+			<div class="player-bar">
+				<button id="player-back" class="pbtn" type="button" title="Back to games" aria-label="Back to games">
+					<svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
+				</button>
+				<span id="player-title" class="player-title"></span>
+				<button id="player-fs" class="pbtn" type="button" title="Full screen" aria-label="Full screen">
+					<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
+				</button>
+				<button class="cloak-btn" type="button" data-cloak title="Cover the screen with Clever and disguise the tab">CLOAK</button>
+			</div>
+			<div id="player-stage" class="player-stage"></div>
+		</div>
+
+		<div id="cloak" class="cloak" tabindex="-1" hidden>
 			<iframe id="cloak-frame" title="Clever"></iframe>
+			<!-- Invisible: double-click the top-left corner (or press Esc / the panic key) to go back. -->
+			<button id="cloak-exit" class="cloak-exit" type="button" aria-label="Go back"></button>
 		</div>
 	</body>
 </html>
